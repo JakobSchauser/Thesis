@@ -1,0 +1,3 @@
+Is the neighborhood search a part of the model or simply a computational tool?
+
+How are the hyperparameters found? beta = 5 etc.

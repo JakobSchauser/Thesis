@@ -4,6 +4,7 @@ from vispy.scene import visuals
 import scipy
 import sys
 from vispy import app, scene
+from vispy.visuals.transforms import STTransform
 
 iterator = 0
 
@@ -35,7 +36,14 @@ def interactive_plot(loaded_cells, alpha=10):
     view.add(scatter1)
     view.add(scatter2)
 
+
+    sphere1 = visuals.Sphere(radius=1, method='latitude', parent=view.scene,
+                               color=(0,0,1,0.5),   )
+    
+    sphere1.transform = STTransform(scale = (250, 80, 80))
     # We want to fly around
+
+    
     view.camera = 'fly'
 
 
@@ -48,7 +56,7 @@ def interactive_plot(loaded_cells, alpha=10):
         vispy.app.run()
 
 def interactive_animate(loaded_cells, alpha=10,
-                     frame_every = 1, interval=1/60 ):
+                     frame_every = 1, interval=1/30 ):
     print('Animating')
 
     # Load the data
@@ -57,16 +65,18 @@ def interactive_animate(loaded_cells, alpha=10,
 
     # Make a canvas and add simple view
     canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
-    view = canvas.central_widget.add_view()                                   
+    view = canvas.central_widget.add_view()                               
+
+    size = 10
 
     # Create scatter object and fill in the data
     # Create scatter object and fill in the data
     scatter1 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-    scatter1.set_data(xs[0], edge_width=0, face_color=(1, 1, 1, .5), size=2.5)
+    scatter1.set_data(xs[0], edge_width=0, face_color=(1, 1, 1, .5), size=size)
 
     # color so we can see the direction of the particles
     scatter2 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-    scatter2.set_data(xs[0] + ps[0]/10, edge_width=0, face_color=(1, 0, 0, .5), size=2.5)
+    scatter2.set_data(xs[0] + ps[0]/5, edge_width=0, face_color=(1, 0, 0, .5), size=size)
 
     view.add(scatter1)
     view.add(scatter2)
@@ -76,8 +86,8 @@ def interactive_animate(loaded_cells, alpha=10,
     def update(ev):
         global iterator
         iterator += 1
-        scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=2.5)
-        scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=(1, 0, 0, .5), size=2.5)
+        scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
+        scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=(1, 0, 0, .5), size=size)
 
 
     timer = app.Timer(interval=interval)
@@ -150,7 +160,7 @@ if __name__ == '__main__':
         if len(loaded_cells.shape) == 4:
             if len(sys.argv) > 2:
                 if sys.argv[2] == '0':
-                    interactive_plot(loaded_cells[-1])
+                    interactive_plot(loaded_cells[0])
                 else:
                     interactive_animate(loaded_cells)
             else:    

@@ -1,3 +1,14 @@
+Questions:
+
 Is the neighborhood search a part of the model or simply a computational tool?
 
 How are the hyperparameters found? beta = 5 etc.
+
+
+
+Meeting notes:
+Less noise (1e-5)
+start with sphere - elongate at a later point
+Add angle!  a.b > 0
+dont fing neighbors every step (jax.lax.cond)
+better IC on sphere. Unit vectors are not homogenenous

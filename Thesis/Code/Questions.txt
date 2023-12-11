@@ -7,8 +7,8 @@ How are the hyperparameters found? beta = 5 etc.
 
 
 Meeting notes:
-Less noise (1e-5)
-start with sphere - elongate at a later point
+DONE - Less noise (1e-5)
+DONE start with sphere - elongate at a later point
 Add angle!  a.b > 0
-dont fing neighbors every step (jax.lax.cond)
-better IC on sphere. Unit vectors are not homogenenous
+DONE - dont fing neighbors every step (jax.lax.cond)
+DONE - better IC on sphere. Unit vectors are not homogenenous

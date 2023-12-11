@@ -40,7 +40,7 @@ def interactive_plot(loaded_cells, alpha=10):
     sphere1 = visuals.Sphere(radius=1, method='latitude', parent=view.scene,
                                color=(0,0,1,0.5),   )
     
-    sphere1.transform = STTransform(scale = (250, 80, 80))
+    sphere1.transform = STTransform(scale = (200, 200/3, 200/3))
     # We want to fly around
 
     

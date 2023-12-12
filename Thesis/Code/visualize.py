@@ -5,10 +5,11 @@ import scipy
 import sys
 from vispy import app, scene
 from vispy.visuals.transforms import STTransform
+import os
 
 iterator = 0
 
-def interactive_plot(loaded_cells, alpha=10):
+def interactive_plot(loaded_cells, loaded_properties = None, alpha=10):
     print('Plotting')
 
     # Make a canvas and add simple view
@@ -55,7 +56,7 @@ def interactive_plot(loaded_cells, alpha=10):
     if sys.flags.interactive != 1:
         vispy.app.run()
 
-def interactive_animate(loaded_cells, alpha=10,
+def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
                      frame_every = 1, interval=1/30 ):
     print('Animating')
 
@@ -70,13 +71,16 @@ def interactive_animate(loaded_cells, alpha=10,
     size = 10
 
     # Create scatter object and fill in the data
-    # Create scatter object and fill in the data
+    colors = [(1,0,0) for i in range(len(xs[0]))]
+    if loaded_properties is not None:
+        colors = [(0,1,0) if loaded_properties[i] == 0 else (1,0,0) for i in range(len(loaded_properties))]
+
     scatter1 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
     scatter1.set_data(xs[0], edge_width=0, face_color=(1, 1, 1, .5), size=size)
 
     # color so we can see the direction of the particles
     scatter2 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-    scatter2.set_data(xs[0] + ps[0]/5, edge_width=0, face_color=(1, 0, 0, .5), size=size)
+    scatter2.set_data(xs[0] + ps[0]/5, edge_width=0, face_color=colors, size=size)
 
     view.add(scatter1)
     view.add(scatter2)
@@ -87,8 +91,7 @@ def interactive_animate(loaded_cells, alpha=10,
         global iterator
         iterator += 1
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
-        scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=(1, 0, 0, .5), size=size)
-
+        scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
 
     timer = app.Timer(interval=interval)
     timer.connect(update)
@@ -157,15 +160,20 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1:
         loaded_cells = np.load(sys.argv[1])
+        loaded_properties = None
+        # check if properties file exists
+        if os.path.isfile(sys.argv[1][:-4] + '_properties.npy'):
+            loaded_properties = np.load(sys.argv[1][:-4] + '_properties.npy')
+
         if len(loaded_cells.shape) == 4:
             if len(sys.argv) > 2:
                 if sys.argv[2] == '0':
-                    interactive_plot(loaded_cells[0])
+                    interactive_plot(loaded_cells[0], loaded_properties)
                 else:
-                    interactive_animate(loaded_cells)
+                    interactive_animate(loaded_cells, loaded_properties)
             else:    
-                interactive_animate(loaded_cells)
+                interactive_animate(loaded_cells, loaded_properties)
         else:
-            interactive_plot(loaded_cells)
+            interactive_plot(loaded_cells, loaded_properties)
     else:
         print('No file specified')

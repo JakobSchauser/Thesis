@@ -12,3 +12,11 @@ DONE start with sphere - elongate at a later point
 Add angle!  a.b > 0
 DONE - dont fing neighbors every step (jax.lax.cond)
 DONE - better IC on sphere. Unit vectors are not homogenenous
+
+
+Meeting notes:
+TODO:
+Set Lambda3 to the correct value
+abs(S3)
+initial conditions PCP pointing around
+non symmetric \lambda3 in x (geninus!) 

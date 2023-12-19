@@ -4,6 +4,7 @@ import jax.random as random
 import os
 from utils import get_random_points_on_sphere
 
+egg_shape = jnp.array([210, 210/3, 210/3])
 
 def continue_IC(path : str, *args):
     cells = np.load(path)[-1].reshape(-1, 3,3)
@@ -23,9 +24,19 @@ def egg_half_IC(N : int) -> jnp.ndarray:
 
     p = pos #/ jnp.linalg.norm(pos, axis=1, keepdims=True)
 
-    pos = pos * G["egg_shape"]
 
-    q = get_random_points_on_sphere(N, 43)
+    q = pos.copy()
+
+    q = pos.copy()
+    q = q.at[:,0].set(0)
+    q = q / jnp.linalg.norm(q, axis=1, keepdims=True)
+    _y = q[:,1]
+    _z = q[:,2]
+    q = q.at[:,1].set(-_z)
+    q = q.at[:,2].set(_y)
+
+    pos = pos * egg_shape
+
 
     cells = jnp.stack([pos, p, q], axis=1)
 
@@ -39,9 +50,16 @@ def egg_IC(N : int) -> jnp.ndarray:
 
     p = pos #/ jnp.linalg.norm(pos, axis=1, keepdims=True)
 
-    pos = pos * G["egg_shape"]
+    # make them all point in the same direction, whirl around the x axis
+    q = pos.copy()
+    q = q.at[:,0].set(0)
+    q = q / jnp.linalg.norm(q, axis=1, keepdims=True)
+    _y = q[:,1]
+    _z = q[:,2]
+    q = q.at[:,1].set(-_z)
+    q = q.at[:,2].set(_y)
 
-    q = get_random_points_on_sphere(N, 43)
+    pos = pos * egg_shape
 
     cells = jnp.stack([pos, p, q], axis=1)
 

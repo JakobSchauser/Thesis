@@ -63,6 +63,7 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
     # Load the data
     xs = loaded_cells[:,:,0,:]
     ps = loaded_cells[:,:,1,:]
+    qs = loaded_cells[:,:,2,:]
 
     # Make a canvas and add simple view
     canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
@@ -82,8 +83,14 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
     scatter2 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
     scatter2.set_data(xs[0] + ps[0]/5, edge_width=0, face_color=colors, size=size)
 
+        # color so we can see the direction of the particles
+    scatter3 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
+    scatter3.set_data(xs[0] + qs[0]/5, edge_width=0, face_color=(0.9,0.9,0), size=size)
+
+
     view.add(scatter1)
     view.add(scatter2)
+    view.add(scatter3)
 
 
 
@@ -92,13 +99,16 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
         iterator += 1
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
         scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
-
+        scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/10, edge_width=0, face_color=(0.9,0.9,0), size=size)
+    
     timer = app.Timer(interval=interval)
     timer.connect(update)
     timer.start()
 
     # We want to fly around
     view.camera = 'fly'
+
+
 
     # We launch the app
     if sys.flags.interactive != 1:

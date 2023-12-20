@@ -4,7 +4,13 @@ import jax.random as random
 import os
 from utils import get_random_points_on_sphere
 
-egg_shape = jnp.array([210, 210/3, 210/3])
+# from G import G
+
+# egg_shape = G["egg_shape"]
+egg_shape = jnp.array([41, 41/3, 41/3])
+
+# egg_shape = jnp.array([230, 230/3, 230/3])
+
 
 def continue_IC(path : str, *args):
     cells = np.load(path)[-1].reshape(-1, 3,3)
@@ -19,31 +25,7 @@ def continue_IC(path : str, *args):
 
 
 
-def egg_half_IC(N : int) -> jnp.ndarray:
-    pos = get_random_points_on_sphere(N, 42)
 
-    p = pos #/ jnp.linalg.norm(pos, axis=1, keepdims=True)
-
-
-    q = pos.copy()
-
-    q = pos.copy()
-    q = q.at[:,0].set(0)
-    q = q / jnp.linalg.norm(q, axis=1, keepdims=True)
-    _y = q[:,1]
-    _z = q[:,2]
-    q = q.at[:,1].set(-_z)
-    q = q.at[:,2].set(_y)
-
-    pos = pos * egg_shape
-
-
-    cells = jnp.stack([pos, p, q], axis=1)
-
-    cell_properties = jnp.where(pos[:,2] < 0, 0, 1)
-    # cell_properties = jnp.ones(N)
-
-    return cells, cell_properties
 
 def egg_IC(N : int) -> jnp.ndarray:
     pos = get_random_points_on_sphere(N, 42)
@@ -64,6 +46,22 @@ def egg_IC(N : int) -> jnp.ndarray:
     cells = jnp.stack([pos, p, q], axis=1)
 
     cell_properties = jnp.ones(N)
+
+    return cells, cell_properties
+
+def egg_half_IC(N : int) -> jnp.ndarray:
+
+    cells, _ = egg_IC(N)
+    cell_properties = jnp.where(cells[:,0,:][:,2] < 0, 0., 1.)
+
+    return cells, cell_properties
+
+def egg_genius(N:int) -> jnp.ndarray:
+    cells, _ = egg_IC(N)
+
+    cell_properties = jnp.where(cells[:,0,:][:,2] < 0, 0., 1.)
+
+    cell_properties = jnp.where(cells[:,0,:][:,0] < -egg_shape[0]/2, 1., cell_properties)
 
     return cells, cell_properties
 

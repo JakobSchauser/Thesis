@@ -69,7 +69,7 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
     canvas = vispy.scene.SceneCanvas(keys='interactive', show=True)
     view = canvas.central_widget.add_view()                               
 
-    size = 10
+    size = 2.0
 
     # Create scatter object and fill in the data
     colors = [(1,0,0) for i in range(len(xs[0]))]

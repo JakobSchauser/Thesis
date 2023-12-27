@@ -7,7 +7,9 @@ from utils import get_random_points_on_sphere
 # from G import G
 
 # egg_shape = G["egg_shape"]
-egg_shape = jnp.array([41, 41/3, 41/3])
+sphere_shape = jnp.array([20, 20, 20])
+egg_shape = jnp.array([42, 42/3, 42/3])
+
 
 # egg_shape = jnp.array([230, 230/3, 230/3])
 
@@ -23,9 +25,17 @@ def continue_IC(path : str, *args):
 
     return cells, properties
 
+def make_better_egg_pos(cells):
+    cells = cells.at[2].set(cells[2] + jnp.square(jnp.abs(cells[0]/egg_shape[0]))*egg_shape[2]/2)
+    return cells
 
+def inv_make_better_egg_pos(cells):
+    cells = cells.at[2].set(cells[2] - jnp.square(jnp.abs(cells[0]/egg_shape[0]))*egg_shape[2]/2)
+    return cells
 
-
+def make_better_egg(cells):
+    cells = cells.at[:,0,2].set(cells[:,0,2] + jnp.square(jnp.abs(cells[:,0,0]/egg_shape[0]))*egg_shape[2]/2)
+    return cells
 
 def egg_IC(N : int) -> jnp.ndarray:
     pos = get_random_points_on_sphere(N, 42)
@@ -65,6 +75,22 @@ def egg_genius(N:int) -> jnp.ndarray:
 
     return cells, cell_properties
 
+def egg_genius2(N:int) -> jnp.ndarray:
+    cells, _ = egg_IC(N)
+
+    cell_properties = jnp.where(cells[:,0,:][:,2] < egg_shape[2]/4, 0., 1.)
+
+    cell_properties = jnp.where(cells[:,0,:][:,0] < -egg_shape[0]/2, 1., cell_properties)
+
+    return cells, cell_properties
+
+def better_egg(N:int) -> jnp.ndarray:
+    cells, cell_properties = egg_IC(N)
+
+    cells = make_better_egg(cells)
+    return cells, cell_properties
+
+
 def plane_IC(N : int) -> jnp.ndarray:
     # pos = get_random_points_on_sphere(N, 42)
     pos = random.normal(random.PRNGKey(42), (N, 3))*100
@@ -82,3 +108,21 @@ def plane_IC(N : int) -> jnp.ndarray:
 
     return cells, cell_properties
 
+
+def get_ic(type:str) -> jnp.ndarray:
+    if type == "egg":
+        return egg_IC
+    elif type == "plane":
+        return plane_IC
+    elif type == "egg_half":
+        return egg_half_IC
+    elif type == "egg_genius":
+        return egg_genius
+    elif type == "egg_genius2":
+        return egg_genius2
+    elif type == "better_egg":
+        return better_egg
+    elif type == "continue":
+        return continue_IC
+    else:
+        raise ValueError("type must be egg, plane or egg_half")

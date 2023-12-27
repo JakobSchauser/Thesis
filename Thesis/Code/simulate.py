@@ -10,7 +10,7 @@ from jax.config import config
 
 from jax_tqdm import loop_tqdm
 
-from InitialConditions import egg_shape
+from InitialConditions import egg_shape, sphere_shape
 
 import functools
 
@@ -22,7 +22,18 @@ import os
 
 import InitialConditions as IC
 
+from InitialConditions import inv_make_better_egg_pos
+
+
 import sys 
+
+from jax_enums import Enumerable
+
+class BC(Enumerable):
+    NONE = 0
+    SPHERE = 1
+    EGG = 2
+    BETTER_EGG = 3
 
 
 
@@ -60,6 +71,38 @@ def from_angles_to_vector(phi, theta) -> jnp.ndarray:
     z = jnp.sin(phi)
     return jnp.array([x, y, z])
 
+
+@cache
+def get_boundary_fn():
+    boundary = G["boundary"]
+    if boundary == BC.NONE:
+        return lambda x: jnp.zeros_like(x)
+    elif boundary == BC.SPHERE:
+        def sphere(pos):
+            corrected_pos_vec = pos / sphere_shape
+            mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
+            v_add = jnp.where(mag > 1.0, (jnp.exp(mag*mag - 1) - 1), 0.)
+            return v_add 
+        return sphere
+    elif boundary == BC.EGG:
+        def egg(pos):
+            corrected_pos_vec = pos / egg_shape
+            mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
+            v_add = jnp.where(mag > 1.0, (jnp.exp(mag*mag - 1) - 1), 0.)
+            return v_add 
+        return egg
+    elif boundary == BC.BETTER_EGG:
+        def better_egg(pos):
+            corrected_pos_vec = inv_make_better_egg_pos(pos)
+            corrected_pos_vec = corrected_pos_vec / egg_shape
+            mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
+            v_add = jnp.where(mag > 1.0, (jnp.exp(mag*mag - 1) - 1), 0.)
+            return v_add 
+        return better_egg
+    else:
+        raise Exception("boundary must be none, sphere, egg or better_egg")
+
+
 @jit
 def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell2_property : float) -> float:
     pos1, p1, q1 = unpack_cellrow(cellrow1)
@@ -77,14 +120,13 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell2_property : float) ->
 
     v = V(r, s)
 
-    # add the global potential pointing towards the origin
-    def add_boundary(pos):
-        corrected_pos_vec = pos / egg_shape
-        mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
-        v_added = jnp.where(mag > 1.0, v + (jnp.exp(mag*mag - 1) - 1), v)
-        return v_added
+    # add the boundary
+    boundary_fn = get_boundary_fn()
+    v_add = boundary_fn(pos2)
 
-    v_added = jax.lax.cond(G["boundary"], add_boundary, lambda *args: v, pos2)
+
+    v_added = v + v_add
+
     # correct for the case where the particles are on top of each other
     v_corrected = jnp.where(jnp.allclose(dir, jnp.zeros(3)), 0.0, v_added)
 
@@ -156,8 +198,18 @@ def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_
 
     grad_U = U_grad(cells, neighbors, cell_properties)
 
-    # update the positions
-    cells = cells - grad_U*G["dt"] 
+    # update the positions using euler
+    cells = cells - grad_U*G["dt"]
+
+    # update the positions using runge-kutta 4
+    # k1 = grad_U
+    # inner = cells - k1*G["dt"]/2
+    # k2 = U_grad(inner, neighbors, cell_properties)
+    # k3 = U_grad(cells - k2*G["dt"]/2, neighbors, cell_properties)
+    # k4 = U_grad(cells - k3*G["dt"], neighbors, cell_properties)
+
+    # cells = cells - G["dt"]*(k1 + 2*k2 + 2*k3 + k4)/6
+
 
     # add random noise to the positions
     cells = cells.at[:,0,:].add(random.normal(random.PRNGKey(0), cells.shape[0:2])*G["eta"])
@@ -170,20 +222,26 @@ def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_
 
 take_step = jit(take_step, static_argnames=["cell_properties"])
 
+
+
 def main(N_cells : int, N_steps : int, save_every : int = 100, save = 0):
     assert np.isclose(G["lambda0"] + G["lambda1"] + G["lambda2"], 1.0), "lambda0 + lambda1 + lambda2 must sum to 1.0 but is " + str(G["lambda0"] + G["lambda1"] + G["lambda2"])
-    assert save == 0 or save == 1 or save == 2, "save must be 0, 1 or 2"
+    assert save == 0 or save == 1 or save == 2 or save == 3, "save must be 0, 1, 2 or 3"
 
     if os.path.exists("runs/"+G["name"]+".npy"):
-        ans = input(G["name"] + " already exists, overwrite? (y/n)")
+        ans = input(G["name"] + " already exists, "+ ('append 'if save == 3 else 'overwrite') + "? (y/n)")
         if ans == "y":
-            print("overwriting")
-            pass
+            if save == 3:
+                print("appending")
+            else:
+                print("overwriting")
         else:
             print("exiting")
             return
+        
     if save == 2:
         assert save_every > 0 and save_every < N_steps, "save_every must be positive but smaller than N_steps"
+
     cells, cell_properties = G["IC"](N_cells)
     # plot_cells(cells)
     all_cells = jnp.ones((int(N_steps/save_every), N_cells, 3, 3), float)
@@ -193,7 +251,7 @@ def main(N_cells : int, N_steps : int, save_every : int = 100, save = 0):
         all_cells = all_cells.at[jnp.floor(i/save_every).astype(int),:,:,:].set(cells)
         return all_cells
     
-    if save != 2:
+    if save != 2 and save != 3:
         def save_cells(i, cells, all_cells, save_every):
             return all_cells
     
@@ -212,6 +270,10 @@ def main(N_cells : int, N_steps : int, save_every : int = 100, save = 0):
     elif save == 2:
         np.save("runs/"+name+".npy", all_cells)
         np.save("runs/"+name+"_properties.npy", cell_properties)
+    elif save == 3:
+        old_cells = np.load("runs/"+name+".npy")
+        np.save("runs/"+name+".npy", np.concatenate((old_cells, all_cells), axis=0))
+
     return cells
 
 
@@ -220,18 +282,19 @@ G = {
     "beta": 5.0,
     "dt": 0.1,
     "eta": 1e-4, # width of the gaussian noise
-    "lambda0": 0.35,
+    "lambda0": 0.38,
     "lambda1": 0.5,
-    "lambda2": 0.15,
-    "boundary": True,
-    "name": "2000_egg_genius",
-    "IC" : lambda x: IC.continue_IC("runs/2000_egg_genius.npy"),#egg_half_IC,
-    # "IC" : IC.egg_genius,
+    "lambda2": 0.12,
+    "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+    "name": "2000_better_egg_more_ABP",
+    "IC" : lambda x: IC.continue_IC("runs/2000_better_egg_more_ABP.npy"),#egg_half_IC,
+    # "IC" : IC.better_egg,
     "N_cells": 2000,
     "N_steps": 5000,
     "cell_properties": {
         "standard" : {
-            "S" : S_only_AB
+            "S" : S_standard
+            # "S" : S_only_AB
         },
         "non_polar" : { 
            "S" : S_only_AB
@@ -240,4 +303,4 @@ G = {
 }
 
 if __name__ == '__main__':
-    main(G["N_cells"], G["N_steps"], save=2, save_every=20)
+    main(G["N_cells"], G["N_steps"], save=3, save_every=20)

@@ -17,6 +17,13 @@ DONE - better IC on sphere. Unit vectors are not homogenenous
 Meeting notes:
 TODO:
 Set Lambda3 to the correct value
-abs(S3)
 initial conditions PCP pointing around
-non symmetric \lambda3 in x (geninus!) 
+non symmetric \lambda3 in x (genius!)
+
+
+
+TODO:
+lav asymmetrisk
+Append/overwrite!
+Automatic density
+Look at abs(S3) instead of S3

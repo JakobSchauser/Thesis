@@ -10,7 +10,7 @@ Meeting notes:
 DONE - Less noise (1e-5)
 DONE start with sphere - elongate at a later point
 Add angle!  a.b > 0
-DONE - dont fing neighbors every step (jax.lax.cond)
+DONE - dont find neighbors every step (jax.lax.cond)
 DONE - better IC on sphere. Unit vectors are not homogenenous
 
 
@@ -21,9 +21,14 @@ initial conditions PCP pointing around
 non symmetric \lambda3 in x (genius!)
 
 
-
 TODO:
 lav asymmetrisk
 Append/overwrite!
 Automatic density
 Look at abs(S3) instead of S3
+
+TODO:
+Alpha!
+Neurolation
+Run loong time
+find way to document

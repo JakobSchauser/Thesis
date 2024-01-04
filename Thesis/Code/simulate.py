@@ -24,6 +24,7 @@ import InitialConditions as IC
 
 from InitialConditions import inv_make_better_egg_pos
 
+import h5py
 
 import sys 
 
@@ -224,17 +225,19 @@ take_step = jit(take_step, static_argnames=["cell_properties"])
 
 
 
-def main(N_cells : int, N_steps : int, save_every : int = 100, save = 0):
+def main(N_cells : int, N_steps : int):
+    save = G["save"]
+    save_every = G["save_every"]
     assert np.isclose(G["lambda0"] + G["lambda1"] + G["lambda2"], 1.0), "lambda0 + lambda1 + lambda2 must sum to 1.0 but is " + str(G["lambda0"] + G["lambda1"] + G["lambda2"])
-    assert save == 0 or save == 1 or save == 2 or save == 3, "save must be 0, 1, 2 or 3"
+    assert save == 0 or save == 1 or save == 2, "save must be 0, 1 or 2 "
 
     if os.path.exists("runs/"+G["name"]+".npy"):
-        ans = input(G["name"] + " already exists, "+ ('append 'if save == 3 else 'overwrite') + "? (y/n)")
-        if ans == "y":
-            if save == 3:
-                print("appending")
-            else:
-                print("overwriting")
+        ans = input(G["name"] + " already exists, append or overwrite? (y/n)")
+        if ans == "append":
+            print("appending")
+            save = 3
+        elif ans == "overwrite":
+            print("overwriting")
         else:
             print("exiting")
             return
@@ -282,25 +285,31 @@ G = {
     "beta": 5.0,
     "dt": 0.1,
     "eta": 1e-4, # width of the gaussian noise
-    "lambda0": 0.38,
+    "lambda0": 0.37,
     "lambda1": 0.5,
-    "lambda2": 0.12,
+    "lambda2": 0.13,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    "name": "2000_better_egg_more_ABP",
-    "IC" : lambda x: IC.continue_IC("runs/2000_better_egg_more_ABP.npy"),#egg_half_IC,
-    # "IC" : IC.better_egg,
+    "name": "2000_genius_long_ABP",
+    "IC" : lambda x: IC.continue_IC("runs/2000_genius_long_ABP.npy"),#egg_half_IC,
+    # "IC" : IC.better_egg_genius,
     "N_cells": 2000,
-    "N_steps": 5000,
+    "N_steps": 50000,
     "cell_properties": {
         "standard" : {
+            # "S" : S_standard
             "S" : S_standard
-            # "S" : S_only_AB
         },
         "non_polar" : { 
            "S" : S_only_AB
         },
-    }
+    },
+    "save" : 2, # 0 = no save, 1 = save cells, 2 = save animation all_cells
+    "save_every":20, # only used if save == 2
 }
 
+import sys
 if __name__ == '__main__':
-    main(G["N_cells"], G["N_steps"], save=3, save_every=20)
+    # if len(sys.argv) > 1:
+        # G["name"] = sys.argv[1]
+
+    main(G["N_cells"], G["N_steps"])

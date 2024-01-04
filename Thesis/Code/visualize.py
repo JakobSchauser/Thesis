@@ -6,6 +6,7 @@ import sys
 from vispy import app, scene
 from vispy.visuals.transforms import STTransform
 import os
+import imageio
 
 iterator = 0
 
@@ -57,7 +58,7 @@ def interactive_plot(loaded_cells, loaded_properties = None, alpha=10):
         vispy.app.run()
 
 def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
-                     frame_every = 1, interval=1/30 ):
+                     frame_every = 1, interval=1/30, save=True ):
     print('Animating')
 
     # Load the data
@@ -96,11 +97,11 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
 
     def update(ev):
         global iterator
-        iterator += 1
+        iterator += 10
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
         scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
         scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/10, edge_width=0, face_color=(0.9,0.9,0), size=size)
-    
+
     timer = app.Timer(interval=interval)
     timer.connect(update)
     timer.start()
@@ -108,12 +109,12 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
     # We want to fly around
     view.camera = 'fly'
 
-
-
-    # We launch the app
     if sys.flags.interactive != 1:
         vispy.app.run()
 
+    vispy.app.quit()
+    
+    # We launch the app
 # def export_gif(folder, timesteps, output_name, alpha=10,
 #                view_particles=None):
 

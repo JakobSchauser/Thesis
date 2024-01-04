@@ -8,7 +8,7 @@ from utils import get_random_points_on_sphere
 
 # egg_shape = G["egg_shape"]
 sphere_shape = jnp.array([20, 20, 20])
-egg_shape = jnp.array([42, 42/3, 42/3])
+egg_shape = jnp.array([41.5, 41.5/3, 41.5/3])
 
 
 # egg_shape = jnp.array([230, 230/3, 230/3])
@@ -88,6 +88,16 @@ def better_egg(N:int) -> jnp.ndarray:
     cells, cell_properties = egg_IC(N)
 
     cells = make_better_egg(cells)
+    return cells, cell_properties
+
+def better_egg_genius(N:int) -> jnp.ndarray:
+    cells, cell_properties = egg_IC(N)
+
+    cells = make_better_egg(cells)
+    cell_properties = jnp.where(cells[:,0,:][:,2] < egg_shape[2]/2, 0., 1.)
+
+    cell_properties = jnp.where(cells[:,0,:][:,0] < -egg_shape[0]/2, 1., cell_properties)
+
     return cells, cell_properties
 
 

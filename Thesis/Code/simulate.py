@@ -28,15 +28,14 @@ import h5py
 
 import sys 
 
-from jax_enums import Enumerable
+# from jax_enums import Enumerable
+import enum
 
-class BC(Enumerable):
+class BC(enum.IntEnum):
     NONE = 0
     SPHERE = 1
     EGG = 2
     BETTER_EGG = 3
-
-
 
 @jit
 def unpack_cellrow(cellrow : jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
@@ -44,6 +43,7 @@ def unpack_cellrow(cellrow : jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray, jnp
     p = cellrow[1]
     q = cellrow[2]
     return pos, p, q
+
 
 @jit
 def quadruple(a1, a2, b1, b2) -> float: 
@@ -60,6 +60,17 @@ def S_standard(r, p1, q1, p2, q2) -> float:
     S3 = quadruple(q1, q2, r, r)
     return G["lambda0"]*S1 + G["lambda1"]*S2 + G["lambda2"]*S3
 
+@jit
+def S_angle(r, p1, q1, p2, q2) -> float:
+    avg_q = (q1 + q2)/2
+    phat = p1 - G["alpha"]*avg_q     #TODO: average q on unit sphere
+
+    phat = phat / jnp.linalg.norm(phat)
+
+    S1 = quadruple(phat, p2, r, r)
+    S2 = quadruple(phat, p2, q1, q2)
+
+    return 0.6*S1 + 0.4*S2 
 
 @jit
 def S_only_AB(r, p1, q1, p2, q2) -> float:
@@ -103,6 +114,14 @@ def get_boundary_fn():
     else:
         raise Exception("boundary must be none, sphere, egg or better_egg")
 
+# def get_S_fn(prop : int):
+#     property = G["cell_properties"][prop]
+#     if property == S_interact.STANDARD:
+#         return S_standard
+#     elif property == S_interact.ONLY_AB:
+#         return S_only_AB
+#     else:
+#         raise Exception("cell_properties must be standard or only_AB")
 
 @jit
 def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell2_property : float) -> float:
@@ -115,8 +134,10 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell2_property : float) ->
     norm_dir = _dir/jnp.linalg.norm(_dir)
 
     # s = S(dir, p1, q1, p2, q2)
-    s = jax.lax.cond(cell2_property == 0.0, G["cell_properties"]["standard"]["S"], G["cell_properties"]["non_polar"]["S"], norm_dir, p1, q1, p2, q2)
-    
+    # s = jax.lax.cond(cell2_property == 0.0, G["cell_properties"]["standard"]["S"], G["cell_properties"]["non_polar"]["S"], norm_dir, p1, q1, p2, q2)
+    # s_type = jax.lax.switch(cell2_property, G["cell_properties"])
+    s = jax.lax.switch(cell2_property.astype(int), G["cell_properties"], norm_dir, p1, q1, p2, q2)
+
     r = jnp.linalg.norm(_dir)
 
     v = V(r, s)
@@ -225,38 +246,31 @@ take_step = jit(take_step, static_argnames=["cell_properties"])
 
 
 
-def main(N_cells : int, N_steps : int):
-    save = G["save"]
+def main(N_cells : int, N_steps : int, save_type : str):
     save_every = G["save_every"]
     assert np.isclose(G["lambda0"] + G["lambda1"] + G["lambda2"], 1.0), "lambda0 + lambda1 + lambda2 must sum to 1.0 but is " + str(G["lambda0"] + G["lambda1"] + G["lambda2"])
-    assert save == 0 or save == 1 or save == 2, "save must be 0, 1 or 2 "
-
-    if os.path.exists("runs/"+G["name"]+".npy"):
-        ans = input(G["name"] + " already exists, append or overwrite? (y/n)")
-        if ans == "append":
-            print("appending")
-            save = 3
-        elif ans == "overwrite":
-            print("overwriting")
-        else:
-            print("exiting")
-            return
         
-    if save == 2:
-        assert save_every > 0 and save_every < N_steps, "save_every must be positive but smaller than N_steps"
+    assert save_every > 0 and save_every < N_steps, "save_every must be positive but smaller than N_steps"
 
-    cells, cell_properties = G["IC"](N_cells)
+    if not (save_type == "continue" or save_type == "branch" or save_type == "append"):
+        cells, cell_properties = G["IC"](N_cells)
+    else:
+        with h5py.File("runs/"+G["name"]+".hdf5", "r") as f:
+            cells = np.array(f["cells"][-1])
+            cell_properties = np.array(f["properties"])
+            old_G = dict(f.attrs.items())
+        if save_type == "continue":
+            G_from_properties(old_G)
+    
+    print("starting simulation")
+
     # plot_cells(cells)
-    all_cells = jnp.ones((int(N_steps/save_every), N_cells, 3, 3), float)
-    old_nbs = jnp.ones((cells.shape[0], 10), int)*-1
+    all_cells = jnp.empty((int(N_steps/save_every), N_cells, 3, 3), float)
+    old_nbs = jnp.empty((cells.shape[0], 10), int)*-1
 
     def save_cells(i, cells, all_cells, save_every):
         all_cells = all_cells.at[jnp.floor(i/save_every).astype(int),:,:,:].set(cells)
         return all_cells
-    
-    if save != 2 and save != 3:
-        def save_cells(i, cells, all_cells, save_every):
-            return all_cells
     
     @loop_tqdm(N_steps)
     def loop_fn(i, cp, save_every=save_every):
@@ -268,20 +282,84 @@ def main(N_cells : int, N_steps : int):
     cells, all_cells, old_nbs, cell_properties = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties))
 
     name = G["name"]
-    if save == 1:
-        np.save("runs/"+name+".npy", cells)
-    elif save == 2:
-        np.save("runs/"+name+".npy", all_cells)
-        np.save("runs/"+name+"_properties.npy", cell_properties)
-    elif save == 3:
-        old_cells = np.load("runs/"+name+".npy")
-        np.save("runs/"+name+".npy", np.concatenate((old_cells, all_cells), axis=0))
+
+    if save_type == "new":
+        with h5py.File("runs/"+name+".hdf5", "w") as f:
+            f.create_dataset("cells", data=all_cells)
+            f.create_dataset("properties", data=cell_properties)
+            f.attrs.update(G_to_properties(G))
+
+    elif save_type == "overwrite":
+        os.remove("runs/"+name+".hdf5")
+        with h5py.File("runs/"+name+".hdf5", "w") as f:
+            f.create_dataset("cells", data=all_cells)
+            f.create_dataset("properties", data=cell_properties)
+            f.attrs.update(G_to_properties(G))
+    elif save_type == "append" or save_type == "continue":
+        with h5py.File("runs/"+name+".hdf5", "r") as f:
+            old_cells = f["cells"][:]
+            old_prop = dict(f.attrs.items())
+
+        appended_cells = np.concatenate((old_cells, all_cells), axis=0)
+
+        prop = G_to_properties(G)
+        old_prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
+        old_prop["cell_properties"] = prop["cell_properties"]
+        
+        with h5py.File("runs/"+name+".hdf5", "a") as f:
+            del f["cells"]
+            f.create_dataset("cells", data=appended_cells)
+            f.attrs.update(old_prop)
+
+    elif save_type == "branch":
+        with h5py.File("runs/"+name+".hdf5", "r") as f:
+            old_cells = f["cells"][:]
+            old_prop = dict(f.attrs.items())
+
+        appended_cells = np.concatenate((old_cells, all_cells), axis=0)
+
+        prop = G_to_properties(G)
+        old_prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
+        old_prop["cell_properties"] = prop["cell_properties"]
+        
+        with h5py.File("runs/"+G["new_name"]+".hdf5", "w") as f:
+            f.create_dataset("cells", data=appended_cells)
+            f.create_dataset("properties", data=cell_properties)
+            f.attrs.update(G_to_properties(old_prop))
 
     return cells
 
 
+def G_to_properties(G):
+    return {
+        "alpha": G["alpha"],
+        "beta": G["beta"],
+        "dt": G["dt"],
+        "eta": G["eta"],
+        "lambda0": G["lambda0"],
+        "lambda1": G["lambda1"],
+        "lambda2": G["lambda2"],
+        "boundary": G["boundary"] if type(G["boundary"]) == str else G["boundary"].name,
+        "N_cells": G["N_cells"],
+        "N_steps": G["N_steps"],
+        "cell_properties": [prop if type(prop) == str else prop.__name__ for prop in G["cell_properties"]],
+        }
+
+def G_from_properties(old_G):
+    G["alpha"] = old_G["alpha"]
+    G["beta"] = old_G["beta"]
+    G["dt"] = old_G["dt"]
+    G["eta"] = old_G["eta"]
+    G["lambda0"] = old_G["lambda0"]
+    G["lambda1"] = old_G["lambda1"]
+    G["lambda2"] = old_G["lambda2"]
+    G["boundary"] = BC[old_G["boundary"]]
+    G["N_cells"] = old_G["N_cells"]
+    G["N_steps"] = old_G["N_steps"]
+    # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
 G = {
+    "alpha": 0.5,
     "beta": 5.0,
     "dt": 0.1,
     "eta": 1e-4, # width of the gaussian noise
@@ -289,27 +367,29 @@ G = {
     "lambda1": 0.5,
     "lambda2": 0.13,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    "name": "2000_genius_long_ABP",
-    "IC" : lambda x: IC.continue_IC("runs/2000_genius_long_ABP.npy"),#egg_half_IC,
-    # "IC" : IC.better_egg_genius,
+    # "IC" : lambda x: IC.continue_IC("runs/2000_genius_long_ABP.npy"),#egg_half_IC,
+    "IC" : IC.better_egg_genius,
     "N_cells": 2000,
-    "N_steps": 50000,
-    "cell_properties": {
-        "standard" : {
-            # "S" : S_standard
-            "S" : S_standard
-        },
-        "non_polar" : { 
-           "S" : S_only_AB
-        },
-    },
-    "save" : 2, # 0 = no save, 1 = save cells, 2 = save animation all_cells
+    "N_steps": 10000,
+    "cell_properties": [S_only_AB, S_only_AB, S_angle],
     "save_every":20, # only used if save == 2
 }
 
 import sys
 if __name__ == '__main__':
-    # if len(sys.argv) > 1:
-        # G["name"] = sys.argv[1]
+    assert len(sys.argv) > 1, "must specify a name"
 
-    main(G["N_cells"], G["N_steps"])
+    if os.path.exists("runs/"+ sys.argv[1]+".hdf5"):
+        assert len(sys.argv) > 2, "must specify a save_type"
+        save_type = sys.argv[2]
+
+        assert save_type in ["append", "overwrite", "branch", "continue"], "save_type must be append, continue, overwrite or branch"
+        if save_type == "branch":
+            assert len(sys.argv) > 3, "must specify a new name"
+            G["new_name"] = sys.argv[3]
+    else:
+        assert len(sys.argv) < 3, "cannot specify a save_type if the file does not exist"
+        save_type = "new"
+    G["name"] = sys.argv[1]
+
+    main(G["N_cells"], G["N_steps"], save_type)

@@ -7,6 +7,7 @@ from vispy import app, scene
 from vispy.visuals.transforms import STTransform
 import os
 import imageio
+import h5py
 
 iterator = 0
 
@@ -74,8 +75,11 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
 
     # Create scatter object and fill in the data
     colors = [(1,0,0) for i in range(len(xs[0]))]
+
+    different_colors = [(0,1,0), (1,0,0), (0,0,1), (1,1,0)]
+
     if loaded_properties is not None:
-        colors = [(0,1,0) if loaded_properties[i] == 0 else (1,0,0) for i in range(len(loaded_properties))]
+        colors = [different_colors[int(l)] for l in loaded_properties]
 
     scatter1 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
     scatter1.set_data(xs[0], edge_width=0, face_color=(1, 1, 1, .5), size=size)
@@ -170,16 +174,20 @@ if __name__ == '__main__':
     # get command line argument
 
     if len(sys.argv) > 1:
-        loaded_cells = np.load(sys.argv[1])
-        loaded_properties = None
-        # check if properties file exists
-        if os.path.isfile(sys.argv[1][:-4] + '_properties.npy'):
-            loaded_properties = np.load(sys.argv[1][:-4] + '_properties.npy')
+        # loaded_cells = np.load(sys.argv[1])
+        # loaded_properties = None
 
+        with h5py.File("runs/" + sys.argv[1] + ".hdf5", 'r') as f:
+            loaded_cells = f['cells'][:]
+            loaded_properties = None
+            if 'properties' in f:
+                loaded_properties = f['properties'][:]
+
+        
         if len(loaded_cells.shape) == 4:
             if len(sys.argv) > 2:
                 if sys.argv[2] == '0':
-                    interactive_plot(loaded_cells[0], loaded_properties)
+                    interactive_plot(loaded_cells[-1], loaded_properties)
                 else:
                     interactive_animate(loaded_cells, loaded_properties)
             else:    

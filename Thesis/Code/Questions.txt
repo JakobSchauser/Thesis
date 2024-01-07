@@ -32,3 +32,7 @@ Alpha!
 Neurolation
 Run loong time
 find way to document
+
+
+TODO:
+p_hat normalized?

@@ -60,7 +60,6 @@ def egg_IC(N : int) -> jnp.ndarray:
     return cells, cell_properties
 
 def egg_half_IC(N : int) -> jnp.ndarray:
-
     cells, _ = egg_IC(N)
     cell_properties = jnp.where(cells[:,0,:][:,2] < 0, 0., 1.)
 
@@ -69,20 +68,20 @@ def egg_half_IC(N : int) -> jnp.ndarray:
 def egg_genius(N:int) -> jnp.ndarray:
     cells, _ = egg_IC(N)
 
-    cell_properties = jnp.where(cells[:,0,:][:,2] < 0, 0., 1.)
+    cell_properties = jnp.where(cells[:,0,:][:,2] < egg_shape[2]/3, 0., 1.)
 
     cell_properties = jnp.where(cells[:,0,:][:,0] < -egg_shape[0]/2, 1., cell_properties)
 
     return cells, cell_properties
 
-def egg_genius2(N:int) -> jnp.ndarray:
-    cells, _ = egg_IC(N)
+# def egg_genius_(N:int) -> jnp.ndarray:
+#     cells, _ = egg_IC(N)
 
-    cell_properties = jnp.where(cells[:,0,:][:,2] < egg_shape[2]/4, 0., 1.)
+#     cell_properties = jnp.where(cells[:,0,:][:,2] < egg_shape[2]/3, 0., 1.)
 
-    cell_properties = jnp.where(cells[:,0,:][:,0] < -egg_shape[0]/2, 1., cell_properties)
+#     cell_properties = jnp.where(cells[:,0,:][:,0] < -egg_shape[0]/2, 1., cell_properties)
 
-    return cells, cell_properties
+#     return cells, cell_properties
 
 def better_egg(N:int) -> jnp.ndarray:
     cells, cell_properties = egg_IC(N)

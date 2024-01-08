@@ -104,7 +104,7 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
         iterator += 10
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
         scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
-        scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/10, edge_width=0, face_color=(0.9,0.9,0), size=size)
+        scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
 
     timer = app.Timer(interval=interval)
     timer.connect(update)

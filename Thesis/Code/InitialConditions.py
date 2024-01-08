@@ -3,7 +3,7 @@ import numpy as np
 import jax.random as random
 import os
 from utils import get_random_points_on_sphere
-
+import h5py
 # from G import G
 
 # egg_shape = G["egg_shape"]
@@ -15,12 +15,15 @@ egg_shape = jnp.array([41.5, 41.5/3, 41.5/3])
 
 
 def continue_IC(path : str, *args):
-    cells = np.load(path)[-1].reshape(-1, 3,3)
+    with h5py.File("runs/" + path + ".hdf5", 'r') as f:
+        cells = f['cells'][-1]
+        properties = f['properties'][:]
+    # cells = np.load(path)[-1].reshape(-1, 3,3)
 
-    if os.path.isfile(path[:-4] + '_properties.npy'):
-        properties = np.load(path[:-4] + '_properties.npy')
-    else:
-        properties = np.zeros(cells.shape[0])
+    # if os.path.isfile(path[:-4] + '_properties.npy'):
+    #     properties = np.load(path[:-4] + '_properties.npy')
+    # else:
+    #     properties = np.zeros(cells.shape[0])
 
 
     return cells, properties
@@ -102,17 +105,19 @@ def better_egg_genius(N:int) -> jnp.ndarray:
 
 def plane_IC(N : int) -> jnp.ndarray:
     # pos = get_random_points_on_sphere(N, 42)
-    pos = random.normal(random.PRNGKey(42), (N, 3))*100
+    pos = random.normal(random.PRNGKey(42), (N, 3))*jnp.sqrt(N)/2.
 
     pos = pos.at[:,2].set(jnp.zeros(N))
     # pinting in the z direction
     p = jnp.array([0, 0, 1.0])[None, :].repeat(N, axis=0)
 
-    q = get_random_points_on_sphere(N, 43)
+    q = jnp.array([0, 1.0, 0])[None, :].repeat(N, axis=0)
+
 
     cells = jnp.stack([pos, p, q], axis=1)
 
-    cell_properties = jnp.ones(N)
+    cell_properties = jnp.zeros(N)
+
 
 
     return cells, cell_properties
@@ -127,8 +132,6 @@ def get_ic(type:str) -> jnp.ndarray:
         return egg_half_IC
     elif type == "egg_genius":
         return egg_genius
-    elif type == "egg_genius2":
-        return egg_genius2
     elif type == "better_egg":
         return better_egg
     elif type == "continue":

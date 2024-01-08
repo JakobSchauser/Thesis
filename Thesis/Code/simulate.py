@@ -62,13 +62,17 @@ def S_standard(r, p1, q1, p2, q2) -> float:
 
 @jit
 def S_angle(r, p1, q1, p2, q2) -> float:
-    avg_q = (q1 + q2)/2
-    phat = p1 - G["alpha"]*avg_q     #TODO: average q on unit sphere
+    avg_q = (q1 + q2)*0.5        #TODO: average q on unit sphere?
 
-    phat = phat / jnp.linalg.norm(phat)
+    phat1 = p1 + G["alpha"]*avg_q*jnp.sum(avg_q*r)
+    phat1 = phat1 / jnp.linalg.norm(phat1)
 
-    S1 = quadruple(phat, p2, r, r)
-    S2 = quadruple(phat, p2, q1, q2)
+    phat2 = p2 - G["alpha"]*avg_q*jnp.sum(avg_q*r)
+    phat2 = phat2 / jnp.linalg.norm(phat2)
+
+
+    S1 = quadruple(phat1, phat2, r, r)
+    S2 = quadruple(phat1, phat2, q1, q2)
 
     return 0.6*S1 + 0.4*S2 
 
@@ -88,7 +92,10 @@ def from_angles_to_vector(phi, theta) -> jnp.ndarray:
 def get_boundary_fn():
     boundary = G["boundary"]
     if boundary == BC.NONE:
-        return lambda x: jnp.zeros_like(x)
+        def none(pos):
+            mag = jnp.abs(jnp.dot(pos, pos)) # squared length
+            return jnp.where(mag < -1.0, 0., 0.)
+        return none
     elif boundary == BC.SPHERE:
         def sphere(pos):
             corrected_pos_vec = pos / sphere_shape
@@ -145,7 +152,6 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell2_property : float) ->
     # add the boundary
     boundary_fn = get_boundary_fn()
     v_add = boundary_fn(pos2)
-
 
     v_added = v + v_add
 
@@ -366,12 +372,12 @@ G = {
     "lambda0": 0.37,
     "lambda1": 0.5,
     "lambda2": 0.13,
-    "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    # "IC" : lambda x: IC.continue_IC("runs/2000_genius_long_ABP.npy"),#egg_half_IC,
-    "IC" : IC.better_egg_genius,
+    "boundary": BC.NONE,   # none, sphere, egg, better_egg
+    "IC" : lambda x: IC.continue_IC("plane_base"),#egg_half_IC,
+    # "IC" : IC.plane_IC,
     "N_cells": 2000,
-    "N_steps": 10000,
-    "cell_properties": [S_only_AB, S_only_AB, S_angle],
+    "N_steps": 30000,
+    "cell_properties": [S_only_AB, S_angle],
     "save_every":20, # only used if save == 2
 }
 

@@ -64,10 +64,10 @@ def S_standard(r, p1, q1, p2, q2) -> float:
 def S_angle(r, p1, q1, p2, q2) -> float:
     avg_q = (q1 + q2)*0.5        #TODO: average q on unit sphere?
 
-    phat1 = p1 + G["alpha"]*avg_q*jnp.sum(avg_q*r)
+    phat1 = p1 - G["alpha"]*avg_q*jnp.sum(avg_q*r)
     phat1 = phat1 / jnp.linalg.norm(phat1)
 
-    phat2 = p2 - G["alpha"]*avg_q*jnp.sum(avg_q*r)
+    phat2 = p2 + G["alpha"]*avg_q*jnp.sum(avg_q*r)
     phat2 = phat2 / jnp.linalg.norm(phat2)
 
 
@@ -325,13 +325,14 @@ def main(N_cells : int, N_steps : int, save_type : str):
         appended_cells = np.concatenate((old_cells, all_cells), axis=0)
 
         prop = G_to_properties(G)
-        old_prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
-        old_prop["cell_properties"] = prop["cell_properties"]
-        
+        prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
+
+
+
         with h5py.File("runs/"+G["new_name"]+".hdf5", "w") as f:
             f.create_dataset("cells", data=appended_cells)
             f.create_dataset("properties", data=cell_properties)
-            f.attrs.update(G_to_properties(old_prop))
+            f.attrs.update(G_to_properties(prop))
 
     return cells
 
@@ -372,12 +373,12 @@ G = {
     "lambda0": 0.37,
     "lambda1": 0.5,
     "lambda2": 0.13,
-    "boundary": BC.NONE,   # none, sphere, egg, better_egg
-    "IC" : lambda x: IC.continue_IC("plane_base"),#egg_half_IC,
-    # "IC" : IC.plane_IC,
-    "N_cells": 2000,
-    "N_steps": 30000,
-    "cell_properties": [S_only_AB, S_angle],
+    "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+    "IC" : lambda x: IC.continue_IC("sparse_line"),#egg_half_IC,
+    # "IC" : IC.better_egg_genius,
+    "N_cells": 1850,
+    "N_steps": 10000,
+    "cell_properties": [S_only_AB, S_only_AB, S_angle],
     "save_every":20, # only used if save == 2
 }
 

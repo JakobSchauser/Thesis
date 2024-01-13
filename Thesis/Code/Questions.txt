@@ -36,3 +36,8 @@ find way to document
 
 TODO:
 p_hat normalized?
+
+
+To show:
+right!: Large_angle_correct
+wrong:  line_egg 

@@ -15,6 +15,9 @@ if __name__ == '__main__':
         if "properties" in f:
             print("\nNumber of different cell types:")
             pprint(len(np.unique(f['properties'][:])))
-
+            types, counts = np.unique(f['properties'][:], return_counts=True)
+            print("\nCell type counts:")
+            pprint(dict(zip(types, counts)))
+            
         print("\nSimulation attributes:")
         pprint(dict(f.attrs.items()))

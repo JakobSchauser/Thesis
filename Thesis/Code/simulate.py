@@ -10,8 +10,6 @@ from jax.config import config
 
 from jax_tqdm import loop_tqdm
 
-from InitialConditions import egg_shape, sphere_shape
-
 import functools
 
 config.update("jax_debug_nans", True)
@@ -20,9 +18,7 @@ from functools import cache
 
 import os
 
-import InitialConditions as IC
-
-from InitialConditions import inv_make_better_egg_pos
+from InitialConditions import InitialConditions
 
 import h5py
 
@@ -36,6 +32,12 @@ class BC(enum.IntEnum):
     SPHERE = 1
     EGG = 2
     BETTER_EGG = 3
+
+class S_type(enum.IntEnum):
+    ONLY_AB = 0
+    STANDARD = 1
+    ANGLE = 2
+
 
 @jit
 def unpack_cellrow(cellrow : jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
@@ -72,7 +74,7 @@ def S_angle(r, p1, q1, p2, q2) -> float:
 
 
     S1 = quadruple(phat1, phat2, r, r)
-    S2 = quadruple(phat1, phat2, q1, q2)
+    S2 = quadruple(p1, p2, q1, q2)
 
     return 0.6*S1 + 0.4*S2 
 
@@ -98,22 +100,22 @@ def get_boundary_fn():
         return none
     elif boundary == BC.SPHERE:
         def sphere(pos):
-            corrected_pos_vec = pos / sphere_shape
+            corrected_pos_vec = pos / G["IC"].scaled_sphere_shape
             mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
             v_add = jnp.where(mag > 1.0, (jnp.exp(mag*mag - 1) - 1), 0.)
             return v_add 
         return sphere
     elif boundary == BC.EGG:
         def egg(pos):
-            corrected_pos_vec = pos / egg_shape
+            corrected_pos_vec = pos / G["IC"].scaled_egg_shape
             mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
             v_add = jnp.where(mag > 1.0, (jnp.exp(mag*mag - 1) - 1), 0.)
             return v_add 
         return egg
     elif boundary == BC.BETTER_EGG:
         def better_egg(pos):
-            corrected_pos_vec = inv_make_better_egg_pos(pos)
-            corrected_pos_vec = corrected_pos_vec / egg_shape
+            corrected_pos_vec = G["IC"].inv_make_better_egg_pos(pos)
+            corrected_pos_vec = corrected_pos_vec / G["IC"].scaled_egg_shape
             mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
             v_add = jnp.where(mag > 1.0, (jnp.exp(mag*mag - 1) - 1), 0.)
             return v_add 
@@ -130,8 +132,16 @@ def get_boundary_fn():
 #     else:
 #         raise Exception("cell_properties must be standard or only_AB")
 
+interaction_matrix = jnp.array([[S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB], 
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.STANDARD], 
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE]])
+
+
+def get_interaction(prop1 : int, prop2 : int, *args):
+    interact = interaction_matrix.at[prop1, prop2].get()
+    return jax.lax.switch(interact, [S_only_AB, S_standard, S_angle], *args)
 @jit
-def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell2_property : float) -> float:
+def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, cell2_property : float) -> float:
     pos1, p1, q1 = unpack_cellrow(cellrow1)
     pos2, p2, q2 = unpack_cellrow(cellrow2)
 
@@ -143,7 +153,14 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell2_property : float) ->
     # s = S(dir, p1, q1, p2, q2)
     # s = jax.lax.cond(cell2_property == 0.0, G["cell_properties"]["standard"]["S"], G["cell_properties"]["non_polar"]["S"], norm_dir, p1, q1, p2, q2)
     # s_type = jax.lax.switch(cell2_property, G["cell_properties"])
-    s = jax.lax.switch(cell2_property.astype(int), G["cell_properties"], norm_dir, p1, q1, p2, q2)
+    s1 = G["cell_properties"].at[cell1_property.astype(int)].get()
+    s2 = G["cell_properties"].at[cell2_property.astype(int)].get()
+    # s1 = jax.lax.switch(, )
+    # s2 = jax.lax.switch(cell2_property.astype(int), G["cell_properties"])
+
+    print(s1)
+    jax.debug.breakpoint()
+    s = get_interaction(s1, s2, norm_dir, p1, q1, p2, q2)
 
     r = jnp.linalg.norm(_dir)
 
@@ -192,6 +209,7 @@ def find_neighbors(cells : jnp.ndarray, k : int = 10):
     z_mask = jnp.sum(n_dis < (d[:, :, None] ** 2 / 4), axis=2) <= 0
 
     indx = find_array_that_has_own_indexes((neighbors.shape[0], k))
+    # indx = jnp.indices((neighbors.shape[0], k))
     actual_neighbors = jnp.where(z_mask, neighbors, indx)
 
     return actual_neighbors
@@ -207,7 +225,7 @@ def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.nd
     arr = jnp.empty((cells.shape[0], neighbors.shape[1]), float)
 
     def loop_fn(i, arr):
-        val = jax.vmap(lambda nb: U(cells[i], nb, cell_properties[i]))(cells[neighbors[i,:]])
+        val = jax.vmap(lambda nb, prop: U(cells[i], nb, cell_properties[i], prop))(cells[neighbors[i,:]], cell_properties[neighbors[i,:]])
         arr = arr.at[i,:].set(val)
         return arr
     
@@ -222,7 +240,7 @@ U_grad = grad(U_sum, argnums=(0))
 
 
 def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_properties : jnp.ndarray):
-    neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 100 == 0), find_neighbors, lambda *args: old_nbs, cells)
+    neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 50 == 0), find_neighbors, lambda *args: old_nbs, cells)
 
     grad_U = U_grad(cells, neighbors, cell_properties)
 
@@ -254,38 +272,57 @@ take_step = jit(take_step, static_argnames=["cell_properties"])
 
 def main(N_cells : int, N_steps : int, save_type : str):
     save_every = G["save_every"]
+
+    saved_steps = (int(N_steps/save_every))
+
     assert np.isclose(G["lambda0"] + G["lambda1"] + G["lambda2"], 1.0), "lambda0 + lambda1 + lambda2 must sum to 1.0 but is " + str(G["lambda0"] + G["lambda1"] + G["lambda2"])
         
     assert save_every > 0 and save_every < N_steps, "save_every must be positive but smaller than N_steps"
 
     if not (save_type == "continue" or save_type == "branch" or save_type == "append"):
-        cells, cell_properties = G["IC"](N_cells)
+        IC_cells, IC_cell_properties = G["IC"].initialize()
     else:
         with h5py.File("runs/"+G["name"]+".hdf5", "r") as f:
-            cells = np.array(f["cells"][-1])
-            cell_properties = np.array(f["properties"])
+            IC_cells = np.array(f["cells"][-1])
+            IC_cell_properties = np.array(f["properties"])
             old_G = dict(f.attrs.items())
         if save_type == "continue":
             G_from_properties(old_G)
-    
+            N_cells = G["N_cells"]
+            G["N_steps"] = N_steps
+
+    if G["proliferate"]:
+        cells = jnp.empty((G["max_cells"], 3, 3), float)
+        cell_properties = jnp.empty(G["max_cells"], float)
+        cells = cells.at[:N_cells].set(IC_cells)
+        cell_properties = cell_properties.at[:N_cells].set(IC_cell_properties)
+        live_mask = jnp.zeros(G["max_cells"], bool)
+        live_mask = live_mask.at[:N_cells].set(jnp.ones(N_cells, bool))
+    else:
+        cells = IC_cells
+        cell_properties = IC_cell_properties
+        live_mask = jnp.ones(N_cells, bool)
+
+
     print("starting simulation")
 
     # plot_cells(cells)
     all_cells = jnp.empty((int(N_steps/save_every), N_cells, 3, 3), float)
+    all_alives = jnp.empty((int(N_steps/save_every), N_cells), bool)
     old_nbs = jnp.empty((cells.shape[0], 10), int)*-1
 
-    def save_cells(i, cells, all_cells, save_every):
+    def save_cells(i, cells, all_cells, live_mask, save_every):
         all_cells = all_cells.at[jnp.floor(i/save_every).astype(int),:,:,:].set(cells)
         return all_cells
     
     @loop_tqdm(N_steps)
     def loop_fn(i, cp, save_every=save_every):
-        cells, all_cells, old_nbs, cell_properties = cp
+        cells, all_cells, old_nbs, cell_properties, alive_mask = cp
         all_cells = jax.lax.cond(i % save_every == 0, lambda : save_cells(i, cells, all_cells, save_every), lambda *args: all_cells)
-        cells, old_nbs = take_step(i, cells, old_nbs, cell_properties)
-        return cells, all_cells, old_nbs, cell_properties
+        cells, old_nbs = take_step(i, cells, old_nbs, cell_properties, alive_mask)
+        return cells, all_cells, old_nbs, cell_properties, alive_mask
     
-    cells, all_cells, old_nbs, cell_properties = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties))
+    cells, all_cells, old_nbs, cell_properties, alive_mask = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, alive_mask))
 
     name = G["name"]
 
@@ -328,7 +365,6 @@ def main(N_cells : int, N_steps : int, save_type : str):
         prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
 
 
-
         with h5py.File("runs/"+G["new_name"]+".hdf5", "w") as f:
             f.create_dataset("cells", data=appended_cells)
             f.create_dataset("properties", data=cell_properties)
@@ -338,6 +374,8 @@ def main(N_cells : int, N_steps : int, save_type : str):
 
 
 def G_to_properties(G):
+    proplist = G["cell_properties"] if type(G["cell_properties"]) == list else G["cell_properties"].tolist()
+
     return {
         "alpha": G["alpha"],
         "beta": G["beta"],
@@ -349,7 +387,7 @@ def G_to_properties(G):
         "boundary": G["boundary"] if type(G["boundary"]) == str else G["boundary"].name,
         "N_cells": G["N_cells"],
         "N_steps": G["N_steps"],
-        "cell_properties": [prop if type(prop) == str else prop.__name__ for prop in G["cell_properties"]],
+        "cell_properties": [prop if type(prop) == str else S_type(prop).name for prop in proplist],
         }
 
 def G_from_properties(old_G):
@@ -366,6 +404,7 @@ def G_from_properties(old_G):
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
 G = {
+    "N_steps": 5000,
     "alpha": 0.5,
     "beta": 5.0,
     "dt": 0.1,
@@ -373,21 +412,28 @@ G = {
     "lambda0": 0.37,
     "lambda1": 0.5,
     "lambda2": 0.13,
+    "proliferate" : False,
+    "proliferation_rate" : 0.0, # per time step
+    "max_cells" : 10000,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    "IC" : lambda x: IC.continue_IC("sparse_line"),#egg_half_IC,
-    # "IC" : IC.better_egg_genius,
-    "N_cells": 1850,
-    "N_steps": 10000,
-    "cell_properties": [S_only_AB, S_only_AB, S_angle],
-    "save_every":20, # only used if save == 2
+    "N_cells": 5000,
+    "cell_properties": jnp.array([S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE]),
+    "save_every": 20, # only used if save == 2
+    "IC_scale" : 65.,
+    "IC_type" : "continue:large_angle_correct", # continue, plane, sphere, egg, better_egg
 }
+
+IC = InitialConditions(G)
+
+G["IC"] = IC
+
 
 import sys
 if __name__ == '__main__':
     assert len(sys.argv) > 1, "must specify a name"
 
     if os.path.exists("runs/"+ sys.argv[1]+".hdf5"):
-        assert len(sys.argv) > 2, "must specify a save_type"
+        assert len(sys.argv) > 2, "must specify a save_type, overwrite or append?"
         save_type = sys.argv[2]
 
         assert save_type in ["append", "overwrite", "branch", "continue"], "save_type must be append, continue, overwrite or branch"

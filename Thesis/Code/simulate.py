@@ -269,11 +269,55 @@ def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_
 take_step = jit(take_step, static_argnames=["cell_properties"])
 
 
+def get_save_fn(name : str, type : str):
+
+    if type == "append":
+        def save_fn(all_cells, cell_properties, G):
+            with h5py.File("runs/"+name+".hdf5", "r") as f:
+                old_cells = f["cells"][:]
+                old_prop = dict(f.attrs.items())
+
+            appended_cells = np.concatenate((old_cells, all_cells), axis=0)
+
+            prop = G_to_properties(G)
+            old_prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
+            old_prop["cell_properties"] = prop["cell_properties"]
+            
+            with h5py.File("runs/"+name+".hdf5", "a") as f:
+                del f["cells"]
+                f.create_dataset("cells", data=appended_cells)
+                f.attrs.update(old_prop)
+
+        return save_fn
+    elif type == "branch":
+        def save_fn(all_cells, cell_properties, G):
+            with h5py.File("runs/"+name+".hdf5", "r") as f:
+                old_cells = f["cells"][:]
+                old_prop = dict(f.attrs.items())
+
+            appended_cells = np.concatenate((old_cells, all_cells), axis=0)
+
+            prop = G_to_properties(G)
+            prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
+
+            with h5py.File("runs/"+G["new_name"]+".hdf5", "w") as f:
+                f.create_dataset("cells", data=appended_cells)
+                f.create_dataset("properties", data=cell_properties)
+                f.attrs.update(G_to_properties(prop))
+        return save_fn
+    else:
+        def save_fn(all_cells, cell_properties, G):
+            if type == "overwrite":
+                os.remove("runs/"+name+".hdf5")
+
+            with h5py.File("runs/"+name+".hdf5", "w") as f:
+                f.create_dataset("cells", data=all_cells)
+                f.create_dataset("properties", data=cell_properties)
+                f.attrs.update(G_to_properties(G))
+        return save_fn
 
 def main(N_cells : int, N_steps : int, save_type : str):
     save_every = G["save_every"]
-
-    saved_steps = (int(N_steps/save_every))
 
     assert np.isclose(G["lambda0"] + G["lambda1"] + G["lambda2"], 1.0), "lambda0 + lambda1 + lambda2 must sum to 1.0 but is " + str(G["lambda0"] + G["lambda1"] + G["lambda2"])
         
@@ -291,6 +335,8 @@ def main(N_cells : int, N_steps : int, save_type : str):
             N_cells = G["N_cells"]
             G["N_steps"] = N_steps
 
+    save_to_disk = get_save_fn(G["name"], save_type)
+
     if G["proliferate"]:
         cells = jnp.empty((G["max_cells"], 3, 3), float)
         cell_properties = jnp.empty(G["max_cells"], float)
@@ -306,69 +352,29 @@ def main(N_cells : int, N_steps : int, save_type : str):
 
     print("starting simulation")
 
-    # plot_cells(cells)
     all_cells = jnp.empty((int(N_steps/save_every), N_cells, 3, 3), float)
-    all_alives = jnp.empty((int(N_steps/save_every), N_cells), bool)
-    old_nbs = jnp.empty((cells.shape[0], 10), int)*-1
+    all_alive_masks = jnp.empty((int(N_steps/save_every), N_cells), bool)
+    old_nbs = jnp.empty((cells.shape[0], 10), int)#*-1   # why did I do this?
 
-    def save_cells(i, cells, all_cells, live_mask, save_every):
+    def save_cells(i, cells, all_cells, save_every):
         all_cells = all_cells.at[jnp.floor(i/save_every).astype(int),:,:,:].set(cells)
         return all_cells
     
+    def save_alive_mask(i, alive_mask, all_alive_masks, save_every):
+        all_alive_masks = all_alive_masks.at[jnp.floor(i/save_every).astype(int),:,:,:].set(alive_mask)
+        return all_alive_masks
+    
     @loop_tqdm(N_steps)
     def loop_fn(i, cp, save_every=save_every):
-        cells, all_cells, old_nbs, cell_properties, alive_mask = cp
+        cells, all_cells, old_nbs, cell_properties, alive_mask, all_alive_masks = cp
         all_cells = jax.lax.cond(i % save_every == 0, lambda : save_cells(i, cells, all_cells, save_every), lambda *args: all_cells)
+        alive_mask = jax.lax.cond(i % save_every == 0, lambda : save_alive_mask(i, alive_mask, all_alive_masks, save_every), lambda *args: alive_mask)
         cells, old_nbs = take_step(i, cells, old_nbs, cell_properties, alive_mask)
-        return cells, all_cells, old_nbs, cell_properties, alive_mask
+        return cells, all_cells, old_nbs, cell_properties, alive_mask, all_alive_masks
     
-    cells, all_cells, old_nbs, cell_properties, alive_mask = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, alive_mask))
+    cells, all_cells, old_nbs, cell_properties, alive_mask, all_alive_masks = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, alive_mask, all_alive_masks))
 
-    name = G["name"]
-
-    if save_type == "new":
-        with h5py.File("runs/"+name+".hdf5", "w") as f:
-            f.create_dataset("cells", data=all_cells)
-            f.create_dataset("properties", data=cell_properties)
-            f.attrs.update(G_to_properties(G))
-
-    elif save_type == "overwrite":
-        os.remove("runs/"+name+".hdf5")
-        with h5py.File("runs/"+name+".hdf5", "w") as f:
-            f.create_dataset("cells", data=all_cells)
-            f.create_dataset("properties", data=cell_properties)
-            f.attrs.update(G_to_properties(G))
-    elif save_type == "append" or save_type == "continue":
-        with h5py.File("runs/"+name+".hdf5", "r") as f:
-            old_cells = f["cells"][:]
-            old_prop = dict(f.attrs.items())
-
-        appended_cells = np.concatenate((old_cells, all_cells), axis=0)
-
-        prop = G_to_properties(G)
-        old_prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
-        old_prop["cell_properties"] = prop["cell_properties"]
-        
-        with h5py.File("runs/"+name+".hdf5", "a") as f:
-            del f["cells"]
-            f.create_dataset("cells", data=appended_cells)
-            f.attrs.update(old_prop)
-
-    elif save_type == "branch":
-        with h5py.File("runs/"+name+".hdf5", "r") as f:
-            old_cells = f["cells"][:]
-            old_prop = dict(f.attrs.items())
-
-        appended_cells = np.concatenate((old_cells, all_cells), axis=0)
-
-        prop = G_to_properties(G)
-        prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
-
-
-        with h5py.File("runs/"+G["new_name"]+".hdf5", "w") as f:
-            f.create_dataset("cells", data=appended_cells)
-            f.create_dataset("properties", data=cell_properties)
-            f.attrs.update(G_to_properties(prop))
+    save_to_disk(all_cells, cell_properties, G)
 
     return cells
 

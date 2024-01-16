@@ -37,7 +37,9 @@ find way to document
 TODO:
 p_hat normalized?
 
+Make cells on border have lower S1 to extend them
 
 To show:
 right!: Large_angle_correct
 wrong:  line_egg 
+

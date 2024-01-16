@@ -37,7 +37,22 @@ class S_type(enum.IntEnum):
     ONLY_AB = 0
     STANDARD = 1
     ANGLE = 2
+    WEAK_AB = 3
+    WEAK_STANDARD = 4
+    INVERSE_ANGLE = 5
+    ANGLE_ISOTROPIC = 6
+    NON_INTERACTING = 7
 
+interaction_matrix = jnp.array([
+                                [S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.NON_INTERACTING], 
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.STANDARD, S_type.WEAK_AB, S_type.STANDARD, S_type.STANDARD, S_type.STANDARD, S_type.NON_INTERACTING],
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE, S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],
+                                [S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB ,S_type.WEAK_AB, S_type.WEAK_AB, S_type.NON_INTERACTING],
+                                [S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.WEAK_STANDARD,S_type.WEAK_STANDARD, S_type.WEAK_STANDARD, S_type.NON_INTERACTING],
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.INVERSE_ANGLE, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],#last one shouæd be inverse
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE_ISOTROPIC, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],
+                                [S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING]
+                                ])
 
 @jit
 def unpack_cellrow(cellrow : jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
@@ -60,16 +75,22 @@ def S_standard(r, p1, q1, p2, q2) -> float:
     S1 = quadruple(p1, p2, r, r)
     S2 = quadruple(p1, p2, q1, q2)
     S3 = quadruple(q1, q2, r, r)
-    return G["lambda0"]*S1 + G["lambda1"]*S2 + G["lambda2"]*S3
+    return G["lambda1"]*S1 + G["lambda2"]*S2 + G["lambda3"]*S3
+
+@jit
+def S_standard_weak(r, p1, q1, p2, q2) -> float:
+    return S_standard(r, p1, q1, p2, q2)*0.5
 
 @jit
 def S_angle(r, p1, q1, p2, q2) -> float:
     avg_q = (q1 + q2)*0.5        #TODO: average q on unit sphere?
 
-    phat1 = p1 - G["alpha"]*avg_q*jnp.sum(avg_q*r)
+    r_unit = r / jnp.linalg.norm(r)
+
+    phat1 = p1 - G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)
     phat1 = phat1 / jnp.linalg.norm(phat1)
 
-    phat2 = p2 + G["alpha"]*avg_q*jnp.sum(avg_q*r)
+    phat2 = p2 + G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)
     phat2 = phat2 / jnp.linalg.norm(phat2)
 
 
@@ -79,9 +100,55 @@ def S_angle(r, p1, q1, p2, q2) -> float:
     return 0.6*S1 + 0.4*S2 
 
 @jit
+def S_angle_isotropic(r, p1, q1, p2, q2) -> float:
+
+    r_unit = r / jnp.linalg.norm(r)
+
+    phat1 = p1 - G["alpha"]*r_unit*0.2
+    phat1 = phat1 / jnp.linalg.norm(phat1)
+
+    phat2 = p2 + G["alpha"]*r_unit*0.2
+    phat2 = phat2 / jnp.linalg.norm(phat2)
+
+
+    S1 = quadruple(phat1, phat2, r, r)
+    S2 = quadruple(p1, p2, q1, q2)
+
+    return 0.6*S1 + 0.4*S2 
+
+
+@jit
+def S_inverse_angle(r, p1, q1, p2, q2) -> float:
+    avg_q = (q1 + q2)*0.5        #TODO: average q on unit sphere?
+
+    r_unit = r / jnp.linalg.norm(r)
+
+    phat1 = p1 + G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)*0.2
+    phat1 = phat1 / jnp.linalg.norm(phat1)
+
+    phat2 = p2 - G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)*0.2
+    phat2 = phat2 / jnp.linalg.norm(phat2)
+
+
+    S1 = quadruple(phat1, phat2, r, r)
+    S2 = quadruple(p1, p2, q1, q2)
+    S3 = quadruple(q1, q2, r, r)
+
+    return (1 - 0.5 - 0.05)*S1 + 0.5*S2 + 0.05*S3
+
+@jit
+def S_non_interacting(r, p1, q1, p2, q2) -> float:
+    return 0.0
+
+@jit
 def S_only_AB(r, p1, q1, p2, q2) -> float:
     S1 = quadruple(p1, p2, r, r)
     return S1
+
+@jit
+def S_only_AB_weak(r, p1, q1, p2, q2) -> float:
+    S1 = quadruple(p1, p2, r, r)
+    return S1*0.5
 
 def from_angles_to_vector(phi, theta) -> jnp.ndarray:
     x = jnp.cos(phi)*jnp.sin(theta)
@@ -132,14 +199,13 @@ def get_boundary_fn():
 #     else:
 #         raise Exception("cell_properties must be standard or only_AB")
 
-interaction_matrix = jnp.array([[S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB], 
-                                [S_type.ONLY_AB, S_type.STANDARD, S_type.STANDARD], 
-                                [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE]])
+
 
 
 def get_interaction(prop1 : int, prop2 : int, *args):
     interact = interaction_matrix.at[prop1, prop2].get()
-    return jax.lax.switch(interact, [S_only_AB, S_standard, S_angle], *args)
+    return jax.lax.switch(interact, [S_only_AB, S_standard, S_angle, S_only_AB_weak, S_standard_weak, S_inverse_angle, S_angle_isotropic, S_non_interacting], *args)
+
 @jit
 def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, cell2_property : float) -> float:
     pos1, p1, q1 = unpack_cellrow(cellrow1)
@@ -219,7 +285,7 @@ def find_neighbors(cells : jnp.ndarray, k : int = 10):
 
 # compute the energy of the system
 @functools.partial(jit, static_argnames=['cell_properties'])
-def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.ndarray):
+def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.ndarray) -> float:
 
     # empty array to hold the energies
     arr = jnp.empty((cells.shape[0], neighbors.shape[1]), float)
@@ -228,7 +294,6 @@ def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.nd
         val = jax.vmap(lambda nb, prop: U(cells[i], nb, cell_properties[i], prop))(cells[neighbors[i,:]], cell_properties[neighbors[i,:]])
         arr = arr.at[i,:].set(val)
         return arr
-    
     
     arr = jax.lax.fori_loop(0, cells.shape[0], loop_fn, arr)
 
@@ -239,23 +304,14 @@ def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.nd
 U_grad = grad(U_sum, argnums=(0))
 
 
-def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_properties : jnp.ndarray):
+def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_properties : jnp.ndarray, N_alive : int):
+
     neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 50 == 0), find_neighbors, lambda *args: old_nbs, cells)
 
     grad_U = U_grad(cells, neighbors, cell_properties)
 
     # update the positions using euler
     cells = cells - grad_U*G["dt"]
-
-    # update the positions using runge-kutta 4
-    # k1 = grad_U
-    # inner = cells - k1*G["dt"]/2
-    # k2 = U_grad(inner, neighbors, cell_properties)
-    # k3 = U_grad(cells - k2*G["dt"]/2, neighbors, cell_properties)
-    # k4 = U_grad(cells - k3*G["dt"], neighbors, cell_properties)
-
-    # cells = cells - G["dt"]*(k1 + 2*k2 + 2*k3 + k4)/6
-
 
     # add random noise to the positions
     cells = cells.at[:,0,:].add(random.normal(random.PRNGKey(0), cells.shape[0:2])*G["eta"])
@@ -264,12 +320,19 @@ def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_
     ns = cells[:,1:,:] / jnp.linalg.norm(cells[:,1:,:], axis=2)[:,:,None]
     cells = cells.at[:,1:,:].set(ns)
     
+
     return cells, neighbors
 
 take_step = jit(take_step, static_argnames=["cell_properties"])
 
 
 def get_save_fn(name : str, type : str):
+
+    def save_file(name, all_cells, cell_properties, G):
+        with h5py.File("runs/"+name+".hdf5", "w") as f:
+            f.create_dataset("cells", data=all_cells)
+            f.create_dataset("properties", data=cell_properties)
+            f.attrs.update(G_to_properties(G))
 
     if type == "append":
         def save_fn(all_cells, cell_properties, G):
@@ -300,26 +363,19 @@ def get_save_fn(name : str, type : str):
             prop = G_to_properties(G)
             prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
 
-            with h5py.File("runs/"+G["new_name"]+".hdf5", "w") as f:
-                f.create_dataset("cells", data=appended_cells)
-                f.create_dataset("properties", data=cell_properties)
-                f.attrs.update(G_to_properties(prop))
+            save_file(G["new_name"], appended_cells, cell_properties, G)
         return save_fn
     else:
         def save_fn(all_cells, cell_properties, G):
             if type == "overwrite":
                 os.remove("runs/"+name+".hdf5")
-
-            with h5py.File("runs/"+name+".hdf5", "w") as f:
-                f.create_dataset("cells", data=all_cells)
-                f.create_dataset("properties", data=cell_properties)
-                f.attrs.update(G_to_properties(G))
+            save_file(name, all_cells, cell_properties, G)
         return save_fn
 
 def main(N_cells : int, N_steps : int, save_type : str):
     save_every = G["save_every"]
 
-    assert np.isclose(G["lambda0"] + G["lambda1"] + G["lambda2"], 1.0), "lambda0 + lambda1 + lambda2 must sum to 1.0 but is " + str(G["lambda0"] + G["lambda1"] + G["lambda2"])
+    assert np.isclose(G["lambda1"] + G["lambda2"] + G["lambda3"], 1.0), "lambda1 + lambda2 + lambda3 must sum to 1.0 but is " + str(G["lambda3"] + G["lambda1"] + G["lambda2"])
         
     assert save_every > 0 and save_every < N_steps, "save_every must be positive but smaller than N_steps"
 
@@ -337,42 +393,40 @@ def main(N_cells : int, N_steps : int, save_type : str):
 
     save_to_disk = get_save_fn(G["name"], save_type)
 
+    N_alive = N_cells
     if G["proliferate"]:
         cells = jnp.empty((G["max_cells"], 3, 3), float)
         cell_properties = jnp.empty(G["max_cells"], float)
         cells = cells.at[:N_cells].set(IC_cells)
         cell_properties = cell_properties.at[:N_cells].set(IC_cell_properties)
-        live_mask = jnp.zeros(G["max_cells"], bool)
-        live_mask = live_mask.at[:N_cells].set(jnp.ones(N_cells, bool))
     else:
         cells = IC_cells
         cell_properties = IC_cell_properties
-        live_mask = jnp.ones(N_cells, bool)
 
 
     print("starting simulation")
 
     all_cells = jnp.empty((int(N_steps/save_every), N_cells, 3, 3), float)
-    all_alive_masks = jnp.empty((int(N_steps/save_every), N_cells), bool)
+    all_N_alives = jnp.empty((int(N_steps/save_every)), int)
     old_nbs = jnp.empty((cells.shape[0], 10), int)#*-1   # why did I do this?
 
     def save_cells(i, cells, all_cells, save_every):
         all_cells = all_cells.at[jnp.floor(i/save_every).astype(int),:,:,:].set(cells)
         return all_cells
     
-    def save_alive_mask(i, alive_mask, all_alive_masks, save_every):
-        all_alive_masks = all_alive_masks.at[jnp.floor(i/save_every).astype(int),:,:,:].set(alive_mask)
-        return all_alive_masks
+    def save_N_alive(i, N_alive, all_N_alives, save_every):
+        all_N_alives = all_N_alives.at[jnp.floor(i/save_every).astype(int)].set(N_alive)
+        return all_N_alives
     
     @loop_tqdm(N_steps)
     def loop_fn(i, cp, save_every=save_every):
-        cells, all_cells, old_nbs, cell_properties, alive_mask, all_alive_masks = cp
+        cells, all_cells, old_nbs, cell_properties, N_alive, all_N_alives = cp
         all_cells = jax.lax.cond(i % save_every == 0, lambda : save_cells(i, cells, all_cells, save_every), lambda *args: all_cells)
-        alive_mask = jax.lax.cond(i % save_every == 0, lambda : save_alive_mask(i, alive_mask, all_alive_masks, save_every), lambda *args: alive_mask)
-        cells, old_nbs = take_step(i, cells, old_nbs, cell_properties, alive_mask)
-        return cells, all_cells, old_nbs, cell_properties, alive_mask, all_alive_masks
+        all_N_alives = jax.lax.cond(i % save_every == 0, lambda : save_N_alive(i, N_alive, all_N_alives, save_every), lambda *args: all_N_alives)
+        cells, old_nbs = take_step(i, cells, old_nbs, cell_properties, N_alive)
+        return cells, all_cells, old_nbs, cell_properties, N_alive, all_N_alives
     
-    cells, all_cells, old_nbs, cell_properties, alive_mask, all_alive_masks = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, alive_mask, all_alive_masks))
+    cells, all_cells, old_nbs, cell_properties, N_alive, all_N_alives = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, N_alive, all_N_alives))
 
     save_to_disk(all_cells, cell_properties, G)
 
@@ -387,9 +441,9 @@ def G_to_properties(G):
         "beta": G["beta"],
         "dt": G["dt"],
         "eta": G["eta"],
-        "lambda0": G["lambda0"],
         "lambda1": G["lambda1"],
         "lambda2": G["lambda2"],
+        "lambda3": G["lambda3"],
         "boundary": G["boundary"] if type(G["boundary"]) == str else G["boundary"].name,
         "N_cells": G["N_cells"],
         "N_steps": G["N_steps"],
@@ -401,32 +455,33 @@ def G_from_properties(old_G):
     G["beta"] = old_G["beta"]
     G["dt"] = old_G["dt"]
     G["eta"] = old_G["eta"]
-    G["lambda0"] = old_G["lambda0"]
     G["lambda1"] = old_G["lambda1"]
     G["lambda2"] = old_G["lambda2"]
+    G["lambda3"] = old_G["lambda3"]
     G["boundary"] = BC[old_G["boundary"]]
     G["N_cells"] = old_G["N_cells"]
     G["N_steps"] = old_G["N_steps"]
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
 G = {
-    "N_steps": 5000,
+    "N_steps": 20_000,
     "alpha": 0.5,
     "beta": 5.0,
     "dt": 0.1,
-    "eta": 1e-4, # width of the gaussian noise
-    "lambda0": 0.37,
-    "lambda1": 0.5,
-    "lambda2": 0.13,
+    "eta": 0.5e-4, # width of the gaussian noise
+    "lambda3": 0.05,
+    "lambda2": 0.5,
+    "lambda1": 1 - 0.5 - 0.05,
     "proliferate" : False,
     "proliferation_rate" : 0.0, # per time step
-    "max_cells" : 10000,
+    "max_cells" : 2000,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    "N_cells": 5000,
-    "cell_properties": jnp.array([S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE]),
+    "N_cells": 2000,
+    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.NON_INTERACTING, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC]),
     "save_every": 20, # only used if save == 2
-    "IC_scale" : 65.,
-    "IC_type" : "continue:large_angle_correct", # continue, plane, sphere, egg, better_egg
+    # "IC_scale" : 65.,
+    "IC_scale" : 41.5,
+    "IC_type" : "continue:timeline_no_angle", # continue, plane, sphere, egg, better_egg
 }
 
 IC = InitialConditions(G)

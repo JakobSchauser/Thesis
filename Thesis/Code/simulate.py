@@ -477,11 +477,11 @@ G = {
     "max_cells" : 2000,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
     "N_cells": 2000,
-    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.ANGLE, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC]),
+    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.NON_INTERACTING, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC]),
     "save_every": 20, # only used if save == 2
     # "IC_scale" : 65.,
     "IC_scale" : 41.5,
-    "IC_type" : "continue:timeline", # continue, plane, sphere, egg, better_egg
+    "IC_type" : "continue:timeline_less_tip", # continue, plane, sphere, egg, better_egg
 }
 
 IC = InitialConditions(G)

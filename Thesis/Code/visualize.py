@@ -103,7 +103,7 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
         scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
         scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
-        iterator += 5
+        iterator += 1
         if iterator > len(xs):
             iterator = len(xs)-1
     timer = app.Timer(interval=interval)
@@ -118,128 +118,6 @@ def interactive_animate(loaded_cells, loaded_properties = None, alpha=10,
 
     vispy.app.quit()
 
-
-
-def export(loaded_cells, loaded_properties = None, alpha=10,
-                     frame_every = 1, interval=1/30, save=True ):
-
-    # Load the data
-    xs = loaded_cells[:,:,0,:]
-    ps = loaded_cells[:,:,1,:]
-    qs = loaded_cells[:,:,2,:]
-
-    # Make a canvas and add simple view
-    canvas = vispy.scene.SceneCanvas(keys='interactive', size=(1200, 800), show=True)
-    view = canvas.central_widget.add_view()                               
-
-    size = 2.0
-
-    # Create scatter object and fill in the data
-    colors = [(1,0,0) for i in range(len(xs[0]))]
-
-    different_colors = [(0,1,0), (1,0,0), (0,0,1), (1,1,0), (0,1,1), (1,0,1), (0,0,0)]
-
-    if loaded_properties is not None:
-        colors = [different_colors[int(l)] for l in loaded_properties]
-    scatter1 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-    scatter1.set_data(xs[0], edge_width=0, face_color=(1, 1, 1, .5), size=size)
-
-    # color so we can see the direction of the particles
-    scatter2 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-    scatter2.set_data(xs[0] + ps[0]/5, edge_width=0, face_color=colors, size=size)
-
-        # color so we can see the direction of the particles
-    scatter3 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-    scatter3.set_data(xs[0] + qs[0]/5, edge_width=0, face_color=(0.9,0.9,0), size=size)
-
-
-    view.add(scatter1)
-    view.add(scatter2)
-    view.add(scatter3)
-
-
-    def update(ev):
-        global iterator
-        iterator += 10
-
-    # timer = app.Timer(interval=interval)
-    # timer.connect(update)
-    # timer.start()
-
-
-    # We want to fly around
-    view = canvas.central_widget.add_view()
-    view.camera = 'arcball'
-    view.camera.distance = 10
-    view.camera.set_range(x=[-13, 13])
-    timesteps = loaded_cells.shape[0]
-
-    output_filename = f'test.gif'
-
-    writer = imageio.get_writer(output_filename)
-    for iterator in range(timesteps):
-        im = canvas.render()
-        writer.append_data(im)
-        scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
-        scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
-        scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
-        # view.camera.transform.rotate(1, axis=[0,0,1])
-
-    writer.close()
-
-    vispy.app.quit()
-
-
-    # We launch the app
-# def export_gif(folder, timesteps, output_name, alpha=10,
-#                view_particles=None):
-
-#     # Getting the data
-#     x_lst = []
-#     for timestep in timesteps:
-#         P = scipy.io.loadmat(folder + f'/t{timestep}.mat')                    
-#         x = P['x']
-#         x_lst.append(x)
-
-#     mask = np.load(folder + '/p_mask.npy') 
-#     x_lst = np.array(x_lst)
-
-#     # Make the canvas
-#     canvas = scene.SceneCanvas(keys='interactive', bgcolor='black',
-#                             size=(1200, 800), show=True)
-
-#     view = canvas.central_widget.add_view()
-#     view.camera = 'arcball'
-#     view.camera.distance = 70
-
-#     # Create scatter object and fill in the data
-#     scatter1 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-#     scatter2 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-#     scatter1.set_data(x_lst[0][mask==0] , edge_width=0, face_color=(0.1, 1, 1, .5), size=2.5)
-#     scatter2.set_data(x_lst[0][mask==1] , edge_width=0, face_color=(1, 1, 1, .5), size=2.5)
-
-#     # Add the scatter object to the view
-#     if not view_particles:
-#         view.add(scatter1)
-#         view.add(scatter2)
-#     else:
-#         assert view_particles == "polar" or view_particles == "non_polar", "view_particles only takes arguments polar or non_polar"
-#         if view_particles == 'polar':
-#             view.add(scatter2)
-#         if view_particles == 'non_polar':
-#             view.add(scatter1)
-
-#     output_filename = f'{output_name}.gif'
-
-#     writer = imageio.get_writer(output_filename)
-#     for i in range(len(timesteps)):
-#         im = canvas.render()
-#         writer.append_data(im)
-#         x = x_lst[int(i) % np.max(timesteps)]
-#         scatter1.set_data(x[mask==0] , edge_width=0, face_color=(0.1, 1, 1, .5), size=2.5)
-#         scatter2.set_data(x[mask==1] , edge_width=0, face_color=(1, 1, 1, .5), size=2.5)
-#         view.camera.transform.rotate(1, axis=[0,0,1])
-#     writer.close()
 
 
 if __name__ == '__main__':

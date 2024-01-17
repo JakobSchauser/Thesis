@@ -49,7 +49,7 @@ interaction_matrix = jnp.array([
                                 [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE, S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],
                                 [S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB ,S_type.WEAK_AB, S_type.WEAK_AB, S_type.NON_INTERACTING],
                                 [S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.WEAK_STANDARD,S_type.WEAK_STANDARD, S_type.WEAK_STANDARD, S_type.NON_INTERACTING],
-                                [S_type.ONLY_AB, S_type.STANDARD, S_type.INVERSE_ANGLE, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],#last one shouæd be inverse
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.INVERSE_ANGLE, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],#last one should be inverse
                                 [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE_ISOTROPIC, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],
                                 [S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING]
                                 ])
@@ -123,10 +123,10 @@ def S_inverse_angle(r, p1, q1, p2, q2) -> float:
 
     r_unit = r / jnp.linalg.norm(r)
 
-    phat1 = p1 + G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)*0.2
+    phat1 = p1 + G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)*0.5
     phat1 = phat1 / jnp.linalg.norm(phat1)
 
-    phat2 = p2 - G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)*0.2
+    phat2 = p2 - G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)*0.5
     phat2 = phat2 / jnp.linalg.norm(phat2)
 
 
@@ -464,7 +464,7 @@ def G_from_properties(old_G):
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
 G = {
-    "N_steps": 20_000,
+    "N_steps": 4_000,
     "alpha": 0.5,
     "beta": 5.0,
     "dt": 0.1,
@@ -477,11 +477,11 @@ G = {
     "max_cells" : 2000,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
     "N_cells": 2000,
-    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.NON_INTERACTING, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC]),
+    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.NON_INTERACTING, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC]),
     "save_every": 20, # only used if save == 2
     # "IC_scale" : 65.,
     "IC_scale" : 41.5,
-    "IC_type" : "continue:timeline_no_angle", # continue, plane, sphere, egg, better_egg
+    "IC_type" : "continue:timeline_tip", # continue, plane, sphere, egg, better_egg
 }
 
 IC = InitialConditions(G)

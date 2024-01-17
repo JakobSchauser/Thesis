@@ -19,7 +19,7 @@ class InitialConditions():
             t, c = G["IC_type"].split(":")
             assert t == "continue", "Only continue is allowed to have ':continue_from'"
             self.type, self.continue_from = G["IC_type"].split(":")
-            assert os.path.isfile("runs/" + self.continue_from + ".hdf5"), "File does not exist"
+            assert os.path.isfile("runs/" + self.continue_from + ".hdf5"), f"File '{self.continue_from}' does not exist"
 
         else:
             self.type = G["IC_type"]

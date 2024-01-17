@@ -104,10 +104,10 @@ def S_angle_isotropic(r, p1, q1, p2, q2) -> float:
 
     r_unit = r / jnp.linalg.norm(r)
 
-    phat1 = p1 - G["alpha"]*r_unit*0.2
+    phat1 = p1 - G["alpha"]*r_unit*0.7
     phat1 = phat1 / jnp.linalg.norm(phat1)
 
-    phat2 = p2 + G["alpha"]*r_unit*0.2
+    phat2 = p2 + G["alpha"]*r_unit*0.7
     phat2 = phat2 / jnp.linalg.norm(phat2)
 
 
@@ -138,7 +138,7 @@ def S_inverse_angle(r, p1, q1, p2, q2) -> float:
 
 @jit
 def S_non_interacting(r, p1, q1, p2, q2) -> float:
-    return 0.0
+    return 1.
 
 @jit
 def S_only_AB(r, p1, q1, p2, q2) -> float:
@@ -477,11 +477,11 @@ G = {
     "max_cells" : 2000,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
     "N_cells": 2000,
-    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.NON_INTERACTING, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC]),
+    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.ANGLE, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC]),
     "save_every": 20, # only used if save == 2
     # "IC_scale" : 65.,
     "IC_scale" : 41.5,
-    "IC_type" : "continue:timeline_tip", # continue, plane, sphere, egg, better_egg
+    "IC_type" : "continue:timeline", # continue, plane, sphere, egg, better_egg
 }
 
 IC = InitialConditions(G)

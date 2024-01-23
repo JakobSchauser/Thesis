@@ -14,11 +14,14 @@ def make_videos(filename:str, video_name:str):
 
     size = 85
 
-    limits = 30
+    limits = 45
+
+    dists = 55
 
     with h5py.File('runs/' + filename + '.hdf5', 'r') as f:
         dat = f['cells'][:]
     positions = dat[:, :, 0]
+
 
     # make a 3d plot of the data
     fig = plt.figure(figsize = (10,10))
@@ -48,13 +51,15 @@ def make_videos(filename:str, video_name:str):
         ax.set_zlim(-limits, limits)
 
         x, y ,z = positions[i, :, 0], positions[i, :, 1], positions[i, :, 2]
-
+        x = x[z < 25]
+        y = y[z < 25]
+        z = z[z < 25]
         # plot white dots with black outlines
         ax.scatter(x, y, z, s=size,       c='w', edgecolors='k')
 
-        ax.scatter(x, z,  y - 40, s=size, c='w', edgecolors='k')
+        ax.scatter(x, z,  y - dists, s=size, c='w', edgecolors='k')
 
-        ax.scatter(x, -z, y + 40, s=size, c='w', edgecolors='k')
+        ax.scatter(x, -z, y + dists, s=size, c='w', edgecolors='k')
 
         # remove the axes
         ax.set_axis_off()
@@ -63,7 +68,7 @@ def make_videos(filename:str, video_name:str):
         ax.view_init(0, 270)
 
     print('Making Stas animation')
-    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=12)
+    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
     print('Saving Stas animation')
     ani.save(video_name+'.mp4')
     print('Done!\n')
@@ -97,11 +102,13 @@ def make_videos(filename:str, video_name:str):
         ax.set_zlim(-limits, limits)
 
         x, y ,z = positions[i, :, 0], positions[i, :, 1], positions[i, :, 2]
-
+        x = x[z < 25]
+        y = y[z < 25]
+        z = z[z < 25]
         # plot white dots with black outlines
-        ax.scatter(x[y > 0], y[y > 0], z[y > 0]-20, s=size,       c='w', edgecolors='k')
+        ax.scatter(x[y > 0], y[y > 0], z[y > 0]-dists/2, s=size,       c='w', edgecolors='k')
 
-        ax.scatter(y[x > 0], x[x > 0], z[x > 0]+20, s=size,       c='w', edgecolors='k')
+        ax.scatter(y[x > 0], x[x > 0], z[x > 0]+dists/2, s=size,       c='w', edgecolors='k')
 
 
         # remove the axes
@@ -111,7 +118,7 @@ def make_videos(filename:str, video_name:str):
         ax.view_init(0, 270)
 
     print('Making cross section animation')
-    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=12)
+    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
     print('Saving cross section animation')
     ani.save(video_name + '_cross_sections.mp4')
     print('Done!\n')

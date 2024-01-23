@@ -464,7 +464,7 @@ def G_from_properties(old_G):
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
 G = {
-    "N_steps": 4_000,
+    "N_steps": 5_000,
     "alpha": 0.5,
     "beta": 5.0,
     "dt": 0.1,
@@ -474,14 +474,14 @@ G = {
     "lambda1": 1 - 0.5 - 0.05,
     "proliferate" : False,
     "proliferation_rate" : 0.0, # per time step
-    "max_cells" : 2000,
+    "max_cells" : 5000,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    "N_cells": 2000,
-    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.NON_INTERACTING, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC]),
+    "N_cells": 5000,
+    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.ANGLE, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC]),
     "save_every": 20, # only used if save == 2
-    # "IC_scale" : 65.,
-    "IC_scale" : 41.5,
-    "IC_type" : "continue:timeline_less_tip", # continue, plane, sphere, egg, better_egg
+    "IC_scale" : 65.,
+    # "IC_scale" : 41.5,
+    "IC_type" : "continue:large_timeline_no_inv", # continue, plane, sphere, egg, better_egg
 }
 
 IC = InitialConditions(G)

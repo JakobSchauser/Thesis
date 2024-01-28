@@ -12,7 +12,7 @@ from jax_tqdm import loop_tqdm
 
 import functools
 
-config.update("jax_debug_nans", True)
+config.update("jax_debug_nans", False)
 
 from functools import cache
 
@@ -60,7 +60,6 @@ def unpack_cellrow(cellrow : jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray, jnp
     p = cellrow[1]
     q = cellrow[2]
     return pos, p, q
-
 
 @jit
 def quadruple(a1, a2, b1, b2) -> float: 
@@ -184,7 +183,7 @@ def get_boundary_fn():
             corrected_pos_vec = G["IC"].inv_make_better_egg_pos(pos)
             corrected_pos_vec = corrected_pos_vec / G["IC"].scaled_egg_shape
             mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
-            v_add = jnp.where(mag > 1.0, (jnp.exp(mag*mag - 1) - 1), 0.)
+            v_add = jnp.where(mag > 1.0, jnp.minimum((jnp.exp(mag*mag - 1) - 1), 5.), 0.)
             return v_add 
         return better_egg
     else:
@@ -211,7 +210,7 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, ce
     pos1, p1, q1 = unpack_cellrow(cellrow1)
     pos2, p2, q2 = unpack_cellrow(cellrow2)
 
-    dir = pos2 - pos1
+    dir = pos1 - pos2
     _dir = jnp.where(jnp.allclose(dir, jnp.zeros(3)), jnp.array([1, 0, 0]), dir)
 
     norm_dir = _dir/jnp.linalg.norm(_dir)
@@ -224,7 +223,6 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, ce
     # s1 = jax.lax.switch(, )
     # s2 = jax.lax.switch(cell2_property.astype(int), G["cell_properties"])
 
-    print(s1)
     jax.debug.breakpoint()
     s = get_interaction(s1, s2, norm_dir, p1, q1, p2, q2)
 
@@ -234,7 +232,7 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, ce
 
     # add the boundary
     boundary_fn = get_boundary_fn()
-    v_add = boundary_fn(pos2)
+    v_add = boundary_fn(pos1)
 
     v_added = v + v_add
 
@@ -306,7 +304,7 @@ U_grad = grad(U_sum, argnums=(0))
 
 def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_properties : jnp.ndarray, N_alive : int):
 
-    neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 50 == 0), find_neighbors, lambda *args: old_nbs, cells)
+    neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 1 == 0), find_neighbors, lambda *args: old_nbs, cells)
 
     grad_U = U_grad(cells, neighbors, cell_properties)
 
@@ -463,25 +461,48 @@ def G_from_properties(old_G):
     G["N_steps"] = old_G["N_steps"]
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
+# G = {
+#     "N_steps": 5_000,
+#     "alpha": 0.5,
+#     "beta": 5.0,
+#     "dt": 0.1,
+#     "eta": 0.5e-4, # width of the gaussian noise
+#     "lambda3": 0.05,
+#     "lambda2": 0.5,
+#     "lambda1": 1 - 0.5 - 0.05,
+#     "proliferate" : False,
+#     "proliferation_rate" : 0.0, # per time step
+#     "max_cells" : 5000,
+#     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+#     "N_cells": 5000,
+#     "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.ANGLE, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC]),
+#     "save_every": 20, # only used if save == 2
+#     "IC_scale" : 65.,
+#     # "IC_scale" : 41.5,
+#     "IC_type" : "continue:large_timeline_no_inv", # continue, plane, sphere, egg, better_egg
+# }
+    
 G = {
-    "N_steps": 5_000,
-    "alpha": 0.5,
-    "beta": 5.0,
-    "dt": 0.1,
-    "eta": 0.5e-4, # width of the gaussian noise
-    "lambda3": 0.05,
-    "lambda2": 0.5,
-    "lambda1": 1 - 0.5 - 0.05,
-    "proliferate" : False,
-    "proliferation_rate" : 0.0, # per time step
-    "max_cells" : 5000,
-    "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    "N_cells": 5000,
-    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.ANGLE, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC]),
-    "save_every": 20, # only used if save == 2
-    "IC_scale" : 65.,
-    # "IC_scale" : 41.5,
-    "IC_type" : "continue:large_timeline_no_inv", # continue, plane, sphere, egg, better_egg
+"N_steps": 1000,
+"alpha": 0.5,
+"beta": 5.0,
+"dt": 0.1,
+"eta": 0.5e-4, # width of the gaussian noise
+"lambda3": 0.05,
+"lambda2": 0.5,
+"lambda1": 1 - 0.5 - 0.05,
+"proliferate" : False,
+"proliferation_rate" : 0.0, # per time step
+# "max_cells" : 2000,
+# "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+"boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+"N_cells": 1000,
+"cell_properties": jnp.array([S_type.ONLY_AB]),
+"save_every": 1, # only used if save == 2
+# "IC_scale" : 65.,
+# "IC_scale" : 41.5,
+"IC_scale" : 25.,
+"IC_type" : "ball", # continue, plane, sphere, egg, better_egg, ball
 }
 
 IC = InitialConditions(G)

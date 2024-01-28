@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 from IPython import display 
 import h5py
 import os
-
+from scipy.spatial.distance import pdist, squareform
 
 def make_videos(filename:str, video_name:str):
     # import the data
@@ -20,6 +20,8 @@ def make_videos(filename:str, video_name:str):
 
     with h5py.File('runs/' + filename + '.hdf5', 'r') as f:
         dat = f['cells'][:]
+        properties = f['properties'][:]
+
     positions = dat[:, :, 0]
 
 
@@ -51,15 +53,37 @@ def make_videos(filename:str, video_name:str):
         ax.set_zlim(-limits, limits)
 
         x, y ,z = positions[i, :, 0], positions[i, :, 1], positions[i, :, 2]
-        x = x[z < 25]
-        y = y[z < 25]
-        z = z[z < 25]
+        # x = x[z < 25]
+        # y = y[z < 25]
+        # z = z[z < 25]
+
+        all_dists = squareform(pdist(positions[i]))
+
+        # find the five closest points to each point
+
+        closest = np.argsort(all_dists, axis=1)[:, 1:6]
+
+        # find the mean distance to the closest points
+
+        mean_dist = np.mean(all_dists[np.arange(all_dists.shape[0])[:,None], closest], axis=1)
+        # color the points based on the mean distance to the three closest points
+
+        colors = np.zeros((all_dists.shape[0], 4))
+        n = np.clip((2.-mean_dist)*2., -1., 1.)
+
+        colors[:, 0] = np.clip(1 + n, 0, 1)
+        colors[:, 1] = np.minimum(1 - n, 1 + n)
+        colors[:, 2] = np.clip(1 - n, 0., 1)
+        colors[:, 3] = 1
+
+
+
         # plot white dots with black outlines
-        ax.scatter(x, y, z, s=size,       c='w', edgecolors='k')
+        ax.scatter(x, y, z, s=size,       c = colors, edgecolors='k')
 
-        ax.scatter(x, z,  y - dists, s=size, c='w', edgecolors='k')
+        ax.scatter(x, z,  y - dists, s=size, c=colors, edgecolors='k')
 
-        ax.scatter(x, -z, y + dists, s=size, c='w', edgecolors='k')
+        ax.scatter(x, -z, y + dists, s=size, c=colors, edgecolors='k')
 
         # remove the axes
         ax.set_axis_off()
@@ -130,7 +154,7 @@ import sys
 if __name__ == '__main__':
     if len(sys.argv) == 3:
         make_videos(sys.argv[1], sys.argv[2])
-    if len(sys.argv) == 2:
+    elif len(sys.argv) == 2:
         make_videos(sys.argv[1], sys.argv[1])
     else:
         print('Please provide a filename and/or a video name')

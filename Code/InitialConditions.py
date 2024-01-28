@@ -144,6 +144,26 @@ class InitialConditions():
 
 
         return cells, cell_properties
+    
+    def ball(self, N : int) -> jnp.ndarray:
+        pos = get_random_points_on_sphere(N, 42)
+
+        p = pos
+        # p = get_random_points_on_sphere(N, 43)
+
+        # give them all random distances from the center
+        r = random.uniform(random.PRNGKey(46), (N,)) * self.scale/2.
+
+        pos = pos * r[:, None]
+
+        q =  get_random_points_on_sphere(N, 50)
+
+        cells = jnp.stack([pos, p, q], axis=1)
+
+        cell_properties = jnp.zeros(N)
+
+        return cells, cell_properties
+
 
 
     def get_ic(self, type:str) -> jnp.ndarray:
@@ -161,6 +181,8 @@ class InitialConditions():
             return self.continue_IC
         elif type == "better_egg_genius":
             return self.better_egg_genius
+        elif type == "ball":
+            return self.ball
         
         else:
             raise ValueError("type must be egg, plane or egg_half")

@@ -279,12 +279,8 @@ def find_neighbors(cells : jnp.ndarray, k : int = 10):
     return actual_neighbors
 
 
-
-
-# compute the energy of the system
 @functools.partial(jit, static_argnames=['cell_properties'])
-def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.ndarray) -> float:
-
+def U_all(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.ndarray) -> jnp.ndarray:
     # empty array to hold the energies
     arr = jnp.empty((cells.shape[0], neighbors.shape[1]), float)
 
@@ -294,6 +290,15 @@ def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.nd
         return arr
     
     arr = jax.lax.fori_loop(0, cells.shape[0], loop_fn, arr)
+
+    return arr
+
+# compute the energy of the system
+@functools.partial(jit, static_argnames=['cell_properties'])
+def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.ndarray) -> float:
+
+    arr = U_all(cells, neighbors, cell_properties)
+    # save the array
 
     final_sum = jnp.sum(arr)
 
@@ -391,40 +396,35 @@ def main(N_cells : int, N_steps : int, save_type : str):
 
     save_to_disk = get_save_fn(G["name"], save_type)
 
-    N_alive = N_cells
-    if G["proliferate"]:
-        cells = jnp.empty((G["max_cells"], 3, 3), float)
-        cell_properties = jnp.empty(G["max_cells"], float)
-        cells = cells.at[:N_cells].set(IC_cells)
-        cell_properties = cell_properties.at[:N_cells].set(IC_cell_properties)
-    else:
-        cells = IC_cells
-        cell_properties = IC_cell_properties
+    cells = IC_cells
+    cell_properties = IC_cell_properties
 
 
     print("starting simulation")
 
     all_cells = jnp.empty((int(N_steps/save_every), N_cells, 3, 3), float)
-    all_N_alives = jnp.empty((int(N_steps/save_every)), int)
+    all_energies = jnp.empty((int(N_steps/save_every), N_cells), float)
     old_nbs = jnp.empty((cells.shape[0], 10), int)#*-1   # why did I do this?
 
     def save_cells(i, cells, all_cells, save_every):
         all_cells = all_cells.at[jnp.floor(i/save_every).astype(int),:,:,:].set(cells)
         return all_cells
     
-    def save_N_alive(i, N_alive, all_N_alives, save_every):
-        all_N_alives = all_N_alives.at[jnp.floor(i/save_every).astype(int)].set(N_alive)
-        return all_N_alives
+    def save_energies(i, cells, neighbors, cell_properties, all_energies, save_every):
+        arr = U_all(cells, neighbors, cell_properties)
+        all_energies = all_energies.at[jnp.floor(i/save_every).astype(int),:].set(arr)
+        return all_energies
     
     @loop_tqdm(N_steps)
     def loop_fn(i, cp, save_every=save_every):
-        cells, all_cells, old_nbs, cell_properties, N_alive, all_N_alives = cp
+        cells, all_cells, old_nbs, cell_properties, all_energies = cp
         all_cells = jax.lax.cond(i % save_every == 0, lambda : save_cells(i, cells, all_cells, save_every), lambda *args: all_cells)
-        all_N_alives = jax.lax.cond(i % save_every == 0, lambda : save_N_alive(i, N_alive, all_N_alives, save_every), lambda *args: all_N_alives)
-        cells, old_nbs = take_step(i, cells, old_nbs, cell_properties, N_alive)
-        return cells, all_cells, old_nbs, cell_properties, N_alive, all_N_alives
+        all_energies = jax.lax.cond(G["save_energies"] & (i % save_every == 0), lambda : save_energies(i, cells, old_nbs, cell_properties, all_energies, save_every), lambda *args: all_energies)
+
+        cells, old_nbs = take_step(i, cells, old_nbs, cell_properties)
+        return cells, all_cells, old_nbs, cell_properties, all_energies
     
-    cells, all_cells, old_nbs, cell_properties, N_alive, all_N_alives = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, N_alive, all_N_alives))
+    cells, all_cells, old_nbs, cell_properties, all_energies = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, all_energies))
 
     save_to_disk(all_cells, cell_properties, G)
 
@@ -461,49 +461,46 @@ def G_from_properties(old_G):
     G["N_steps"] = old_G["N_steps"]
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
-# G = {
-#     "N_steps": 5_000,
-#     "alpha": 0.5,
-#     "beta": 5.0,
-#     "dt": 0.1,
-#     "eta": 0.5e-4, # width of the gaussian noise
-#     "lambda3": 0.05,
-#     "lambda2": 0.5,
-#     "lambda1": 1 - 0.5 - 0.05,
-#     "proliferate" : False,
-#     "proliferation_rate" : 0.0, # per time step
-#     "max_cells" : 5000,
-#     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-#     "N_cells": 5000,
-#     "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.ANGLE, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC]),
-#     "save_every": 20, # only used if save == 2
-#     "IC_scale" : 65.,
-#     # "IC_scale" : 41.5,
-#     "IC_type" : "continue:large_timeline_no_inv", # continue, plane, sphere, egg, better_egg
-# }
-    
 G = {
-"N_steps": 1000,
-"alpha": 0.5,
-"beta": 5.0,
-"dt": 0.1,
-"eta": 0.5e-4, # width of the gaussian noise
-"lambda3": 0.05,
-"lambda2": 0.5,
-"lambda1": 1 - 0.5 - 0.05,
-"proliferate" : False,
-"proliferation_rate" : 0.0, # per time step
-# "max_cells" : 2000,
-# "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-"boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-"N_cells": 1000,
-"cell_properties": jnp.array([S_type.ONLY_AB]),
-"save_every": 1, # only used if save == 2
-# "IC_scale" : 65.,
-# "IC_scale" : 41.5,
-"IC_scale" : 25.,
-"IC_type" : "ball", # continue, plane, sphere, egg, better_egg, ball
+    "N_steps": 2_000,
+    "alpha": 0.5,
+    "beta": 5.0,
+    "dt": 0.1,
+    "eta": 0.5e-4, # width of the gaussian noise
+    "lambda3": 0.05,
+    "lambda2": 0.5,
+    "lambda1": 1 - 0.5 - 0.05,
+    "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+    "N_cells": 2000,
+    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.ANGLE, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC]),
+    "save_every": 20, # only used if save == 2
+    "IC_scale" : 65.,
+    # "IC_scale" : 41.5,
+    "IC_type" : "continue:large_timeline_no_inv", # continue, plane, sphere, egg, better_egg
 }
+    
+# G = {
+# "N_steps": 1000,
+# "alpha": 0.5,
+# "beta": 5.0,
+# "dt": 0.1,
+# "eta": 0.5e-4, # width of the gaussian noise
+# "lambda3": 0.05,
+# "lambda2": 0.5,
+# "lambda1": 1 - 0.5 - 0.05,
+# "proliferate" : False,
+# "proliferation_rate" : 0.0, # per time step
+# # "max_cells" : 2000,
+# # "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+# "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+# "N_cells": 1000,
+# "cell_properties": jnp.array([S_type.ONLY_AB]),
+# "save_every": 1, # only used if save == 2
+# # "IC_scale" : 65.,
+# # "IC_scale" : 41.5,
+# "IC_scale" : 25.,
+# "IC_type" : "ball", # continue, plane, sphere, egg, better_egg, ball
+# }
 
 IC = InitialConditions(G)
 

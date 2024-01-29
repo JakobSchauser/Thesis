@@ -44,6 +44,8 @@ def make_videos(filename:str, video_name:str):
     # place the camera
     ax.view_init(0, 270)
 
+    property_dists = np.where((properties == 3) | (properties == 4), 1.6, 2.)
+
 
     # make an animation of the data
     def animate(i):
@@ -69,7 +71,9 @@ def make_videos(filename:str, video_name:str):
         # color the points based on the mean distance to the three closest points
 
         colors = np.zeros((all_dists.shape[0], 4))
-        n = np.clip((2.-mean_dist)*2., -1., 1.)
+
+
+        n = np.clip((property_dists-mean_dist)*2., -1., 1.)
 
         colors[:, 0] = np.clip(1 + n, 0, 1)
         colors[:, 1] = np.minimum(1 - n, 1 + n)

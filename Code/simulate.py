@@ -14,6 +14,7 @@ import functools
 
 config.update("jax_debug_nans", False)
 
+
 from functools import cache
 
 import os
@@ -86,10 +87,10 @@ def S_angle(r, p1, q1, p2, q2) -> float:
 
     r_unit = r / jnp.linalg.norm(r)
 
-    phat1 = p1 - G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)
+    phat1 = p1 + G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)
     phat1 = phat1 / jnp.linalg.norm(phat1)
 
-    phat2 = p2 + G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)
+    phat2 = p2 - G["alpha"]*avg_q*jnp.sum(avg_q*r_unit)
     phat2 = phat2 / jnp.linalg.norm(phat2)
 
 
@@ -103,10 +104,10 @@ def S_angle_isotropic(r, p1, q1, p2, q2) -> float:
 
     r_unit = r / jnp.linalg.norm(r)
 
-    phat1 = p1 - G["alpha"]*r_unit*0.7
+    phat1 = p1 - G["alpha"]*r_unit*1.5
     phat1 = phat1 / jnp.linalg.norm(phat1)
 
-    phat2 = p2 + G["alpha"]*r_unit*0.7
+    phat2 = p2 + G["alpha"]*r_unit*1.5
     phat2 = phat2 / jnp.linalg.norm(phat2)
 
 
@@ -223,7 +224,6 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, ce
     # s1 = jax.lax.switch(, )
     # s2 = jax.lax.switch(cell2_property.astype(int), G["cell_properties"])
 
-    jax.debug.breakpoint()
     s = get_interaction(s1, s2, norm_dir, p1, q1, p2, q2)
 
     r = jnp.linalg.norm(_dir)
@@ -279,9 +279,11 @@ def find_neighbors(cells : jnp.ndarray, k : int = 10):
     return actual_neighbors
 
 
+# compute the energy of the system
 @functools.partial(jit, static_argnames=['cell_properties'])
-def U_all(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.ndarray) -> jnp.ndarray:
-    # empty array to hold the energies
+def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.ndarray) -> float:
+
+    # save the array
     arr = jnp.empty((cells.shape[0], neighbors.shape[1]), float)
 
     def loop_fn(i, arr):
@@ -291,27 +293,20 @@ def U_all(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.nd
     
     arr = jax.lax.fori_loop(0, cells.shape[0], loop_fn, arr)
 
-    return arr
+    energies = np.sum(arr, axis = 1)
 
-# compute the energy of the system
-@functools.partial(jit, static_argnames=['cell_properties'])
-def U_sum(cells : jnp.ndarray, neighbors : jnp.ndarray, cell_properties : jnp.ndarray) -> float:
+    final_sum = jnp.sum(energies)
 
-    arr = U_all(cells, neighbors, cell_properties)
-    # save the array
+    return final_sum, energies / jnp.count_nonzero(arr, axis = 1)
 
-    final_sum = jnp.sum(arr)
-
-    return final_sum
-
-U_grad = grad(U_sum, argnums=(0))
+U_grad = grad(U_sum, argnums=(0), has_aux=True)
 
 
-def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_properties : jnp.ndarray, N_alive : int):
+def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_properties : jnp.ndarray,):
 
-    neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 1 == 0), find_neighbors, lambda *args: old_nbs, cells)
+    neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 100 == 0), find_neighbors, lambda *args: old_nbs, cells)
 
-    grad_U = U_grad(cells, neighbors, cell_properties)
+    grad_U, energies = U_grad(cells, neighbors, cell_properties)
 
     # update the positions using euler
     cells = cells - grad_U*G["dt"]
@@ -324,26 +319,32 @@ def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_
     cells = cells.at[:,1:,:].set(ns)
     
 
-    return cells, neighbors
+    return cells, neighbors, energies
 
 take_step = jit(take_step, static_argnames=["cell_properties"])
 
 
 def get_save_fn(name : str, type : str):
-
-    def save_file(name, all_cells, cell_properties, G):
+    def save_file(name, all_cells, cell_properties, all_energies, G):
         with h5py.File("runs/"+name+".hdf5", "w") as f:
             f.create_dataset("cells", data=all_cells)
+            if G["save_energies"]:
+                f.create_dataset("energies", data=all_energies)
             f.create_dataset("properties", data=cell_properties)
             f.attrs.update(G_to_properties(G))
 
     if type == "append":
-        def save_fn(all_cells, cell_properties, G):
+        def save_fn(all_cells, cell_properties, all_energies, G):
             with h5py.File("runs/"+name+".hdf5", "r") as f:
                 old_cells = f["cells"][:]
+                if G["save_energies"]:
+                    old_energies = f["energies"][:]
                 old_prop = dict(f.attrs.items())
 
+
             appended_cells = np.concatenate((old_cells, all_cells), axis=0)
+            if G["save_energies"]:
+                appended_energies = np.concatenate((old_energies, all_energies), axis=0)
 
             prop = G_to_properties(G)
             old_prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
@@ -352,27 +353,36 @@ def get_save_fn(name : str, type : str):
             with h5py.File("runs/"+name+".hdf5", "a") as f:
                 del f["cells"]
                 f.create_dataset("cells", data=appended_cells)
+
+                if G["save_energies"]:
+                    del f["energies"]
+                    f.create_dataset("energies", data=appended_energies)
                 f.attrs.update(old_prop)
 
         return save_fn
     elif type == "branch":
-        def save_fn(all_cells, cell_properties, G):
+        def save_fn(all_cells, cell_properties, all_energies, G):
             with h5py.File("runs/"+name+".hdf5", "r") as f:
                 old_cells = f["cells"][:]
+                if G["save_energies"]:
+                    old_energies = f["energies"][:]
                 old_prop = dict(f.attrs.items())
 
             appended_cells = np.concatenate((old_cells, all_cells), axis=0)
 
+            if G["save_energies"]:
+                appended_energies = np.concatenate((old_energies, all_energies), axis=0)
+
             prop = G_to_properties(G)
             prop["N_steps"] = old_prop["N_steps"] + G["N_steps"]
 
-            save_file(G["new_name"], appended_cells, cell_properties, G)
+            save_file(G["new_name"], appended_cells, cell_properties, appended_energies, G)
         return save_fn
     else:
-        def save_fn(all_cells, cell_properties, G):
+        def save_fn(all_cells, cell_properties, all_energies, G):
             if type == "overwrite":
                 os.remove("runs/"+name+".hdf5")
-            save_file(name, all_cells, cell_properties, G)
+            save_file(name, all_cells, cell_properties,all_energies, G)
         return save_fn
 
 def main(N_cells : int, N_steps : int, save_type : str):
@@ -404,29 +414,29 @@ def main(N_cells : int, N_steps : int, save_type : str):
 
     all_cells = jnp.empty((int(N_steps/save_every), N_cells, 3, 3), float)
     all_energies = jnp.empty((int(N_steps/save_every), N_cells), float)
+    energies = jnp.zeros((N_cells), float)
     old_nbs = jnp.empty((cells.shape[0], 10), int)#*-1   # why did I do this?
 
     def save_cells(i, cells, all_cells, save_every):
         all_cells = all_cells.at[jnp.floor(i/save_every).astype(int),:,:,:].set(cells)
         return all_cells
     
-    def save_energies(i, cells, neighbors, cell_properties, all_energies, save_every):
-        arr = U_all(cells, neighbors, cell_properties)
-        all_energies = all_energies.at[jnp.floor(i/save_every).astype(int),:].set(arr)
+    def save_energies(i, energies, all_energies, save_every):
+        all_energies = all_energies.at[jnp.floor(i/save_every).astype(int),:].set(energies)
         return all_energies
     
     @loop_tqdm(N_steps)
     def loop_fn(i, cp, save_every=save_every):
-        cells, all_cells, old_nbs, cell_properties, all_energies = cp
+        cells, all_cells, old_nbs, cell_properties, all_energies, energies = cp
         all_cells = jax.lax.cond(i % save_every == 0, lambda : save_cells(i, cells, all_cells, save_every), lambda *args: all_cells)
-        all_energies = jax.lax.cond(G["save_energies"] & (i % save_every == 0), lambda : save_energies(i, cells, old_nbs, cell_properties, all_energies, save_every), lambda *args: all_energies)
+        all_energies = jax.lax.cond(G["save_energies"] & (i % save_every == 0), lambda : save_energies(i, energies, all_energies, save_every), lambda *args: all_energies)
 
-        cells, old_nbs = take_step(i, cells, old_nbs, cell_properties)
-        return cells, all_cells, old_nbs, cell_properties, all_energies
+        cells, old_nbs, energies = take_step(i, cells, old_nbs, cell_properties)
+        return cells, all_cells, old_nbs, cell_properties, all_energies, energies
     
-    cells, all_cells, old_nbs, cell_properties, all_energies = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, all_energies))
+    cells, all_cells, old_nbs, cell_properties, all_energies, energies = jax.lax.fori_loop(0, N_steps, loop_fn, (cells, all_cells, old_nbs, cell_properties, all_energies, energies))
 
-    save_to_disk(all_cells, cell_properties, G)
+    save_to_disk(all_cells, cell_properties, all_energies,  G)
 
     return cells
 
@@ -462,7 +472,7 @@ def G_from_properties(old_G):
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
 G = {
-    "N_steps": 2_000,
+    "N_steps": 5_000,
     "alpha": 0.5,
     "beta": 5.0,
     "dt": 0.1,
@@ -472,11 +482,12 @@ G = {
     "lambda1": 1 - 0.5 - 0.05,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
     "N_cells": 2000,
-    "cell_properties": jnp.array([S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.ANGLE, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC]),
+    "cell_properties": jnp.array([S_type.WEAK_AB, S_type.WEAK_AB, S_type.ANGLE, S_type.WEAK_AB, S_type.ANGLE_ISOTROPIC]),
     "save_every": 20, # only used if save == 2
-    "IC_scale" : 65.,
-    # "IC_scale" : 41.5,
-    "IC_type" : "continue:large_timeline_no_inv", # continue, plane, sphere, egg, better_egg
+    "save_energies": False,
+    # "IC_scale" : 65.,
+    "IC_scale" : 41.5,
+    "IC_type" : "continue:small_timeline", # continue, plane, sphere, egg, better_egg
 }
     
 # G = {

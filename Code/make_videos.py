@@ -123,14 +123,23 @@ def make_videos(filename:str, video_name:str):
     x, y ,z = positions[0, :, 0], positions[0, :, 1], positions[0, :, 2]
 
     
-    ax.set_xlim(np.min(x) - 2, np.max(x) + 2)
-    ax.set_ylim(np.min(y) - 2, np.max(y) + 2)
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    fig.tight_layout()
+    # ax.set_xlim(np.min(x) - 2, np.max(x) + 2)
+    # ax.set_ylim(np.min(X) - 2, np.max(X) + 2)
+    ax.set_xlim(-65,65)
+    ax.set_ylim(-65,65)
+    ax.axis('off')
+
+
+    # fig.tight_layout()
     # plot the positions
 
     # place the camera
+    im = plt.imread('egg_cutout.png')
+    newax = fig.add_axes([0.3, 0, 1, 1], anchor='NE', zorder=99)
+    newax.imshow(im)
+
+
+    newax.axis('off')
 
 
     # make an animation of the data
@@ -142,8 +151,14 @@ def make_videos(filename:str, video_name:str):
         xy_coordinates = np.vstack((x[y < 0], z[y < 0])).T
 
 
+        ax.set_xlim(-65,65)
+        ax.set_ylim(-65,65)
+
         vor = Voronoi(xy_coordinates)
         voronoi_plot_2d(vor, show_vertices=False, line_width=2, line_alpha=0.6, point_size=10, ax = ax, point_alpha=0)
+        ax.axis('off')
+        # add image to the plot
+
 
  
     print('Making voronoi animation')

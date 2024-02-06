@@ -43,17 +43,18 @@ class S_type(enum.IntEnum):
     INVERSE_ANGLE = 5
     ANGLE_ISOTROPIC = 6
     NON_INTERACTING = 7
+    WEAKER_AB = 8
 
 interaction_matrix = jnp.array([
-                                [S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.ONLY_AB, S_type.NON_INTERACTING], 
-                                [S_type.ONLY_AB, S_type.STANDARD, S_type.STANDARD, S_type.WEAK_AB, S_type.STANDARD, S_type.STANDARD, S_type.STANDARD, S_type.NON_INTERACTING],
-                                [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE, S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],
-                                [S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB, S_type.WEAK_AB ,S_type.WEAK_AB, S_type.WEAK_AB, S_type.NON_INTERACTING],
-                                [S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.WEAK_STANDARD, S_type.WEAK_AB, S_type.WEAK_STANDARD,S_type.WEAK_STANDARD, S_type.WEAK_STANDARD, S_type.NON_INTERACTING],
-                                [S_type.ONLY_AB, S_type.STANDARD, S_type.INVERSE_ANGLE, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],#last one should be inverse
-                                [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE_ISOTROPIC, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING],
-                                [S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING]
-                                ])
+                                [S_type.ONLY_AB, S_type.WEAKER_AB, S_type.WEAKER_AB, S_type.ONLY_AB, S_type.WEAKER_AB, S_type.ONLY_AB, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING, S_type.WEAKER_AB], 
+                                [S_type.WEAKER_AB, S_type.STANDARD, S_type.STANDARD, S_type.WEAKER_AB, S_type.STANDARD, S_type.STANDARD, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE, S_type.WEAKER_AB, S_type.WEAKER_AB, S_type.WEAK_AB, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
+                                [S_type.WEAK_AB, S_type.WEAKER_AB, S_type.WEAKER_AB, S_type.WEAK_AB, S_type.WEAKER_AB ,S_type.WEAK_AB, S_type.WEAKER_AB, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
+                                [S_type.WEAKER_AB, S_type.WEAK_STANDARD, S_type.WEAK_STANDARD, S_type.WEAKER_AB, S_type.WEAK_STANDARD,S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
+                                [S_type.ONLY_AB, S_type.STANDARD, S_type.INVERSE_ANGLE, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],#last one should be inverse
+                                [S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
+                                [S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING, S_type.NON_INTERACTING,  S_type.NON_INTERACTING],
+                                [S_type.WEAKER_AB,  S_type.WEAKER_AB,  S_type.WEAKER_AB,  S_type.WEAKER_AB,  S_type.WEAKER_AB,  S_type.WEAKER_AB,  S_type.WEAKER_AB,  S_type.NON_INTERACTING,  S_type.WEAKER_AB]])
 
 @jit
 def unpack_cellrow(cellrow : jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
@@ -80,7 +81,21 @@ def S_standard(r, p1, q1, p2, q2) -> float:
 @jit
 def S_standard_weak(r, p1, q1, p2, q2) -> float:
     return S_standard(r, p1, q1, p2, q2)*0.5
+@jit
+def S_only_AB(r, p1, q1, p2, q2) -> float:
+    S1 = quadruple(p1, p2, r, r)
+    return S1
 
+@jit
+def S_only_AB_weak(r, p1, q1, p2, q2) -> float:
+    S1 = quadruple(p1, p2, r, r)
+    return S1*0.5
+
+@jit
+def S_only_AB_weaker(r, p1, q1, p2, q2) -> float:
+    S1 = quadruple(p1, p2, r, r)
+    return S1*0.25
+    
 @jit
 def S_angle(r, p1, q1, p2, q2) -> float:
     avg_q = (q1 + q2)*0.5        #TODO: average q on unit sphere?
@@ -97,24 +112,24 @@ def S_angle(r, p1, q1, p2, q2) -> float:
     S1 = quadruple(phat1, phat2, r, r)
     S2 = quadruple(p1, p2, q1, q2)
 
-    return 0.6*S1 + 0.4*S2 
+    return (0.6*S1 + 0.4*S2)
 
 @jit
 def S_angle_isotropic(r, p1, q1, p2, q2) -> float:
 
     r_unit = r / jnp.linalg.norm(r)
 
-    phat1 = p1 - G["alpha"]*r_unit*1.5
+    phat1 = p1 + G["alpha"]*r_unit
     phat1 = phat1 / jnp.linalg.norm(phat1)
 
-    phat2 = p2 + G["alpha"]*r_unit*1.5
+    phat2 = p2 - G["alpha"]*r_unit
     phat2 = phat2 / jnp.linalg.norm(phat2)
 
 
     S1 = quadruple(phat1, phat2, r, r)
     S2 = quadruple(p1, p2, q1, q2)
 
-    return 0.6*S1 + 0.4*S2 
+    return (0.6*S1 + 0.4*S2)*1.
 
 
 @jit
@@ -140,15 +155,7 @@ def S_inverse_angle(r, p1, q1, p2, q2) -> float:
 def S_non_interacting(r, p1, q1, p2, q2) -> float:
     return 1.
 
-@jit
-def S_only_AB(r, p1, q1, p2, q2) -> float:
-    S1 = quadruple(p1, p2, r, r)
-    return S1
 
-@jit
-def S_only_AB_weak(r, p1, q1, p2, q2) -> float:
-    S1 = quadruple(p1, p2, r, r)
-    return S1*0.5
 
 def from_angles_to_vector(phi, theta) -> jnp.ndarray:
     x = jnp.cos(phi)*jnp.sin(theta)
@@ -204,7 +211,7 @@ def get_boundary_fn():
 
 def get_interaction(prop1 : int, prop2 : int, *args):
     interact = interaction_matrix.at[prop1, prop2].get()
-    return jax.lax.switch(interact, [S_only_AB, S_standard, S_angle, S_only_AB_weak, S_standard_weak, S_inverse_angle, S_angle_isotropic, S_non_interacting], *args)
+    return jax.lax.switch(interact, [S_only_AB, S_standard, S_angle, S_only_AB_weak, S_standard_weak, S_inverse_angle, S_angle_isotropic, S_non_interacting, S_only_AB_weaker], *args)
 
 @jit
 def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, cell2_property : float) -> float:
@@ -304,7 +311,7 @@ U_grad = grad(U_sum, argnums=(0), has_aux=True)
 
 def take_step(step_indx : int, cells : jnp.ndarray, old_nbs : jnp.ndarray, cell_properties : jnp.ndarray,):
 
-    neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 100 == 0), find_neighbors, lambda *args: old_nbs, cells)
+    neighbors = jax.lax.cond((step_indx < 30) | (step_indx % 50 == 0), find_neighbors, lambda *args: old_nbs, cells)
 
     grad_U, energies = U_grad(cells, neighbors, cell_properties)
 
@@ -472,26 +479,26 @@ def G_from_properties(old_G):
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
 G = {
-    "N_steps": 5_000,
+    "N_steps": 500,
     "alpha": 0.5,
     "beta": 5.0,
     "dt": 0.1,
     "eta": 0.5e-4, # width of the gaussian noise
-    "lambda3": 0.05,
+    "lambda3": 0.12,
     "lambda2": 0.5,
-    "lambda1": 1 - 0.5 - 0.05,
+    "lambda1": 1 - 0.5 - 0.12,
     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    "N_cells": 2000,
-    "cell_properties": jnp.array([S_type.WEAK_AB, S_type.WEAK_AB, S_type.ANGLE, S_type.WEAK_AB, S_type.ANGLE_ISOTROPIC]),
+    "N_cells": 5000,
+    "cell_properties": jnp.array([S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.ANGLE, S_type.WEAK_AB, S_type.ANGLE_ISOTROPIC]),
     "save_every": 20, # only used if save == 2
     "save_energies": False,
-    # "IC_scale" : 65.,
-    "IC_scale" : 41.5,
-    "IC_type" : "continue:small_timeline", # continue, plane, sphere, egg, better_egg
+    "IC_scale" : 65.,
+    # "IC_scale" : 41.5,
+    "IC_type" : "continue:large_timeline_base12", # continue, plane, sphere, egg, better_egg
 }
     
 # G = {
-# "N_steps": 1000,
+# "N_steps": 3000,
 # "alpha": 0.5,
 # "beta": 5.0,
 # "dt": 0.1,

@@ -117,8 +117,7 @@ def make_videos(filename:str, video_name:str):
 
 
     # make a 3d plot of the data
-    fig = plt.figure(figsize = (10,10))
-    ax = fig.add_subplot(111, )
+    fig, ax = plt.subplots(figsize = (10,10))
 
     x, y ,z = positions[0, :, 0], positions[0, :, 1], positions[0, :, 2]
 
@@ -133,13 +132,12 @@ def make_videos(filename:str, video_name:str):
     # fig.tight_layout()
     # plot the positions
 
-    # place the camera
+    # add an image that fills the whole plot
     im = plt.imread('egg_cutout.png')
-    newax = fig.add_axes([0.3, 0, 1, 1], anchor='NE', zorder=99)
-    newax.imshow(im)
-
-
+    newax = fig.add_axes([0, 0, 1, 1], anchor='C', zorder=999)
     newax.axis('off')
+    newax.imshow(im, alpha=1, extent=[-65, 65, -65, 65])
+    
 
 
     # make an animation of the data
@@ -148,21 +146,23 @@ def make_videos(filename:str, video_name:str):
 
         x, y ,z = positions[i, :, 0], positions[i, :, 1], positions[i, :, 2]
         # only get x and y 
-        xy_coordinates = np.vstack((x[y < 0], z[y < 0])).T
+        xy_coordinates = np.vstack((x[y < -3], z[y < -3])).T
 
 
-        ax.set_xlim(-65,65)
-        ax.set_ylim(-65,65)
 
         vor = Voronoi(xy_coordinates)
         voronoi_plot_2d(vor, show_vertices=False, line_width=2, line_alpha=0.6, point_size=10, ax = ax, point_alpha=0)
+        
+        ax.set_xlim(-65,65)
+        ax.set_ylim(-65,65)
         ax.axis('off')
+
         # add image to the plot
 
 
  
     print('Making voronoi animation')
-    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
+    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=20)
     ani.save(video_name+'_voronoi.mp4')
     print('Done!\n')
 
@@ -211,8 +211,8 @@ def make_videos(filename:str, video_name:str):
         ax.view_init(0, 270)
 
     print('Making cross section animation')
-    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
-    ani.save(video_name + '_cross_sections.mp4')
+    # ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
+    # ani.save(video_name + '_cross_sections.mp4')
     print('Done!\n')
 
 

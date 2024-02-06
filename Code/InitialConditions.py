@@ -51,19 +51,52 @@ class InitialConditions():
 
 
         return cells, properties
-
+    def make_better_egg(self, cells):
+        cells = cells.at[:,0,2].set(cells[:,0,2] + jnp.square(jnp.abs(cells[:,0,0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2)
+        return cells
+    
     def make_better_egg_pos(self, cells):
         cells = cells.at[2].set(cells[2] + jnp.square(jnp.abs(cells[0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2)
         return cells
-
+    
     def inv_make_better_egg_pos(self, cells):
         cells = cells.at[2].set(cells[2] - jnp.square(jnp.abs(cells[0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2)
         return cells
 
-    def make_better_egg(self, cells):
-        cells = cells.at[:,0,2].set(cells[:,0,2] + jnp.square(jnp.abs(cells[:,0,0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2)
-        return cells
+    def make_even_better_egg(self, cells):
+        z_add = jnp.square(jnp.abs(cells[:,0,0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
 
+        cells = cells.at[:,0,2].set(cells[:,0,2] + z_add)
+
+        x_sub = jnp.where(cells[:,0,0] < 0, 0, self.scaled_egg_shape[0]/4.*cells[:,0,0]/self.scaled_egg_shape[0])
+
+        cells = cells.at[:,0,0].set(cells[:,0,0] - x_sub)
+
+        return cells
+    
+    def make_even_better_egg_pos(self, cells):
+        z_add = jnp.square(jnp.abs(cells[0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
+
+        cells = cells.at[2].set(cells[2] + z_add)
+
+        x_sub = jnp.where(cells[0] < 0, 0, self.scaled_egg_shape[0]/3.*cells[0]/self.scaled_egg_shape[0])# shoudl be 4. but 3. looks better
+
+        cells = cells.at[0].set(cells[0] - x_sub)
+
+        return cells
+    
+    def inv_make_even_better_egg_pos(self, cells):
+        z_add = jnp.square(jnp.abs(cells[0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
+
+        cells = cells.at[2].set(cells[2] - z_add)
+
+        x_sub = jnp.where(cells[0] < 0, 0, self.scaled_egg_shape[0]/4.*cells[0]/self.scaled_egg_shape[0])
+
+        cells = cells.at[0].set(cells[0] + x_sub)
+
+        return cells
+    
+    
     def egg_IC(self, N : int) -> jnp.ndarray:
         pos = get_random_points_on_sphere(N, 42)
 
@@ -116,6 +149,12 @@ class InitialConditions():
         cells = self.make_better_egg(cells)
         return cells, cell_properties
 
+    def even_better_egg(self, N:int) -> jnp.ndarray:
+        cells, cell_properties = self.egg_IC(N)
+
+        cells = self.make_even_better_egg(cells)
+        return cells, cell_properties
+    
     def better_egg_genius(self, N:int) -> jnp.ndarray:
         cells, cell_properties = self.egg_IC(N)
 
@@ -183,6 +222,8 @@ class InitialConditions():
             return self.better_egg_genius
         elif type == "ball":
             return self.ball
+        elif type == "even_better_egg":
+            return self.even_better_egg
         
         else:
             raise ValueError("type must be egg, plane or egg_half")

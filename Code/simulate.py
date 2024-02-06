@@ -33,6 +33,7 @@ class BC(enum.IntEnum):
     SPHERE = 1
     EGG = 2
     BETTER_EGG = 3
+    EVEN_BETTER_EGG = 4
 
 class S_type(enum.IntEnum):
     ONLY_AB = 0
@@ -194,6 +195,14 @@ def get_boundary_fn():
             v_add = jnp.where(mag > 1.0, jnp.minimum((jnp.exp(mag*mag - 1) - 1), 5.), 0.)
             return v_add 
         return better_egg
+    elif boundary == BC.EVEN_BETTER_EGG:
+        def even_better_egg(pos):
+            corrected_pos_vec = G["IC"].inv_make_even_better_egg_pos(pos)
+            corrected_pos_vec = corrected_pos_vec / G["IC"].scaled_egg_shape
+            mag = jnp.dot(corrected_pos_vec, corrected_pos_vec) # squared length
+            v_add = jnp.where(mag > 1.0, jnp.minimum((jnp.exp(mag*mag - 1) - 1), 5.), 0.)
+            return v_add 
+        return even_better_egg
     else:
         raise Exception("boundary must be none, sphere, egg or better_egg")
 
@@ -478,47 +487,49 @@ def G_from_properties(old_G):
     G["N_steps"] = old_G["N_steps"]
     # G["cell_properties"] = [getattr(IC, prop) for prop in G["cell_properties"]]
 
-G = {
-    "N_steps": 500,
-    "alpha": 0.5,
-    "beta": 5.0,
-    "dt": 0.1,
-    "eta": 0.5e-4, # width of the gaussian noise
-    "lambda3": 0.12,
-    "lambda2": 0.5,
-    "lambda1": 1 - 0.5 - 0.12,
-    "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-    "N_cells": 5000,
-    "cell_properties": jnp.array([S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.ANGLE, S_type.WEAK_AB, S_type.ANGLE_ISOTROPIC]),
-    "save_every": 20, # only used if save == 2
-    "save_energies": False,
-    "IC_scale" : 65.,
-    # "IC_scale" : 41.5,
-    "IC_type" : "continue:large_timeline_base12", # continue, plane, sphere, egg, better_egg
-}
-    
 # G = {
-# "N_steps": 3000,
-# "alpha": 0.5,
-# "beta": 5.0,
-# "dt": 0.1,
-# "eta": 0.5e-4, # width of the gaussian noise
-# "lambda3": 0.05,
-# "lambda2": 0.5,
-# "lambda1": 1 - 0.5 - 0.05,
-# "proliferate" : False,
-# "proliferation_rate" : 0.0, # per time step
-# # "max_cells" : 2000,
-# # "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-# "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
-# "N_cells": 1000,
-# "cell_properties": jnp.array([S_type.ONLY_AB]),
-# "save_every": 1, # only used if save == 2
-# # "IC_scale" : 65.,
-# # "IC_scale" : 41.5,
-# "IC_scale" : 25.,
-# "IC_type" : "ball", # continue, plane, sphere, egg, better_egg, ball
+#     "N_steps": 500,
+#     "alpha": 0.5,
+#     "beta": 5.0,
+#     "dt": 0.1,
+#     "eta": 0.5e-4, # width of the gaussian noise
+#     "lambda3": 0.12,
+#     "lambda2": 0.5,
+#     "lambda1": 1 - 0.5 - 0.12,
+#     "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+#     "N_cells": 5000,
+#     "cell_properties": jnp.array([S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.ANGLE, S_type.WEAK_AB, S_type.ANGLE_ISOTROPIC]),
+#     "save_every": 20, # only used if save == 2
+#     "save_energies": False,
+#     "IC_scale" : 65.,
+#     # "IC_scale" : 41.5,
+#     "IC_type" : "continue:large_timeline_base12", # continue, plane, sphere, egg, better_egg
 # }
+    
+G = {
+"N_steps": 1000,
+"alpha": 0.5,
+"beta": 5.0,
+"dt": 0.1,
+"eta": 0.5e-4, # width of the gaussian noise
+"lambda3": 0.05,
+"lambda2": 0.5,
+"lambda1": 1 - 0.5 - 0.05,
+"proliferate" : False,
+"proliferation_rate" : 0.0, # per time step
+# "max_cells" : 2000,
+# "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
+"boundary": BC.EVEN_BETTER_EGG,   # none, sphere, egg, better_egg, even_better_egg
+"N_cells": 5000,
+"cell_properties": jnp.array([S_type.ONLY_AB]),
+"save_every": 1, # only used if save == 2
+# "IC_scale" : 65.,
+"save_energies": False,
+
+# "IC_scale" : 41.5,
+"IC_scale" : 70,
+"IC_type" : "even_better_egg", # continue, plane, sphere, egg, better_egg, even_better_egg, ball
+}
 
 IC = InitialConditions(G)
 

@@ -66,9 +66,13 @@ class InitialConditions():
     def make_even_better_egg(self, cells):
         z_add = jnp.square(jnp.abs(cells[:,0,0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
 
+        # make the bottom of the egg lower
+
+        z_add = jnp.where(cells[:,0,0] < 0, z_add, z_add/2.)
+
         cells = cells.at[:,0,2].set(cells[:,0,2] + z_add)
 
-        x_sub = jnp.where(cells[:,0,0] < 0, 0, self.scaled_egg_shape[0]/4.*cells[:,0,0]/self.scaled_egg_shape[0])
+        x_sub = jnp.where(cells[:,0,0] < 0, 0, self.scaled_egg_shape[0]/3.*cells[:,0,0]/self.scaled_egg_shape[0])
 
         cells = cells.at[:,0,0].set(cells[:,0,0] - x_sub)
 
@@ -76,6 +80,8 @@ class InitialConditions():
     
     def make_even_better_egg_pos(self, cells):
         z_add = jnp.square(jnp.abs(cells[0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
+
+        z_add = jnp.where(cells[0] < 0, z_add, z_add/2.)
 
         cells = cells.at[2].set(cells[2] + z_add)
 
@@ -88,9 +94,11 @@ class InitialConditions():
     def inv_make_even_better_egg_pos(self, cells):
         z_add = jnp.square(jnp.abs(cells[0]/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
 
+        z_add = jnp.where(cells[0] < 0, z_add, z_add/2.)
+
         cells = cells.at[2].set(cells[2] - z_add)
 
-        x_sub = jnp.where(cells[0] < 0, 0, self.scaled_egg_shape[0]/4.*cells[0]/self.scaled_egg_shape[0])
+        x_sub = jnp.where(cells[0] < 0, 0, self.scaled_egg_shape[0]/3.*cells[0]/self.scaled_egg_shape[0])
 
         cells = cells.at[0].set(cells[0] + x_sub)
 

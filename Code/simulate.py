@@ -527,7 +527,7 @@ G = {
 "save_energies": False,
 
 # "IC_scale" : 41.5,
-"IC_scale" : 70,
+"IC_scale" : 65,
 "IC_type" : "even_better_egg", # continue, plane, sphere, egg, better_egg, even_better_egg, ball
 }
 

@@ -50,7 +50,7 @@ interaction_matrix = jnp.array([
                                 [S_type.ONLY_AB, S_type.WEAKER_AB, S_type.WEAKER_AB, S_type.ONLY_AB, S_type.WEAKER_AB, S_type.ONLY_AB, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING, S_type.WEAKER_AB], 
                                 [S_type.WEAKER_AB, S_type.STANDARD, S_type.STANDARD, S_type.WEAKER_AB, S_type.STANDARD, S_type.STANDARD, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
                                 [S_type.ONLY_AB, S_type.STANDARD, S_type.ANGLE, S_type.WEAKER_AB, S_type.WEAKER_AB, S_type.WEAK_AB, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
-                                [S_type.WEAK_AB, S_type.WEAKER_AB, S_type.WEAKER_AB, S_type.WEAK_AB, S_type.WEAKER_AB ,S_type.WEAK_AB, S_type.WEAKER_AB, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
+                                [S_type.WEAK_AB, S_type.WEAKER_AB, S_type.WEAKER_AB, S_type.WEAK_AB, S_type.WEAKER_AB ,S_type.WEAK_AB, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
                                 [S_type.WEAKER_AB, S_type.WEAK_STANDARD, S_type.WEAK_STANDARD, S_type.WEAKER_AB, S_type.WEAK_STANDARD,S_type.WEAK_STANDARD, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
                                 [S_type.ONLY_AB, S_type.STANDARD, S_type.INVERSE_ANGLE, S_type.WEAK_AB, S_type.WEAK_STANDARD, S_type.INVERSE_ANGLE, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],#last one should be inverse
                                 [S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.ANGLE_ISOTROPIC, S_type.NON_INTERACTING,  S_type.WEAKER_AB],
@@ -90,7 +90,7 @@ def S_only_AB(r, p1, q1, p2, q2) -> float:
 @jit
 def S_only_AB_weak(r, p1, q1, p2, q2) -> float:
     S1 = quadruple(p1, p2, r, r)
-    return S1*0.5
+    return S1*0.6
 
 @jit
 def S_only_AB_weaker(r, p1, q1, p2, q2) -> float:
@@ -512,23 +512,23 @@ G = {
 "beta": 5.0,
 "dt": 0.1,
 "eta": 0.5e-4, # width of the gaussian noise
-"lambda3": 0.05,
+"lambda3": 0.3,
 "lambda2": 0.5,
-"lambda1": 1 - 0.5 - 0.05,
+"lambda1": 1 - 0.5 - 0.3,
 "proliferate" : False,
 "proliferation_rate" : 0.0, # per time step
 # "max_cells" : 2000,
 # "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
 "boundary": BC.EVEN_BETTER_EGG,   # none, sphere, egg, better_egg, even_better_egg
 "N_cells": 5000,
-"cell_properties": jnp.array([S_type.ONLY_AB]),
+"cell_properties": jnp.array([S_type.WEAK_AB, S_type.WEAK_AB, S_type.ANGLE, S_type.ANGLE_ISOTROPIC]),
 "save_every": 1, # only used if save == 2
 # "IC_scale" : 65.,
 "save_energies": False,
 
 # "IC_scale" : 41.5,
 "IC_scale" : 65,
-"IC_type" : "even_better_egg", # continue, plane, sphere, egg, better_egg, even_better_egg, ball
+"IC_type" : "continue:even_better_1", # continue, plane, sphere, egg, better_egg, even_better_egg, ball
 }
 
 IC = InitialConditions(G)

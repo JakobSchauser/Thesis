@@ -85,17 +85,23 @@ def S_standard_weak(r, p1, q1, p2, q2) -> float:
 @jit
 def S_only_AB(r, p1, q1, p2, q2) -> float:
     S1 = quadruple(p1, p2, r, r)
-    return S1
+    S2 = quadruple(p1, p2, q1, q2)
+
+    return S1*0.6 + S2*0.4
 
 @jit
 def S_only_AB_weak(r, p1, q1, p2, q2) -> float:
     S1 = quadruple(p1, p2, r, r)
-    return S1*0.6
+    S2 = quadruple(p1, p2, q1, q2)
+
+    return S1*0.4 + S2*0.4
 
 @jit
 def S_only_AB_weaker(r, p1, q1, p2, q2) -> float:
     S1 = quadruple(p1, p2, r, r)
-    return S1*0.25
+    S2 = quadruple(p1, p2, q1, q2)
+
+    return S1*0.2 + S2*0.4
     
 @jit
 def S_angle(r, p1, q1, p2, q2) -> float:
@@ -507,7 +513,7 @@ def G_from_properties(old_G):
 # }
     
 G = {
-"N_steps": 1000,
+"N_steps": 3000,
 "alpha": 0.5,
 "beta": 5.0,
 "dt": 0.1,
@@ -521,14 +527,15 @@ G = {
 # "boundary": BC.BETTER_EGG,   # none, sphere, egg, better_egg
 "boundary": BC.EVEN_BETTER_EGG,   # none, sphere, egg, better_egg, even_better_egg
 "N_cells": 5000,
-"cell_properties": jnp.array([S_type.WEAK_AB, S_type.WEAK_AB, S_type.ANGLE, S_type.ANGLE_ISOTROPIC]),
+"cell_properties": jnp.array([S_type.ONLY_AB]),
 "save_every": 1, # only used if save == 2
 # "IC_scale" : 65.,
 "save_energies": False,
 
 # "IC_scale" : 41.5,
-"IC_scale" : 65,
-"IC_type" : "continue:even_better_1", # continue, plane, sphere, egg, better_egg, even_better_egg, ball
+# "IC_scale" : 65,
+"IC_scale" : 70,
+"IC_type" : "ball", # continue, plane, sphere, egg, better_egg, even_better_egg, ball
 }
 
 IC = InitialConditions(G)

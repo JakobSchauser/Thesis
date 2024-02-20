@@ -69,8 +69,8 @@ def quadruple(a1, a2, b1, b2) -> float:
     return jnp.dot(jnp.cross(a1, b1), jnp.cross(a2, b2))
 
 @jit
-def V(r : float, S : float) -> float:
-    return jnp.exp(-r) - S * jnp.exp(- r / G["beta"])
+def V(r : float, S : float, A : float) -> float:
+    return jnp.exp(-r/A) - S * jnp.exp(- r / G["beta"])
 
 @jit
 def S_standard(r, p1, q1, p2, q2) -> float:
@@ -228,6 +228,16 @@ def get_interaction(prop1 : int, prop2 : int, *args):
     interact = interaction_matrix.at[prop1, prop2].get()
     return jax.lax.switch(interact, [S_only_AB, S_standard, S_angle, S_only_AB_weak, S_standard_weak, S_inverse_angle, S_angle_isotropic, S_non_interacting, S_only_AB_weaker], *args)
 
+
+def get_shape_change(q1, q2, dir, type1 : int):
+    lf = lambda p1, p2, d1, d2: 0.0
+
+    l2 = lambda q1, q2, dir1, dir2: jnp.abs(jnp.dot(q1, dir1))
+
+    A = jax.lax.switch(type1, [lf, lf, lf, lf, lf, l2], q1, q2, dir, dir)
+
+    return 0.8 + A*0.3
+
 @jit
 def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, cell2_property : float) -> float:
     pos1, p1, q1 = unpack_cellrow(cellrow1)
@@ -250,7 +260,9 @@ def U(cellrow1 : jnp.ndarray, cellrow2 : jnp.ndarray, cell1_property : float, ce
 
     r = jnp.linalg.norm(_dir)
 
-    v = V(r, s)
+    A = get_shape_change(q1, q2, _dir, cell1_property.astype(int))
+
+    v = V(r, s, A)
 
     # add the boundary
     boundary_fn = get_boundary_fn()
@@ -513,7 +525,7 @@ def G_from_properties(old_G):
 # }
     
 G = {
-"N_steps": 3000,
+"N_steps": 500,
 "alpha": 0.5,
 "beta": 5.0,
 "dt": 0.1,
@@ -535,7 +547,7 @@ G = {
 # "IC_scale" : 41.5,
 # "IC_scale" : 65,
 "IC_scale" : 70,
-"IC_type" : "ball", # continue, plane, sphere, egg, better_egg, even_better_egg, ball
+"IC_type" : "continue:pink_top", # continue, plane, sphere, egg, better_egg, even_better_egg, ball
 }
 
 IC = InitialConditions(G)

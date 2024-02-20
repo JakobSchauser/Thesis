@@ -35,83 +35,83 @@ def make_videos(filename:str, video_name:str):
 
 
     # # make a 3d plot of the data
-    # fig = plt.figure(figsize = (10,10))
-    # ax = fig.add_subplot(111, projection='3d', )
-    # ax.set_xlim(-limits, limits)
-    # ax.set_ylim(-limits, limits)
-    # ax.set_zlim(-limits, limits)
-    # ax.set_xlabel('X')
-    # ax.set_ylabel('Y')
-    # ax.set_zlabel('Z')
-    # fig.tight_layout()
-    # # plot the positions
-    # ax.scatter(positions[0, :, 0], positions[0, :, 1], positions[0, :, 2], s=size)
+    fig = plt.figure(figsize = (10,10))
+    ax = fig.add_subplot(111, projection='3d', )
+    ax.set_xlim(-limits, limits)
+    ax.set_ylim(-limits, limits)
+    ax.set_zlim(-limits, limits)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    fig.tight_layout()
+    # plot the positions
+    ax.scatter(positions[0, :, 0], positions[0, :, 1], positions[0, :, 2], s=size)
 
-    # # remove the axes
-    # ax.set_axis_off()
+    # remove the axes
+    ax.set_axis_off()
 
-    # # place the camera
-    # ax.view_init(0, 270)
+    # place the camera
+    ax.view_init(0, 270)
 
-    # property_dists = np.where((properties == 1) | (properties == 3), 0.18, 0.52,)
-
-
-    # # make an animation of the data
-    # def animate(i):
-    #     ax.clear()
-    #     ax.set_xlim(-limits, limits)
-    #     ax.set_ylim(-limits, limits)
-    #     ax.set_zlim(-limits, limits)
-
-    #     x, y ,z = positions[i, :, 0], positions[i, :, 1], positions[i, :, 2]
-    #     # x = x[z < 25]
-    #     # y = y[z < 25]
-    #     # z = z[z < 25]
-
-    #     # all_dists = squareform(pdist(positions[i]))
-
-    #     # # find the five closest points to each point
-
-    #     # closest = np.argsort(all_dists, axis=1)[:, 1:6]
-
-    #     # # find the mean distance to the closest points
-
-    #     # mean_dist = np.mean(all_dists[np.arange(all_dists.shape[0])[:,None], closest], axis=1)
-    #     # # color the points based on the mean distance to the three closest points
+    property_dists = np.where((properties == 1) | (properties == 3), 0.18, 0.52,)
 
 
+    # make an animation of the data
+    def animate(i):
+        ax.clear()
+        ax.set_xlim(-limits, limits)
+        ax.set_ylim(-limits, limits)
+        ax.set_zlim(-limits, limits)
 
-    #     # n = np.clip((property_dists-mean_dist)*2., -1., 1.)
-    #     colors = np.ones((positions[i].shape[0], 4))
+        x, y ,z = positions[i, :, 0], positions[i, :, 1], positions[i, :, 2]
+        # x = x[z < 25]
+        # y = y[z < 25]
+        # z = z[z < 25]
 
-    #     # if has_energies:
-    #     #     colors = np.zeros((positions[i].shape[0], 4))
+        # all_dists = squareform(pdist(positions[i]))
+
+        # # find the five closest points to each point
+
+        # closest = np.argsort(all_dists, axis=1)[:, 1:6]
+
+        # # find the mean distance to the closest points
+
+        # mean_dist = np.mean(all_dists[np.arange(all_dists.shape[0])[:,None], closest], axis=1)
+        # # color the points based on the mean distance to the three closest points
+
+
+
+        # n = np.clip((property_dists-mean_dist)*2., -1., 1.)
+        colors = np.ones((positions[i].shape[0], 4))
+
+        # if has_energies:
+        #     colors = np.zeros((positions[i].shape[0], 4))
             
-    #     #     n = np.clip((property_dists + energies[i])*4., -1., 1.)
+        #     n = np.clip((property_dists + energies[i])*4., -1., 1.)
 
-    #     #     colors[:, 0] = np.clip(1 + n, 0, 1)
-    #     #     colors[:, 1] = np.minimum(1 - n, 1 + n)
-    #     #     colors[:, 2] = np.clip(1 - n, 0., 1)
-    #     #     colors[:, 3] = 1
+        #     colors[:, 0] = np.clip(1 + n, 0, 1)
+        #     colors[:, 1] = np.minimum(1 - n, 1 + n)
+        #     colors[:, 2] = np.clip(1 - n, 0., 1)
+        #     colors[:, 3] = 1
 
 
-    #     # plot white dots with black outlines
-    #     ax.scatter(x, y, z, s=size,       c = colors, edgecolors='k')
+        # plot white dots with black outlines
+        ax.scatter(x, y, z, s=size,       c = colors, edgecolors='k')
 
-    #     ax.scatter(x, z,  y - dists, s=size, c=colors, edgecolors='k')
+        ax.scatter(x, z,  y - dists, s=size, c=colors, edgecolors='k')
 
-    #     ax.scatter(x, -z, y + dists, s=size, c=colors, edgecolors='k')
+        ax.scatter(x, -z, y + dists, s=size, c=colors, edgecolors='k')
 
  
-    #     ax.set_axis_off()
+        ax.set_axis_off()
 
-    #     # place the camera
-    #     ax.view_init(0, 270)
+        # place the camera
+        ax.view_init(0, 270)
 
-    # print('Making Stas animation')
-    # ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
-    # ani.save(video_name+'.mp4')
-    # print('Done!\n')
+    print('Making Stas animation')
+    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
+    ani.save(video_name+'.mp4')
+    print('Done!\n')
 
     positions = dat[:, :, 0]
 
@@ -132,11 +132,11 @@ def make_videos(filename:str, video_name:str):
     # fig.tight_layout()
     # plot the positions
 
-    # add an image that fills the whole plot
-    im = plt.imread('egg_cutout.png')
-    newax = fig.add_axes([0, 0, 1, 1], anchor='C', zorder=999)
-    newax.axis('off')
-    newax.imshow(im, alpha=1, extent=[-65, 65, -65, 65])
+    # # add an image that fills the whole plot
+    # im = plt.imread('egg_cutout.png')
+    # newax = fig.add_axes([0, 0, 1, 1], anchor='C', zorder=999)
+    # newax.axis('off')
+    # newax.imshow(im, alpha=1, extent=[-65, 65, -65, 65])
     
 
 
@@ -162,7 +162,7 @@ def make_videos(filename:str, video_name:str):
 
  
     print('Making voronoi animation')
-    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=20)
+    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
     ani.save(video_name+'_voronoi.mp4')
     print('Done!\n')
 
@@ -211,8 +211,8 @@ def make_videos(filename:str, video_name:str):
         ax.view_init(0, 270)
 
     print('Making cross section animation')
-    # ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
-    # ani.save(video_name + '_cross_sections.mp4')
+    ani = animation.FuncAnimation(fig, animate, frames=positions.shape[0], interval=8)
+    ani.save(video_name + '_cross_sections.mp4')
     print('Done!\n')
 
 

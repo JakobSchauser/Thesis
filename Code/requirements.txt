@@ -1,1 +1,4 @@
-jax
+jax==0.4.20
+jaxlib==0.4.20
+jax-tqdm
+# -U "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html

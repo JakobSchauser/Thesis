@@ -138,8 +138,6 @@ def make_videos(filename:str, video_name:str):
     # newax.axis('off')
     # newax.imshow(im, alpha=1, extent=[-65, 65, -65, 65])
     
-
-
     # make an animation of the data
     def animate(i):
         ax.clear()

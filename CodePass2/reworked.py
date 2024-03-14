@@ -135,6 +135,10 @@ class Simulation:
             corrected_pos_vec = corrected_pos_vec / self.scaled_egg_shape[None, :]
             mag = torch.sum(corrected_pos_vec**2, dim=1)
             v_add = torch.where(mag > 1.0, (torch.exp(mag*mag - 1) - 1), 0.)
+
+            # make sure the number is not too large
+            v_add = torch.where(v_add > 5., 5., v_add)
+            
         return v_add 
     
     def potential(self, x, p, q, p_mask, idx, d):
@@ -163,9 +167,9 @@ class Simulation:
 
         bc_contrib = torch.zeros_like(S)
 
-        egg_bc = self.egg_BC(x)
+        # egg_bc = self.egg_BC(x)
 
-        bc_contrib[:, 0] = egg_bc
+        # bc_contrib[:, 0] = egg_bc
 
         S += bc_contrib
 
@@ -185,10 +189,13 @@ class Simulation:
         p_mask = torch.tensor(p_mask, dtype=torch.int, device=self.device)
         self.beta   = torch.zeros_like(p_mask)
 
+        self.scaled_egg_shape = torch.tensor(self.scaled_egg_shape, dtype=self.dtype, device=self.device)
+
 
         return x, p, q, p_mask
 
     def update_k(self, true_neighbour_max):
+        return 25
         k = self.k
         fraction = true_neighbour_max / k                                                         # Fraction between the maximimal number of nearest neighbors and the initial nunber of nearest neighbors we look for.
         if fraction < 0.25:                                                                       # If fraction is small our k is too large and we make k smaller
@@ -196,6 +203,7 @@ class Simulation:
         elif fraction > 0.75:                                                                     # Vice versa
             k = int(1.5 * k)
         self.k = k                                                                                # We update k
+        print(k)
         return k # TODO: maybe set to set number
     
     def should_update_neighbors_bool(self, tstep): ## TODO: maybe remove
@@ -207,6 +215,8 @@ class Simulation:
 
     def time_step(self, x, p, q, p_mask, tstep):
         # Start with cell division
+        gc.collect()
+        
 
         # Idea: only update _potential_ neighbours every x steps late in simulation
         # For now we do this on CPU, so transfer will be expensive
@@ -243,6 +253,7 @@ class Simulation:
 
         x.grad.zero_()
 
+
         return x, p, q, p_mask
 
     # def simulation(self, x, p, q, lam, beta, eta, potential=potential, yield_every=1, dt=0.1):
@@ -255,6 +266,10 @@ class Simulation:
             tstep += 1
             x, p, q, p_mask = self.time_step(x, p, q, p_mask, tstep)
 
+            nan_mask = torch.isnan(x)
+            if nan_mask.any():
+                print("NAN")
+                
             if tstep % self.yield_every == 0:
                 xx = x.detach().to("cpu").numpy().copy()
                 pp = p.detach().to("cpu").numpy().copy()
@@ -273,19 +288,19 @@ def save(data_tuple, name, sim_dict):
         if not name in file:
             file.create_dataset(name, data=data)
         else:
-            file[name].resize((len(file[name]) + len(data), *data[0].shape))
-            file[name][-len(data):] = data
+            del file[name]
+            file.create_dataset(name, data=data)
 
     with h5py.File("runs/"+name+".hdf5", "a") as f:
             append_or_create = lambda name, data: append_or_create_h5py(name, data, f)
 
-            append_or_create("x", x_lst)
+            append_or_create("x", np.array(x_lst))
 
-            append_or_create("properties", p_mask_lst)
+            append_or_create("properties", np.array(p_mask_lst))
 
-            append_or_create("p", p_lst)
+            append_or_create("p", np.array(p_lst))
 
-            append_or_create("q", q_lst)
+            append_or_create("q", np.array(q_lst))
 
             # f.attrs.update(sim_dict)
 
@@ -324,10 +339,10 @@ def run_simulation(sim_dict):
     sim = Simulation(sim_dict)
     runner = sim.simulation(x, p, q, p_mask)
 
-    x_lst = np.array([x])
-    p_lst = np.array([p])
-    q_lst = np.array([q])
-    p_mask_lst = np.array([p_mask])
+    x_lst = [x]
+    p_lst = [p]
+    q_lst = [q]
+    p_mask_lst = [p_mask]
 
 
     save((p_mask_lst, x_lst, p_lst,  q_lst), name=name, sim_dict=sim_dict)
@@ -339,7 +354,7 @@ def run_simulation(sim_dict):
 
     i = 0
     t1 = time()
-
+    
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
         print(f'Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)')
@@ -347,10 +362,8 @@ def run_simulation(sim_dict):
         x_lst.append(xx)
         p_lst.append(pp)
         q_lst.append(qq)
-        p_mask_lst.append(pp_mask)
+        # p_mask_lst.append(pp_mask)
         
-        if len(xx) > sim_dict['max_cells']:
-            break
 
         if i % 100 == 0:
             save((p_mask_lst, x_lst, p_lst,  q_lst), name=name, sim_dict=sim_dict)

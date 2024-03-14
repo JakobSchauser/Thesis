@@ -37,7 +37,7 @@ class Simulation:
         self.d = None
         self.idx = None
 
-
+        self.scaled_egg_shape = np.array([1., 1./3., 1./3.])*60. #TODO: make this a parameter
 
     @staticmethod
     def find_potential_neighbours(x, k=100, distance_upper_bound=np.inf, workers=-1):
@@ -109,12 +109,32 @@ class Simulation:
 
         return S
     
+
+    def inv_make_even_better_egg_pos(self, pos):
+        with torch.no_grad():
+            pos2 = pos
+            xx, yy, zz = pos2[:,0], pos2[:,1], pos2[:,2]
+
+            z_add = torch.square(torch.abs(xx/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
+
+            z_add = torch.where(xx < 0, z_add, z_add/2.)
+
+            pos2[:,2] = zz - z_add
+            # do this not in place
+
+
+            x_sub = torch.where(xx < 0, 0, self.scaled_egg_shape[0]/3.*xx/self.scaled_egg_shape[0])
+            
+            pos2[:,0] = xx + x_sub
+
+        return pos2
+    
     def egg_BC(self, pos):
-        corrected_pos_vec = G["IC"].inv_make_even_better_egg_pos(pos)
-        corrected_pos_vec = corrected_pos_vec / G["IC"].scaled_egg_shape
-        mag = corrected_pos_vec**2   # squared length
-        # v_add = jnp.where(mag > 1.0, jnp.minimum((jnp.exp(mag*mag - 1) - 1), 5.), 0.)
-        v_add = torch.where(mag > 1.0, torch.minimum((torch.exp(mag*mag - 1) - 1), 5.), 0.)
+        with torch.no_grad():
+            corrected_pos_vec = self.inv_make_even_better_egg_pos(pos)
+            corrected_pos_vec = corrected_pos_vec / self.scaled_egg_shape[None, :]
+            mag = torch.sum(corrected_pos_vec**2, dim=1)
+            v_add = torch.where(mag > 1.0, (torch.exp(mag*mag - 1) - 1), 0.)
         return v_add 
     
     def potential(self, x, p, q, p_mask, idx, d):
@@ -141,8 +161,13 @@ class Simulation:
         # Calculate potential
         S = self.calculate_interaction(dx, p, q, p_mask, idx)
 
+        bc_contrib = torch.zeros_like(S)
 
-        S += self.egg_BC(x)
+        egg_bc = self.egg_BC(x)
+
+        bc_contrib[:, 0] = egg_bc
+
+        S += bc_contrib
 
         Vij = z_mask.float() * (torch.exp(-d) - S * torch.exp(-d/5))
         Vij_sum = torch.sum(Vij)      
@@ -176,16 +201,9 @@ class Simulation:
     def should_update_neighbors_bool(self, tstep): ## TODO: maybe remove
         if self.idx is None:
             return True
-        elif tstep < self.warmup_dur:
-            alt_tstep = tstep
-        elif tstep < (self.pre_polar_dur+self.warmup_dur):
-            alt_tstep = tstep - self.warmup_dur
-        else:
-            alt_tstep = tstep - (self.warmup_dur + self.pre_polar_dur)
 
-        n_update = 1 if alt_tstep < 50 else max([1, int(20 * np.tanh(alt_tstep / 200))])
 
-        return (tstep % n_update == 0)
+        return (tstep % 50 == 0)
 
     def time_step(self, x, p, q, p_mask, tstep):
         # Start with cell division
@@ -195,7 +213,7 @@ class Simulation:
         k = self.update_k(self.true_neighbour_max)
         k = min(k, len(x) - 1)
 
-        if self.update_neighbors_bool(tstep):
+        if self.should_update_neighbors_bool(tstep):
             d, idx = self.find_potential_neighbours(x.detach().to("cpu").numpy(), k=k)
             self.idx = torch.tensor(idx, dtype=torch.long, device=self.device)
             self.d = torch.tensor(d, dtype=self.dtype, device=self.device)
@@ -217,12 +235,11 @@ class Simulation:
         # Time-step
         with torch.no_grad():
             x += -x.grad * self.dt + self.eta * torch.empty(*x.shape, dtype=self.dtype, device=self.device).normal_() * self.sqrt_dt
-            if not(self.warming_up) and not(self.pre_polar):
-                p += -p.grad * self.dt + self.eta * torch.empty(*x.shape, dtype=self.dtype, device=self.device).normal_() * self.sqrt_dt
-                q += -q.grad * self.dt + self.eta * torch.empty(*x.shape, dtype=self.dtype, device=self.device).normal_() * self.sqrt_dt
+            p += -p.grad * self.dt + self.eta * torch.empty(*x.shape, dtype=self.dtype, device=self.device).normal_() * self.sqrt_dt
+            q += -q.grad * self.dt + self.eta * torch.empty(*x.shape, dtype=self.dtype, device=self.device).normal_() * self.sqrt_dt
 
-                p.grad.zero_()
-                q.grad.zero_()
+            p.grad.zero_()
+            q.grad.zero_()
 
         x.grad.zero_()
 
@@ -270,37 +287,50 @@ def save(data_tuple, name, sim_dict):
 
             append_or_create("q", q_lst)
 
-            f.attrs.update(sim_dict)
+            # f.attrs.update(sim_dict)
 
 def run_simulation(sim_dict):
     # Make the simulation runner object:
-    data_tuple = sim_dict.pop('data')
+    continue_from = sim_dict.pop('continue')
     yield_steps, yield_every = sim_dict['yield_steps'], sim_dict['yield_every']
 
 
-    assert len(data_tuple) == 4 or len(data_tuple) == 2, 'data must be tuple of either len 2 (for data generation) or 4 (for data input)'
+    name = sim_dict.pop('name')
 
-    if len(data_tuple) == 4:
-        p_mask, x, p, q = data_tuple
-    else:
-        data_gen = data_tuple[0]
-        p_mask, x, p, q = data_gen(*data_tuple[1])
+    # assert len(data_tuple) == 4 or len(data_tuple) == 2, 'data must be tuple of either len 2 (for data generation) or 4 (for data input)'
+
+    # if len(data_tuple) == 4:
+    #     p_mask, x, p, q = data_tuple
+    # else:
+    #     data_gen = data_tuple[0]
+    #     p_mask, x, p, q = data_gen(*data_tuple[1])
+
+    assert continue_from + ".hdf5" in os.listdir('runs'), 'continue_from must be a valid run in /runs/'
+    
+    with h5py.File("runs/"+continue_from+".hdf5", "r") as f:
+        x = f['x'][-1]
+        p = f['p'][-1]
+        q = f['q'][-1]
+        p_mask = np.array(f['properties'])
         
+
+    print("x.shape")
+    print(x.shape)
+    print("p.shape")
+    print(p.shape)
+    print("q.shape")
+    print(q.shape)
+
     sim = Simulation(sim_dict)
     runner = sim.simulation(x, p, q, p_mask)
 
+    x_lst = np.array([x])
+    p_lst = np.array([p])
+    q_lst = np.array([q])
+    p_mask_lst = np.array([p_mask])
 
 
-    x_lst = [x]
-    p_lst = [p]
-    q_lst = [q]
-    p_mask_lst = [p_mask]
-
-    with open(f'data/runs/sim_dict.json', 'w') as f:
-        sim_dict['dtype'] = str(sim_dict['dtype'])
-        json.dump(sim_dict, f, indent = 2)
-
-    save((p_mask_lst, x_lst, p_lst,  q_lst), name='data', sim_dict=sim_dict)
+    save((p_mask_lst, x_lst, p_lst,  q_lst), name=name, sim_dict=sim_dict)
 
 
     notes = sim_dict['notes']
@@ -323,12 +353,12 @@ def run_simulation(sim_dict):
             break
 
         if i % 100 == 0:
-            save((p_mask_lst, x_lst, p_lst,  q_lst), name='data', sim_dict=sim_dict)
+            save((p_mask_lst, x_lst, p_lst,  q_lst), name=name, sim_dict=sim_dict)
 
     print(f'Simulation done, saved {yield_steps} datapoints')
     print('Took', time() - t1, 'seconds')
 
-    save((p_mask_lst, x_lst, p_lst,  q_lst), name='data', sim_dict=sim_dict)
+    save((p_mask_lst, x_lst, p_lst,  q_lst), name=name, sim_dict=sim_dict)
 
 
     # return_dict = {

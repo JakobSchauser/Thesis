@@ -5,19 +5,21 @@ if __name__ == '__main__':
 
 
     sim_dict = {
-        'output_folder'     : f"size{size}_conc{conc}_{i}",
-        'data'              : (make_random_sphere, [size, conc, 35]), #if tuple 2 long then data generation, if 4 long then data
+        # 'data'              : (make_random_sphere, [size, conc, 35]), #if tuple 2 long then data generation, if 4 long then data
+        'continue'          : "first_new_egg",
+        "name"              : "first_run",
         'dt'                : 0.2,
         'eta'               : 0.2,
+        'init_k'            : 100,
         'yield_steps'       : 2,
         'yield_every'       : 10_000,
         'lambdas'           : [0.3 ,0.3, 0.45, 0.43, 0.12],
         'gamma'             : 5.0,
         'seethru'           : 1,
         'alpha'             : 0,
-        'device'            : 'cuda',
+        'device'            : 'cpu',
         'dtype'             : torch_float,
-        'notes'             : f"size{size}_conc{conc}_{i}",
+        'notes'             : f"Trying the new method",
     }
 
-    run_simulation()
+    run_simulation(sim_dict)

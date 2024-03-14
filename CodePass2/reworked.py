@@ -19,6 +19,11 @@ class InteractionType(enum.IntEnum):
     NON_INTERACTING = 4
 
 
+def printfull(x):
+    torch.set_printoptions(profile="full")
+    print(x) 
+    torch.set_printoptions(profile="default") # reset
+
 
 class Simulation:
     def __init__(self, sim_dict):
@@ -112,17 +117,15 @@ class Simulation:
 
     def inv_make_even_better_egg_pos(self, pos):
         with torch.no_grad():
-            pos2 = pos
+            pos2 = pos.clone()
             xx, yy, zz = pos2[:,0], pos2[:,1], pos2[:,2]
-
+    
             z_add = torch.square(torch.abs(xx/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
-
+    
             z_add = torch.where(xx < 0, z_add, z_add/2.)
-
+    
             pos2[:,2] = zz - z_add
-            # do this not in place
-
-
+            
             x_sub = torch.where(xx < 0, 0, self.scaled_egg_shape[0]/3.*xx/self.scaled_egg_shape[0])
             
             pos2[:,0] = xx + x_sub
@@ -130,15 +133,18 @@ class Simulation:
         return pos2
     
     def egg_BC(self, pos):
-        with torch.no_grad():
-            corrected_pos_vec = self.inv_make_even_better_egg_pos(pos)
-            corrected_pos_vec = corrected_pos_vec / self.scaled_egg_shape[None, :]
-            mag = torch.sum(corrected_pos_vec**2, dim=1)
-            v_add = torch.where(mag > 1.0, (torch.exp(mag*mag - 1) - 1), 0.)
-
-            # make sure the number is not too large
-            v_add = torch.where(v_add > 5., 5., v_add)
+        # with torch.no_grad():
+        corrected_pos_vec = self.inv_make_even_better_egg_pos(pos)
+        corrected_pos_vec = corrected_pos_vec / self.scaled_egg_shape[None, :]
+        mag = torch.sum(corrected_pos_vec**2, dim=1)
             
+        v_add = torch.where(mag > 1.0, (torch.exp(mag*mag - 1) - 1), 0.)
+
+        # make sure the number is not too large
+        v_add = torch.where(v_add > 5., 5., v_add)
+
+        v_add = torch.sum(v_add)
+        
         return v_add 
     
     def potential(self, x, p, q, p_mask, idx, d):
@@ -165,13 +171,13 @@ class Simulation:
         # Calculate potential
         S = self.calculate_interaction(dx, p, q, p_mask, idx)
 
-        bc_contrib = torch.zeros_like(S)
+        # bc_contrib = torch.zeros_like(S)
 
-        # egg_bc = self.egg_BC(x)
+        egg_bc = self.egg_BC(x)
 
         # bc_contrib[:, 0] = egg_bc
 
-        S += bc_contrib
+        S += egg_bc
 
         Vij = z_mask.float() * (torch.exp(-d) - S * torch.exp(-d/5))
         Vij_sum = torch.sum(Vij)      
@@ -266,9 +272,17 @@ class Simulation:
             tstep += 1
             x, p, q, p_mask = self.time_step(x, p, q, p_mask, tstep)
 
+            large_mask = x > 10000
+            if large_mask.any():
+                printfull(x)
+                print("LARGE")
+                break
+            
             nan_mask = torch.isnan(x)
             if nan_mask.any():
                 print("NAN")
+                printfull(x)
+                break
                 
             if tstep % self.yield_every == 0:
                 xx = x.detach().to("cpu").numpy().copy()

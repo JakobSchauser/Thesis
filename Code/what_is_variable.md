@@ -17,4 +17,7 @@ Trying timing
 
 Trying alpha inversely proportional to distance
 
+First or second nearest neighbor or a mix
+
+
 

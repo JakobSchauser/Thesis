@@ -13,7 +13,7 @@ if __name__ == '__main__':
         'init_k'            : 100,
         'yield_steps'       : 2,
         'yield_every'       : 10_000,
-        'lambdas'           : [0.3 ,0.3, 0.45, 0.43, 0.12],
+        'lambdas'           : [0.3,0.3, 0.45, 0.0, 0.0],
         'gamma'             : 5.0,
         'seethru'           : 1,
         'alpha'             : 0,

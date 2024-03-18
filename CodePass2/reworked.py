@@ -11,6 +11,10 @@ import json
 import enum
 
 
+def custom_progress(f : float, a : str = "X", b : str = "x", c : str = "X") -> str:
+    return "".join([a] * int(f*10) + [c] + [b] * int((1-f)*10))
+
+
 class InteractionType(enum.IntEnum):
     ONLY_AB = 0
     STANDARD = 1
@@ -42,7 +46,7 @@ class Simulation:
         self.d = None
         self.idx = None
 
-        self.scaled_egg_shape = np.array([1., 1./3., 1./3.])*60. #TODO: make this a parameter
+        self.scaled_egg_shape = np.array([60., 60./3., 60./3.]) #TODO: make this a parameter
 
     @staticmethod
     def find_potential_neighbours(x, k=100, distance_upper_bound=np.inf, workers=-1):
@@ -90,15 +94,18 @@ class Simulation:
 
         lam = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 4),
                         device=self.device)                                                            # Initializing an empty array for our lambdas
-        lam[interaction_mask == 0] = torch.tensor([l00,0,0,0], device=self.device)                     # Setting lambdas for non polar interaction
-        lam[interaction_mask == 1] = torch.tensor([l01,0,0,0], device=self.device)                     # Setting lambdas for polar-nonpolar interaction
-        lam[interaction_mask == 2] = torch.tensor([0,l1,l2,l3], device=self.device)                    # Setting lambdas for pure polar interaction
-
+        
+        # lam[interaction_mask == 0] = torch.tensor([l00,0,0,0], device=self.device)                     # Setting lambdas for non polar interaction
+        # lam[interaction_mask == 1] = torch.tensor([l01,0,0,0], device=self.device)                     # Setting lambdas for polar-nonpolar interaction
+        # lam[interaction_mask == 2] = torch.tensor([0,l1,l2,l3], device=self.device)                    # Setting lambdas for pure polar interaction
+        lam[:,:] = torch.tensor([0,l1,l2,l3], device=self.device)  
 
         alphas = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1]), 
-                        device=self.device)                                                             # Initializing an empty array for our alphas
-        alphas[interaction_mask == 0] = 0.5                                                             # Setting alphas for non polar interaction
-        alphas[interaction_mask == 1] = 0                                                               # Setting alphas for polar-nonpolar interaction
+                        device=self.device)   # Initializing an empty array for our alphas
+        # alphas[interaction_mask == 0] = 0.5                                                             # Setting alphas for non polar interaction
+        # alphas[interaction_mask == 1] = 0                                                               # Setting alphas for polar-nonpolar interaction
+
+        # printfull(interaction_mask)
 
         pi_tilde = pi - self.alpha*dx
         pj_tilde = pj + self.alpha*dx
@@ -110,27 +117,28 @@ class Simulation:
         S2 = torch.sum(torch.cross(pi, qi, dim=2) * torch.cross(pj, qj, dim=2), dim=2)                        # Calculating S2 (The ABP-PCP part of S).
         S3 = torch.sum(torch.cross(qi, dx, dim=2) * torch.cross(qj, dx, dim=2), dim=2)                        # Calculating S3 (The PCP-position part of S)
 
-        S = lam[:,:,0] + lam[:,:,1] * S1 + lam[:,:,2] * S2 + lam[:,:,3] * S3
+        S = lam[:,:,1] * S1 + lam[:,:,2] * S2 + lam[:,:,3] * S3
 
         return S
     
 
     def inv_make_even_better_egg_pos(self, pos):
-        with torch.no_grad():
-            pos2 = pos.clone()
-            xx, yy, zz = pos2[:,0], pos2[:,1], pos2[:,2]
-    
-            z_add = torch.square(torch.abs(xx/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
-    
-            z_add = torch.where(xx < 0, z_add, z_add/2.)
-    
-            pos2[:,2] = zz - z_add
-            
-            x_sub = torch.where(xx < 0, 0, self.scaled_egg_shape[0]/3.*xx/self.scaled_egg_shape[0])
-            
-            pos2[:,0] = xx + x_sub
+        # with torch.no_grad():
 
-        return pos2
+        return_pos = pos.clone()
+        xx, yy, zz = pos[:,0], pos[:,1], pos[:,2]
+
+        z_add = torch.square(torch.abs(xx/self.scaled_egg_shape[0]))*self.scaled_egg_shape[2]/2
+
+        z_add = torch.where(xx < 0, z_add, z_add/2.)
+
+        return_pos[:,2] -=  z_add
+        
+        x_sub = torch.where(xx < 0, 0, self.scaled_egg_shape[0]/3.*xx/self.scaled_egg_shape[0])
+        
+        return_pos[:,0] += x_sub
+
+        return return_pos
     
     def egg_BC(self, pos):
         # with torch.no_grad():
@@ -141,8 +149,13 @@ class Simulation:
         v_add = torch.where(mag > 1.0, (torch.exp(mag*mag - 1) - 1), 0.)
 
         # make sure the number is not too large
-        v_add = torch.where(v_add > 5., 5., v_add)
 
+        # print(v_add.cpu().detach().numpy())
+        
+        
+        v_add = torch.where(v_add > 10., 10., v_add)
+
+        
         v_add = torch.sum(v_add)
         
         return v_add 
@@ -173,17 +186,19 @@ class Simulation:
 
         # bc_contrib = torch.zeros_like(S)
 
-        egg_bc = self.egg_BC(x)
 
-        # bc_contrib[:, 0] = egg_bc
+        # # bc_contrib[:, 0] = egg_bc
 
-        S += egg_bc
 
         Vij = z_mask.float() * (torch.exp(-d) - S * torch.exp(-d/5))
-        Vij_sum = torch.sum(Vij)      
+
+        
+        bc = self.egg_BC(x)
+        
+        Vij_sum = torch.sum(Vij) + bc 
 
         return Vij_sum, int(m) # TODO print m
-
+        
     def init_simulation(self, x, p, q, p_mask):
         assert len(x) == len(p)
         assert len(q) == len(x)
@@ -238,8 +253,8 @@ class Simulation:
 
         # Normalise p, q
         with torch.no_grad():
-            p[p_mask != 0] /= torch.sqrt(torch.sum(p[p_mask != 0] ** 2, dim=1))[:, None]          # Normalizing p. Only the non-zero polarities are considered.
-            q[p_mask != 0] /= torch.sqrt(torch.sum(q[p_mask != 0] ** 2, dim=1))[:, None]          # Normalizing q. Only the non-zero polarities are considered.
+            p /= torch.sqrt(torch.sum(p ** 2, dim=1))[:, None]          # Normalizing p. Only the non-zero polarities are considered.
+            q /= torch.sqrt(torch.sum(q ** 2, dim=1))[:, None]          # Normalizing q. Only the non-zero polarities are considered.
 
 
         # Calculate potential
@@ -273,15 +288,15 @@ class Simulation:
             x, p, q, p_mask = self.time_step(x, p, q, p_mask, tstep)
 
             large_mask = x > 10000
-            if large_mask.any():
-                printfull(x)
-                print("LARGE")
-                break
+            # if large_mask.any():
+            #     printfull(x)
+            #     print("LARGE")
+            #     # break
             
             nan_mask = torch.isnan(x)
             if nan_mask.any():
-                print("NAN")
                 printfull(x)
+                print("NAN")
                 break
                 
             if tstep % self.yield_every == 0:
@@ -343,12 +358,6 @@ def run_simulation(sim_dict):
         p_mask = np.array(f['properties'])
         
 
-    print("x.shape")
-    print(x.shape)
-    print("p.shape")
-    print(p.shape)
-    print("q.shape")
-    print(q.shape)
 
     sim = Simulation(sim_dict)
     runner = sim.simulation(x, p, q, p_mask)
@@ -371,7 +380,8 @@ def run_simulation(sim_dict):
     
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
-        print(f'Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)')
+        ss = custom_progress(i/yield_steps, "😊  ", "😔  ", "😮  ")
+        print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
 
         x_lst.append(xx)
         p_lst.append(pp)
@@ -386,18 +396,3 @@ def run_simulation(sim_dict):
     print('Took', time() - t1, 'seconds')
 
     save((p_mask_lst, x_lst, p_lst,  q_lst), name=name, sim_dict=sim_dict)
-
-
-    # return_dict = {
-    #             'pot_neigh_lst'      : pot_neigh_lst,
-    #             'true_neigh_lst'     : true_neigh_lst,
-    #             'sort_neigh_lst'     : sort_neigh_lst,
-    #             'prolif_lst'         : prolif_lst,
-    #             'potential_lst'      : potential_lst,
-    #             'backprob_lst'       : backprob_lst,
-    #             'normalize_pol_lst'  : normalize_pol_lst,
-    #             'update_lst'         : update_lst,
-    #             'zero_grad_lst'      : zero_grad_lst,
-    #             'timestep_lst'       : timestep_lst }
-
-    # return return_dict

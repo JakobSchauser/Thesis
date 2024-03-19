@@ -82,7 +82,7 @@ class Simulation:
     def calculate_interaction(self, dx, p, q, p_mask, idx):
         # Making interaction mask
         interaction_mask = p_mask[:,None].expand(p_mask.shape[0], idx.shape[1])#*5 + p_mask[idx]
-        # interaction_mask_b = p_mask[idx]
+        interaction_mask_b = p_mask[idx]
         # Calculate S
         # l00, l01, l1, l2, l3 = self.lambdas
 
@@ -100,7 +100,8 @@ class Simulation:
             lam[interaction_mask == k] = self.lambdas[k]
             alphas[interaction_mask == k] = self.alphas[k]
 
-        # lam[(interaction_mask == 0) * interaction_mask_b == 1] = 0.5*self.lambdas[0]
+        lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = 0.3*self.lambdas[0]
+        lam[(interaction_mask == 1) * (interaction_mask_b == 0)] = 0.3*self.lambdas[0]
             
         angle_dx = dx
         # avg_q = (qi + qj)*0.5

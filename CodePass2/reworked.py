@@ -12,15 +12,15 @@ import enum
 
 
 def custom_progress(f : float, a : str = "X", b : str = "x", c : str = "X") -> str:
-    return "".join([a] * int(f*10) + [c] + [b] * int((1-f)*10))
+    return "".join([a] * int(np.floor(f*10)) + [c] + [b]*(10 - int(np.floor((f*10)))))
 
 
-class InteractionType(enum.IntEnum):
-    ONLY_AB = 0
-    STANDARD = 1
-    ANGLE = 2
-    ANGLE_ISOTROPIC = 3
-    NON_INTERACTING = 4
+# class InteractionType(enum.IntEnum):
+#     ONLY_AB = 0
+#     STANDARD = 1
+#     ANGLE = 2
+#     ANGLE_ISOTROPIC = 3
+#     NON_INTERACTING = 4
 
 
 def printfull(x):
@@ -38,10 +38,9 @@ class Simulation:
         self.dt = sim_dict['dt']
         self.sqrt_dt = np.sqrt(self.dt)
         self.eta = sim_dict['eta']
-        self.lambdas = sim_dict['lambdas']
+        self.interaction_data = sim_dict['interaction_data']
         self.gamma = sim_dict['gamma']
         self.seethru = sim_dict['seethru']
-        self.alpha = sim_dict['alpha']
         self.yield_every  = sim_dict['yield_every']
         self.d = None
         self.idx = None
@@ -82,33 +81,35 @@ class Simulation:
     
     def calculate_interaction(self, dx, p, q, p_mask, idx):
         # Making interaction mask
-        interaction_mask = p_mask[:,None].expand(p_mask.shape[0], idx.shape[1]) + p_mask[idx]
-
+        interaction_mask = p_mask[:,None].expand(p_mask.shape[0], idx.shape[1])#*5 + p_mask[idx]
+        # interaction_mask_b = p_mask[idx]
         # Calculate S
-        l00, l01, l1, l2, l3 = self.lambdas
+        # l00, l01, l1, l2, l3 = self.lambdas
 
         pi = p[:, None, :].expand(p.shape[0], idx.shape[1], 3)
         pj = p[idx]
         qi = q[:, None, :].expand(q.shape[0], idx.shape[1], 3)
         qj = q[idx]
 
-        lam = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 4),
+        lam = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 3),
                         device=self.device)                                                            # Initializing an empty array for our lambdas
-        
-        # lam[interaction_mask == 0] = torch.tensor([l00,0,0,0], device=self.device)                     # Setting lambdas for non polar interaction
-        # lam[interaction_mask == 1] = torch.tensor([l01,0,0,0], device=self.device)                     # Setting lambdas for polar-nonpolar interaction
-        # lam[interaction_mask == 2] = torch.tensor([0,l1,l2,l3], device=self.device)                    # Setting lambdas for pure polar interaction
-        lam[:,:] = torch.tensor([0,l1,l2,l3], device=self.device)  
-
-        alphas = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1]), 
+        alphas = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 3), 
                         device=self.device)   # Initializing an empty array for our alphas
-        # alphas[interaction_mask == 0] = 0.5                                                             # Setting alphas for non polar interaction
-        # alphas[interaction_mask == 1] = 0                                                               # Setting alphas for polar-nonpolar interaction
 
-        # printfull(interaction_mask)
+        for k in range(len(self.interaction_data)):
+            lam[interaction_mask == k] = self.lambdas[k]
+            alphas[interaction_mask == k] = self.alphas[k]
 
-        pi_tilde = pi - self.alpha*dx
-        pj_tilde = pj + self.alpha*dx
+        # lam[(interaction_mask == 0) * interaction_mask_b == 1] = 0.5*self.lambdas[0]
+            
+        angle_dx = dx
+        # avg_q = (qi + qj)*0.5
+        # ts = (avg_q*dx).sum(axis = 1)
+
+        # angle_dx = torch.where(interaction_mask[:,:,None] == 2, avg_q*ts[:,None,:], dx)
+        
+        pi_tilde = pi + alphas*angle_dx
+        pj_tilde = pj - alphas*angle_dx
 
         pi_tilde = pi_tilde/torch.sqrt(torch.sum(pi_tilde ** 2, dim=2))[:, :, None]                           # The p-tildes are normalized
         pj_tilde = pj_tilde/torch.sqrt(torch.sum(pj_tilde ** 2, dim=2))[:, :, None]
@@ -117,7 +118,7 @@ class Simulation:
         S2 = torch.sum(torch.cross(pi, qi, dim=2) * torch.cross(pj, qj, dim=2), dim=2)                        # Calculating S2 (The ABP-PCP part of S).
         S3 = torch.sum(torch.cross(qi, dx, dim=2) * torch.cross(qj, dx, dim=2), dim=2)                        # Calculating S3 (The PCP-position part of S)
 
-        S = lam[:,:,1] * S1 + lam[:,:,2] * S2 + lam[:,:,3] * S3
+        S = lam[:,:,0] * S1 + lam[:,:,1] * S2 + lam[:,:,2] * S3
 
         return S
     
@@ -146,14 +147,14 @@ class Simulation:
         corrected_pos_vec = corrected_pos_vec / self.scaled_egg_shape[None, :]
         mag = torch.sum(corrected_pos_vec**2, dim=1)
             
-        v_add = torch.where(mag > 1.0, (torch.exp(mag*mag - 1) - 1), 0.)
+        v_add = torch.where(mag > 1.0, (torch.exp(mag*mag - 1) - 1)*10., 0.)
 
         # make sure the number is not too large
 
         # print(v_add.cpu().detach().numpy())
         
         
-        v_add = torch.where(v_add > 10., 10., v_add)
+        v_add = torch.where(v_add > 50., 50., v_add)
 
         
         v_add = torch.sum(v_add)
@@ -213,6 +214,13 @@ class Simulation:
         self.scaled_egg_shape = torch.tensor(self.scaled_egg_shape, dtype=self.dtype, device=self.device)
 
 
+        self.lambdas = []
+
+        for type in self.interaction_data:
+            self.lambdas.append(torch.tensor(type[:3], device=self.device))
+
+        self.alphas = [torch.tensor(type[3], device=self.device) for type in self.interaction_data]
+        
         return x, p, q, p_mask
 
     def update_k(self, true_neighbour_max):
@@ -380,7 +388,7 @@ def run_simulation(sim_dict):
     
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
-        ss = custom_progress(i/yield_steps, "😊  ", "😔  ", "😮  ")
+        ss = custom_progress(i/yield_steps, "X", "x", "X")
         print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
 
         x_lst.append(xx)

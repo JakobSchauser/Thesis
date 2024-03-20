@@ -11,8 +11,8 @@ import json
 import enum
 
 
-def custom_progress(f : float, a : str = "X", b : str = "x", c : str = "X") -> str:
-    return "".join([a] * int(np.floor(f*10)) + [c] + [b]*(10 - int(np.floor((f*10)))))
+def custom_progress(f : float, a : str = "X", b : str = "x", c : str = None) -> str:
+    return "".join([a] * int(np.floor(f*10)) + [c if c is not None else a] + [b]*(10 - int(np.floor((f*10)))))
 
 
 # class InteractionType(enum.IntEnum):
@@ -79,7 +79,7 @@ class Simulation:
 
     
     
-    def calculate_interaction(self, dx, p, q, p_mask, idx):
+    def calculate_interaction(self, dx, p, q, p_mask, idx, d):
         # Making interaction mask
         interaction_mask = p_mask[:,None].expand(p_mask.shape[0], idx.shape[1])#*5 + p_mask[idx]
         interaction_mask_b = p_mask[idx]
@@ -102,12 +102,22 @@ class Simulation:
 
         lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = 0.3*self.lambdas[0]
         lam[(interaction_mask == 1) * (interaction_mask_b == 0)] = 0.3*self.lambdas[0]
-            
-        angle_dx = dx
-        # avg_q = (qi + qj)*0.5
-        # ts = (avg_q*dx).sum(axis = 1)
 
-        # angle_dx = torch.where(interaction_mask[:,:,None] == 2, avg_q*ts[:,None,:], dx)
+        lam[(interaction_mask == 1) * (interaction_mask_b == 2)] = 0.5*self.lambdas[1]
+        lam[(interaction_mask == 2) * (interaction_mask_b == 1)] = 0.5*self.lambdas[2]
+
+        lam[(interaction_mask == 0) * (interaction_mask_b == 2)] = 0.5*self.lambdas[0]
+        lam[(interaction_mask == 2) * (interaction_mask_b == 0)] = 0.5*self.lambdas[2]
+        
+        
+        alphas[(interaction_mask_b == 0)] = self.alphas[0]
+        alphas[(interaction_mask_b == 1)] = self.alphas[1]
+            
+        # angle_dx = dx
+        avg_q = (qi + qj)*0.5
+        ts = (avg_q*dx).sum(axis = 2)
+
+        angle_dx = torch.where(interaction_mask[:,:,None] == 2, avg_q*ts[:,:,None]*d[:,:,None], dx)
         
         pi_tilde = pi + alphas*angle_dx
         pj_tilde = pj - alphas*angle_dx
@@ -184,7 +194,7 @@ class Simulation:
 
 
         # Calculate potential
-        S = self.calculate_interaction(dx, p, q, p_mask, idx)
+        S = self.calculate_interaction(dx, p, q, p_mask, idx, d)
 
         # bc_contrib = torch.zeros_like(S)
 
@@ -364,7 +374,10 @@ def run_simulation(sim_dict):
         x = f['x'][-1]
         p = f['p'][-1]
         q = f['q'][-1]
-        p_mask = np.array(f['properties'])
+        if len(f['properties']) == 1:
+            p_mask = np.array(f['properties'][0])
+        else:
+            p_mask = np.array(f['properties'])
         
 
 
@@ -389,7 +402,7 @@ def run_simulation(sim_dict):
     
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
-        ss = custom_progress(i/yield_steps, "X", "x", "X")
+        ss = custom_progress(i/yield_steps, "🤮 ", "🤒 ", "🤢 ")
         print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
 
         x_lst.append(xx)

@@ -53,7 +53,7 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
         scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
         scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
-        iterator += 1 
+        iterator += 10
         if iterator >= len(xs):
             iterator = len(xs)-1
     timer = app.Timer(interval=interval)
@@ -78,14 +78,13 @@ if __name__ == '__main__':
         # loaded_properties = None
 
         with h5py.File("runs/" + sys.argv[1] + ".hdf5", 'r') as f:
-            positions = f['x'][:]
+            positions = f['x'][::1]
             loaded_properties = None
             if 'properties' in f:
                 loaded_properties = f['properties'][:]
 
-            ps = f['p'][:]
-            qs = f['q'][:]
-
+            ps = f['p'][::1]
+            qs = f['q'][::1]
             
         print(loaded_properties)
         

@@ -45,7 +45,8 @@ class Simulation:
         self.d = None
         self.idx = None
 
-        self.scaled_egg_shape = np.array([60., 60./3., 60./3.]) #TODO: make this a parameter
+        # self.scaled_egg_shape = np.array([60., 60./3., 60./3.]) #TODO: make this a parameter
+        self.scaled_egg_shape = np.array([80., 80./3., 80./3.])
 
     @staticmethod
     def find_potential_neighbours(x, k=100, distance_upper_bound=np.inf, workers=-1):
@@ -91,7 +92,7 @@ class Simulation:
         qi = q[:, None, :].expand(q.shape[0], idx.shape[1], 3)
         qj = q[idx]
 
-        lam = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 3),
+        lam = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 4),
                         device=self.device)                                                            # Initializing an empty array for our lambdas
         alphas = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 3), 
                         device=self.device)   # Initializing an empty array for our alphas
@@ -100,24 +101,63 @@ class Simulation:
             lam[interaction_mask == k] = self.lambdas[k]
             alphas[interaction_mask == k] = self.alphas[k]
 
-        lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = 0.3*self.lambdas[0]
-        lam[(interaction_mask == 1) * (interaction_mask_b == 0)] = 0.3*self.lambdas[0]
+        ll = 0.5*self.lambdas[0]
+        ll[2] = 0
+        
+        lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = ll
+        lam[(interaction_mask == 1) * (interaction_mask_b == 0)] = ll
 
         lam[(interaction_mask == 1) * (interaction_mask_b == 2)] = 0.5*self.lambdas[1]
         lam[(interaction_mask == 2) * (interaction_mask_b == 1)] = 0.5*self.lambdas[2]
 
         lam[(interaction_mask == 0) * (interaction_mask_b == 2)] = 0.5*self.lambdas[0]
         lam[(interaction_mask == 2) * (interaction_mask_b == 0)] = 0.5*self.lambdas[2]
+
+        lam[(interaction_mask == 0) * (interaction_mask_b == 5)] = 0.9*self.lambdas[0]
+        lam[(interaction_mask == 5) * (interaction_mask_b == 0)] = 0.9*self.lambdas[5]
+
+        lam[(interaction_mask == 1) * (interaction_mask_b == 5)] = 0.5*self.lambdas[1]
+        lam[(interaction_mask == 5) * (interaction_mask_b == 1)] = 0.5*self.lambdas[5]
+
+        lam[(interaction_mask == 2) * (interaction_mask_b == 5)] = 0.5*self.lambdas[2]
+        lam[(interaction_mask == 5) * (interaction_mask_b == 2)] = 0.5*self.lambdas[5]
         
+        lam[(interaction_mask == 0) * (interaction_mask_b == 4)] = 0.99*self.lambdas[0]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 0)] = 0.99*self.lambdas[4]
         
-        alphas[(interaction_mask_b == 0)] = self.alphas[0]
-        alphas[(interaction_mask_b == 1)] = self.alphas[1]
+        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.5*self.lambdas[1]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.5*self.lambdas[4]
+
+        lam[(interaction_mask == 0) * (interaction_mask_b == 3)] = 0.3*self.lambdas[0]
+        lam[(interaction_mask == 3) * (interaction_mask_b == 0)] = 0.3*self.lambdas[0]
+
+        lam[(interaction_mask == 1) * (interaction_mask_b == 3)] = 0.7*self.lambdas[1]
+        lam[(interaction_mask == 3) * (interaction_mask_b == 1)] = 0.7*self.lambdas[1]
+
+        lam[(interaction_mask == 4) * (interaction_mask_b == 3)] = 0.8*self.lambdas[4]
+        lam[(interaction_mask == 3) * (interaction_mask_b == 4)] = 0.8*self.lambdas[3]
+        
+        lam[(interaction_mask == 2) * (interaction_mask_b == 4)] = 0.5*self.lambdas[2]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 2)] = 0.5*self.lambdas[4]
+
+
+        alphas[(interaction_mask == 0)*(interaction_mask_b == 4)] = -self.alphas[4]
+        alphas[(interaction_mask == 0)*(interaction_mask_b == 4)] = -self.alphas[4]
+
+        
             
         # angle_dx = dx
         avg_q = (qi + qj)*0.5
         ts = (avg_q*dx).sum(axis = 2)
 
-        angle_dx = torch.where(interaction_mask[:,:,None] == 2, avg_q*ts[:,:,None]*d[:,:,None], dx)
+        avg_p = (pi+pj)*0.5
+        perps = torch.cross(avg_q, avg_p, dim=2)
+        ts2 = (perps*dx).sum(axis = 2)
+
+        angle_dx = torch.where(interaction_mask[:,:,None] == 2, avg_q*ts[:,:,None], dx)
+        angle_dx = torch.where(interaction_mask[:,:,None] == 5, perps*ts2[:,:,None], angle_dx)
+
+        angle_dx = angle_dx*d[:,:,None]
         
         pi_tilde = pi + alphas*angle_dx
         pj_tilde = pj - alphas*angle_dx
@@ -125,11 +165,16 @@ class Simulation:
         pi_tilde = pi_tilde/torch.sqrt(torch.sum(pi_tilde ** 2, dim=2))[:, :, None]                           # The p-tildes are normalized
         pj_tilde = pj_tilde/torch.sqrt(torch.sum(pj_tilde ** 2, dim=2))[:, :, None]
 
+        # S0 = (d - 2.)/10.
         S1 = torch.sum(torch.cross(pj_tilde, dx, dim=2) * torch.cross(pi_tilde, dx, dim=2), dim=2)            # Calculating S1 (The ABP-position part of S). Scalar for each particle-interaction. Meaning we get array of size (n, m) , m being the max number of nearest neighbors for a particle
         S2 = torch.sum(torch.cross(pi, qi, dim=2) * torch.cross(pj, qj, dim=2), dim=2)                        # Calculating S2 (The ABP-PCP part of S).
         S3 = torch.sum(torch.cross(qi, dx, dim=2) * torch.cross(qj, dx, dim=2), dim=2)                        # Calculating S3 (The PCP-position part of S)
 
-        S = lam[:,:,0] * S1 + lam[:,:,1] * S2 + lam[:,:,2] * S3
+        # msk = torch.sum(pj_tilde * pi_tilde, dim = 2) < -0.0
+        # S1[msk] = 0.
+        
+        
+        S = lam[:,:,1] * S1 + lam[:,:,2] * S2 + lam[:,:,3] * S3
 
         return S
     
@@ -212,6 +257,7 @@ class Simulation:
         return Vij_sum, int(m) # TODO print m
         
     def init_simulation(self, x, p, q, p_mask):
+        print(p.shape, x.shape)
         assert len(x) == len(p)
         assert len(q) == len(x)
         assert len(p_mask) == len(x)
@@ -228,9 +274,9 @@ class Simulation:
         self.lambdas = []
 
         for type in self.interaction_data:
-            self.lambdas.append(torch.tensor(type[:3], device=self.device))
+            self.lambdas.append(torch.tensor(type[:4], device=self.device))
 
-        self.alphas = [torch.tensor(type[3], device=self.device) for type in self.interaction_data]
+        self.alphas = [torch.tensor(type[4], device=self.device) for type in self.interaction_data]
         
         return x, p, q, p_mask
 
@@ -371,9 +417,15 @@ def run_simulation(sim_dict):
     assert continue_from + ".hdf5" in os.listdir('runs'), 'continue_from must be a valid run in /runs/'
     
     with h5py.File("runs/"+continue_from+".hdf5", "r") as f:
-        x = f['x'][-1]
-        p = f['p'][-1]
-        q = f['q'][-1]
+        if len(f['x'][:].shape) > 2:
+            x = f['x'][-1]
+            p = f['p'][-1]
+            q = f['q'][-1]
+        else:
+            x = f['x'][:]
+            p = f['p'][:]
+            q = f['q'][:]
+            
         if len(f['properties']) == 1:
             p_mask = np.array(f['properties'][0])
         else:
@@ -389,7 +441,17 @@ def run_simulation(sim_dict):
     q_lst = [q]
     p_mask_lst = [p_mask]
 
-
+    print("running "+ name)
+    with h5py.File("runs/"+name+".hdf5", "w") as f:
+        if "x" in f:
+            del f["x"]
+        if "p" in f:
+            del f["p"]
+        if "q" in f:
+            del f["q"]
+        if "properties" in f:
+            del f["properties"]
+    
     save((p_mask_lst, x_lst, p_lst,  q_lst), name=name, sim_dict=sim_dict)
 
 
@@ -402,7 +464,7 @@ def run_simulation(sim_dict):
     
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
-        ss = custom_progress(i/yield_steps, "🤮 ", "🤒 ", "🤢 ")
+        ss = custom_progress(i/yield_steps, "🐥 ", "🥚 ", "🐣 ")
         print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
 
         x_lst.append(xx)

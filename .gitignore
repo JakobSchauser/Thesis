@@ -1,2 +1,7 @@
 *.zip
 Code/runs/*
+*.mp4
+3d/*
+Articles/*
+*.hdf5
+DeconstructingGastrulation-Data/Data analysis/Data analysis/*

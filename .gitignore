@@ -4,4 +4,6 @@ Code/runs/*
 3d/*
 Articles/*
 *.hdf5
+*.h5
+*.mat
 DeconstructingGastrulation-Data/Data analysis/Data analysis/*

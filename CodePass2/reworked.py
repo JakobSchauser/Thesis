@@ -101,7 +101,7 @@ class Simulation:
             lam[interaction_mask == k] = self.lambdas[k]
             alphas[interaction_mask == k] = self.alphas[k]
 
-        ll = 0.5*self.lambdas[0]
+        ll = 0.35*self.lambdas[0]
         ll[2] = 0
         
         lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = ll
@@ -113,8 +113,8 @@ class Simulation:
         lam[(interaction_mask == 0) * (interaction_mask_b == 2)] = 0.5*self.lambdas[0]
         lam[(interaction_mask == 2) * (interaction_mask_b == 0)] = 0.5*self.lambdas[2]
 
-        lam[(interaction_mask == 0) * (interaction_mask_b == 5)] = 0.9*self.lambdas[0]
-        lam[(interaction_mask == 5) * (interaction_mask_b == 0)] = 0.9*self.lambdas[5]
+        lam[(interaction_mask == 0) * (interaction_mask_b == 5)] = 0.85*self.lambdas[0]
+        lam[(interaction_mask == 5) * (interaction_mask_b == 0)] = 0.85*self.lambdas[5]
 
         lam[(interaction_mask == 1) * (interaction_mask_b == 5)] = 0.5*self.lambdas[1]
         lam[(interaction_mask == 5) * (interaction_mask_b == 1)] = 0.5*self.lambdas[5]
@@ -122,20 +122,20 @@ class Simulation:
         lam[(interaction_mask == 2) * (interaction_mask_b == 5)] = 0.5*self.lambdas[2]
         lam[(interaction_mask == 5) * (interaction_mask_b == 2)] = 0.5*self.lambdas[5]
         
-        lam[(interaction_mask == 0) * (interaction_mask_b == 4)] = 0.99*self.lambdas[0]
-        lam[(interaction_mask == 4) * (interaction_mask_b == 0)] = 0.99*self.lambdas[4]
+        lam[(interaction_mask == 0) * (interaction_mask_b == 4)] = 0.85*self.lambdas[0]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 0)] = 0.85*self.lambdas[4]
         
-        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.5*self.lambdas[1]
-        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.5*self.lambdas[4]
+        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.85*self.lambdas[1]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.85*self.lambdas[4]
 
         lam[(interaction_mask == 0) * (interaction_mask_b == 3)] = 0.3*self.lambdas[0]
         lam[(interaction_mask == 3) * (interaction_mask_b == 0)] = 0.3*self.lambdas[0]
 
-        lam[(interaction_mask == 1) * (interaction_mask_b == 3)] = 0.7*self.lambdas[1]
-        lam[(interaction_mask == 3) * (interaction_mask_b == 1)] = 0.7*self.lambdas[1]
+        lam[(interaction_mask == 1) * (interaction_mask_b == 3)] = 0.8*self.lambdas[1]
+        lam[(interaction_mask == 3) * (interaction_mask_b == 1)] = 0.8*self.lambdas[1]
 
-        lam[(interaction_mask == 4) * (interaction_mask_b == 3)] = 0.8*self.lambdas[4]
-        lam[(interaction_mask == 3) * (interaction_mask_b == 4)] = 0.8*self.lambdas[3]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 3)] = 0.9*self.lambdas[4]
+        lam[(interaction_mask == 3) * (interaction_mask_b == 4)] = 0.4*self.lambdas[3]
         
         lam[(interaction_mask == 2) * (interaction_mask_b == 4)] = 0.5*self.lambdas[2]
         lam[(interaction_mask == 4) * (interaction_mask_b == 2)] = 0.5*self.lambdas[4]
@@ -156,6 +156,7 @@ class Simulation:
 
         angle_dx = torch.where(interaction_mask[:,:,None] == 2, avg_q*ts[:,:,None], dx)
         angle_dx = torch.where(interaction_mask[:,:,None] == 5, perps*ts2[:,:,None], angle_dx)
+        # angle_dx = torch.where(interaction_mask[:,:,None] == 6, perps*ts2[:,:,None], angle_dx)
 
         angle_dx = angle_dx*d[:,:,None]
         
@@ -398,6 +399,45 @@ def save(data_tuple, name, sim_dict):
 
             # f.attrs.update(sim_dict)
 
+def genetic_step(sim_dict, genetics):
+    continue_from = sim_dict.pop('continue')
+    yield_steps, yield_every = sim_dict['yield_steps'], sim_dict['yield_every']
+
+    name = sim_dict.pop('name')
+
+    assert continue_from + ".hdf5" in os.listdir('runs'), 'continue_from must be a valid run in /runs/'
+    
+    with h5py.File("runs/"+continue_from+".hdf5", "r") as f:
+        if len(f['x'][:].shape) > 2:
+            x = f['x'][-1]
+            p = f['p'][-1]
+            q = f['q'][-1]
+        else:
+            x = f['x'][:]
+            p = f['p'][:]
+            q = f['q'][:]
+            
+
+    start_x = x.copy()
+
+    p_mask = genetics
+
+    sim = Simulation(sim_dict)
+    runner = sim.simulation(x, p, q, p_mask)
+
+
+    i = 0
+    t1 = time()
+    for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
+        i += 1
+        ss = custom_progress(i/yield_steps, "🌻 ", "🌰 ", "🌱 ")
+        print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
+
+    print(f'Simulation done')
+    print('Took', time() - t1, 'seconds')
+
+    return start_x, x
+
 def run_simulation(sim_dict):
     # Make the simulation runner object:
     continue_from = sim_dict.pop('continue')
@@ -464,7 +504,7 @@ def run_simulation(sim_dict):
     
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
-        ss = custom_progress(i/yield_steps, "🐥 ", "🥚 ", "🐣 ")
+        ss = custom_progress(i/yield_steps, "🌻 ", "🌰 ", "🌱 ")
         print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
 
         x_lst.append(xx)

@@ -24,7 +24,7 @@ def make_videos(filename:str, interval :int):
     has_energies = False
 
     with h5py.File('runs/' + filename + '.hdf5', 'r') as f:
-        dat = f['x'][::10]
+        dat = f['x'][::5]
         properties = f['properties'][:][0]
 
     video_name = filename
@@ -204,7 +204,7 @@ def make_videos(filename:str, interval :int):
         # plot white dots with black outlines
         ax.scatter(x[y > 0], y[y > 0], z[y > 0]-dists/2, s=size,       c='w', edgecolors='k')
 
-        ax.scatter(y[x > 0], x[x > 0], z[x > 0]+dists/2, s=size,       c='w', edgecolors='k')
+        ax.scatter(y[x > 10], x[x > 10], z[x > 10]+dists/2, s=size,       c='w', edgecolors='k')
 
         print(i/positions.shape[0], end='\r')
 

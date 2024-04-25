@@ -8,7 +8,52 @@ from vispy.visuals.transforms import STTransform
 import os
 import h5py
 
+
 iterator = 0
+
+cuts =   [[[ -3,  32],
+   [ 44 ,  7],
+   [ 35 , 53],],
+
+  [[ 57 ,  4],
+   [ 50 , 63],
+   [ 65 , 42],],
+
+  [[ -7 , 95],
+   [ 48  ,53],
+   [ 54 , 46],],]
+
+cuts = np.array(cuts)
+
+def from_pos_to_perc(poss):
+    xx = poss[-1][:,0]
+    yy = poss[-1][:,1]
+    zz = poss[-1][:,2]
+
+    xx = (xx - xx.min())/(xx.max() - xx.min())*100
+    yy = (yy - yy.min())/(yy.max() - yy.min())*100
+    zz = (zz - zz.min())/(zz.max() - zz.min())*100
+
+    return np.array([xx, yy, zz]).T
+
+
+def get_genetics(cuts, percs):
+    genetics = np.zeros(5000)
+    xx,yy,zz = percs.T
+
+    types = [1,2,4]
+
+    for i in range(3):
+        xlow, xhigh =  cuts[i,0,0],  cuts[i,0,0] + cuts[i,0,1]
+        ylow, yhigh =  cuts[i,1,0],  cuts[i,1,0] + cuts[i,1,1]
+        zlow, zhigh =  cuts[i,2,0],  cuts[i,2,0] + cuts[i,2,1]
+        
+        cut = (xx > xlow) * (xx < xhigh) * (yy > ylow) * (yy < yhigh) * (zz >zlow) * (zz < zhigh)
+        genetics[cut] = types[i]
+    
+    return genetics
+
+
 
 def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
                      frame_every = 1, interval=1/30, save=True ):
@@ -27,6 +72,8 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
     colors = [(1,0,0) for i in range(len(xs[0]))]
 
     different_colors = [(0,1,0), (1,0,0), (0,0,1), (1,1,0), (0,1,1), (1,0,1), (0,0,0)]
+
+    loaded_properties = get_genetics(cuts, from_pos_to_perc(xs))
 
     if loaded_properties is not None:
         colors = [different_colors[int(l)] for l in loaded_properties]
@@ -73,21 +120,15 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
 if __name__ == '__main__':
     # get command line argument
 
-    if len(sys.argv) > 1:
-        # loaded_cells = np.load(sys.argv[1])
-        # loaded_properties = None
+    with h5py.File("stas_one_stripe.hdf5", 'r') as f:
+        positions = f['x'][::1]
+        loaded_properties = None
+        if 'properties' in f:
+            loaded_properties = f['properties'][:]
 
-        with h5py.File("runs/" + sys.argv[1] + ".hdf5", 'r') as f:
-            positions = f['x'][::1]
-            loaded_properties = None
-            if 'properties' in f:
-                loaded_properties = f['properties'][:]
-
-            ps = f['p'][::1]
-            qs = f['q'][::1]
-            
-        print(loaded_properties)
+        ps = f['p'][::1]
+        qs = f['q'][::1]
         
-        interactive_animate(positions, ps, qs, loaded_properties[0])
-    else:
-        print('No file specified')
+    print(loaded_properties)
+    
+    interactive_animate(positions, ps, qs, loaded_properties[0])

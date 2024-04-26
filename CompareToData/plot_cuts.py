@@ -11,18 +11,13 @@ import h5py
 
 iterator = 0
 
-cuts =   [[[ -3,  32],
-   [ 44 ,  7],
-   [ 35 , 53],],
+cuts =   [[[63, 60],
+  [59,  0],
+  [18 , 9],],
 
-  [[ 57 ,  4],
-   [ 50 , 63],
-   [ 65 , 42],],
-
-  [[ -7 , 95],
-   [ 48  ,53],
-   [ 54 , 46],],]
-
+ [[43, 52],
+  [71, 47],
+  [61, 40],],]
 cuts = np.array(cuts)
 
 def from_pos_to_perc(poss):
@@ -43,7 +38,7 @@ def get_genetics(cuts, percs):
 
     types = [1,2,4]
 
-    for i in range(3):
+    for i in range(len(cuts)):
         xlow, xhigh =  cuts[i,0,0],  cuts[i,0,0] + cuts[i,0,1]
         ylow, yhigh =  cuts[i,1,0],  cuts[i,1,0] + cuts[i,1,1]
         zlow, zhigh =  cuts[i,2,0],  cuts[i,2,0] + cuts[i,2,1]

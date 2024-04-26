@@ -125,8 +125,8 @@ class Simulation:
         lam[(interaction_mask == 0) * (interaction_mask_b == 4)] = 0.85*self.lambdas[0]
         lam[(interaction_mask == 4) * (interaction_mask_b == 0)] = 0.85*self.lambdas[4]
         
-        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.85*self.lambdas[1]
-        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.85*self.lambdas[4]
+        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.95*self.lambdas[1]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.95*self.lambdas[4]
 
         lam[(interaction_mask == 0) * (interaction_mask_b == 3)] = 0.3*self.lambdas[0]
         lam[(interaction_mask == 3) * (interaction_mask_b == 0)] = 0.3*self.lambdas[0]

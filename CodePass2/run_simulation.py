@@ -2,26 +2,26 @@ from reworked import run_simulation
 from torch import float as torch_float
 
 l0 = 0.
-l1, l2, l3 = 0.6, 0.1, 0.07
+l1, l2, l3 = 0.55, 0.1, 0.095
 alpha = 0.2
 
 
 
-
-interaction_data = [[l0, l1*0.6, l2, 0., 0.],        # green
-                    [l0, l1*0.7-l3, l2, l3, 0.],        # red
-                    [0.15, l1-0.05*l3, l2, 0.5*l3, alpha*0.75],     # blue  changed from 0.7
-                    [l0, l1*2., l2, 0., -alpha*0.9],        # yellow 
-                    [0., l1*1.2, l2, 0., alpha*0.6],     # baby blue
-                    [l0, l1*2., l2, 0., alpha*1.], # pink
+                            
+interaction_data = [[l0, l1*1., l2, 0., 0.],        # green
+                    [l0, l1*0.55, l2, l3, 0.],        # red
+                    [0.2, l1, l2, 0.3*l3, alpha],     # blue  
+                    [l0, l1*1.7, l2, 0., alpha*0.0],        # yellow 
+                    [0., l1*1.2, l2, 0., alpha*0.8],     # baby blue from 0.8
+                    [0., l1*1.5, l2, 0., alpha*0.8], # pink
                     # [l0, l1*1., l2, 0., -alpha*0.9] # black
                     ]
 
 
-# l1, l2, l3 = 1.0, 0.0, 0.0
+# l1, l2, l3 = 0.7, 0.1, 0.2
 
 # interaction_data = [[l0, l1, l2, 0., 0.],        # green
-#                     [l0, l1, l2, 0., 0.],
+#                     [l0, l1, l2, l3, 0.],
 #                     [l0, l1, l2, 0., 0.],
 #                     [l0, l1, l2, 0., 0.],
 #                     [l0, l1, l2, 0., 0.],
@@ -41,13 +41,13 @@ if __name__ == '__main__':
     sim_dict = {
         # 'data'              : (make_random_sphere, [size, conc, 35]), #if tuple 2 long then data generation, if 4 long then data
         # 'continue'          : "random_baby_2",
-        'continue'          : "stas_no_constrict_under_pole",
-        "name"              : "stas_comments_4",
+        'continue'          : "stas_one_stripe",
+        "name"              : "inverse_anisotropy",
         'dt'                : 0.1,
         'eta'               : 0.002,
         'init_k'            : 100,
         'alpha'             : 0,
-        'yield_steps'       : 1000,
+        'yield_steps'       : 2000,
         'yield_every'       : 50,
         'interaction_data'  : interaction_data,
         'gamma'             : 5.0,

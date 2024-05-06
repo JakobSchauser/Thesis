@@ -101,7 +101,7 @@ class Simulation:
             lam[interaction_mask == k] = self.lambdas[k]
             alphas[interaction_mask == k] = self.alphas[k]
 
-        ll = 0.35*self.lambdas[0]
+        ll = 0.5*self.lambdas[0] # used to be 0.5
         ll[2] = 0
         
         lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = ll
@@ -113,8 +113,8 @@ class Simulation:
         lam[(interaction_mask == 0) * (interaction_mask_b == 2)] = 0.5*self.lambdas[0]
         lam[(interaction_mask == 2) * (interaction_mask_b == 0)] = 0.5*self.lambdas[2]
 
-        lam[(interaction_mask == 0) * (interaction_mask_b == 5)] = 0.85*self.lambdas[0]
-        lam[(interaction_mask == 5) * (interaction_mask_b == 0)] = 0.85*self.lambdas[5]
+        lam[(interaction_mask == 0) * (interaction_mask_b == 5)] = 0.5*self.lambdas[0]
+        lam[(interaction_mask == 5) * (interaction_mask_b == 0)] = 0.5*self.lambdas[5]
 
         lam[(interaction_mask == 1) * (interaction_mask_b == 5)] = 0.5*self.lambdas[1]
         lam[(interaction_mask == 5) * (interaction_mask_b == 1)] = 0.5*self.lambdas[5]
@@ -122,14 +122,14 @@ class Simulation:
         lam[(interaction_mask == 2) * (interaction_mask_b == 5)] = 0.5*self.lambdas[2]
         lam[(interaction_mask == 5) * (interaction_mask_b == 2)] = 0.5*self.lambdas[5]
         
-        lam[(interaction_mask == 0) * (interaction_mask_b == 4)] = 0.85*self.lambdas[0]
-        lam[(interaction_mask == 4) * (interaction_mask_b == 0)] = 0.85*self.lambdas[4]
+        lam[(interaction_mask == 0) * (interaction_mask_b == 4)] = 0.95*self.lambdas[0]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 0)] = 0.95*self.lambdas[4]
         
-        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.95*self.lambdas[1]
-        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.95*self.lambdas[4]
+        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.8*self.lambdas[1]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.8*self.lambdas[4]
 
-        lam[(interaction_mask == 0) * (interaction_mask_b == 3)] = 0.3*self.lambdas[0]
-        lam[(interaction_mask == 3) * (interaction_mask_b == 0)] = 0.3*self.lambdas[0]
+        lam[(interaction_mask == 0) * (interaction_mask_b == 3)] = 0.6*self.lambdas[0]
+        lam[(interaction_mask == 3) * (interaction_mask_b == 0)] = 0.6*self.lambdas[0]
 
         lam[(interaction_mask == 1) * (interaction_mask_b == 3)] = 0.8*self.lambdas[1]
         lam[(interaction_mask == 3) * (interaction_mask_b == 1)] = 0.8*self.lambdas[1]
@@ -177,7 +177,7 @@ class Simulation:
         
         S = lam[:,:,1] * S1 + lam[:,:,2] * S2 + lam[:,:,3] * S3
 
-        return S, ts2
+        return S, ts, ts2
     
 
     def inv_make_even_better_egg_pos(self, pos):
@@ -240,17 +240,17 @@ class Simulation:
 
 
         # Calculate potential
-        S, perpendicularities = self.calculate_interaction(dx, p, q, p_mask, idx, d)
+        S, parallels, perpendicularities = self.calculate_interaction(dx, p, q, p_mask, idx, d)
 
         # bc_contrib = torch.zeros_like(S)
 
+        anisotropy = torch.where(p_mask[:,None] == 0, -0.1*(torch.abs(perpendicularities)), 0.)
+        
+        # anisotropy = torch.where(p_mask[:,None] == 1, -0.05*(torch.abs(perpendicularities)), anisotropy)
 
-        print(perpendicularities.shape)
-        print(perpendicularities)
-
-        anisotropy = torch.where(p_mask == 0, 2., 1.)
-
-        Vij = z_mask.float() * (torch.exp(-d/anisotropy[:,None]) - S * torch.exp(-d/5))
+        anisotropy = anisotropy + 1
+        
+        Vij = z_mask.float() * (torch.exp(-d/anisotropy) - S * torch.exp(-d/5))
 
         
         bc = self.egg_BC(x)
@@ -506,7 +506,7 @@ def run_simulation(sim_dict):
     
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
-        ss = custom_progress(i/yield_steps, "🌻 ", "🌰 ", "🌱 ")
+        ss = custom_progress(i/yield_steps, "🌻 ", "🐸 ", "🌱 ")
         print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
 
         x_lst.append(xx)

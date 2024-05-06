@@ -177,7 +177,7 @@ class Simulation:
         
         S = lam[:,:,1] * S1 + lam[:,:,2] * S2 + lam[:,:,3] * S3
 
-        return S
+        return S, ts2
     
 
     def inv_make_even_better_egg_pos(self, pos):
@@ -240,15 +240,17 @@ class Simulation:
 
 
         # Calculate potential
-        S = self.calculate_interaction(dx, p, q, p_mask, idx, d)
+        S, perpendicularities = self.calculate_interaction(dx, p, q, p_mask, idx, d)
 
         # bc_contrib = torch.zeros_like(S)
 
 
-        # # bc_contrib[:, 0] = egg_bc
+        print(perpendicularities.shape)
+        print(perpendicularities)
 
+        anisotropy = torch.where(p_mask == 0, 2., 1.)
 
-        Vij = z_mask.float() * (torch.exp(-d) - S * torch.exp(-d/5))
+        Vij = z_mask.float() * (torch.exp(-d/anisotropy[:,None]) - S * torch.exp(-d/5))
 
         
         bc = self.egg_BC(x)

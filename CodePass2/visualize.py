@@ -53,7 +53,7 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
         scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
         scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
-        iterator += 1
+        iterator += 10
         if iterator >= len(xs):
             iterator = len(xs)-1
     timer = app.Timer(interval=interval)
@@ -62,6 +62,14 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
 
     # We want to fly around
     view.camera = 'fly'
+
+    # move the camera a bit back
+    #view.camera.center = (100,0,0)
+
+    # rotate the camera
+    #view.camera.azimuth = 90
+    #view.camera.elevation = 0
+
 
     if sys.flags.interactive != 1:
         vispy.app.run()

@@ -138,12 +138,15 @@ class Simulation:
 
         lam = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 4),
                         device=self.device)                                                            # Initializing an empty array for our lambdas
+        original_lams = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 4),
+                device=self.device)                                                            # Initializing an empty array for our lambdas
         alphas = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 3), 
                         device=self.device)   # Initializing an empty array for our alphas
 
         for k in range(len(self.interaction_data)):
             lam[interaction_mask == k] = self.lambdas[k]
             alphas[interaction_mask == k] = self.alphas[k]
+            original_lams[interaction_mask == k] = self.lambdas[k]
 
 
         lam, alphas = self.get_lambds_from_interaction_mask(interaction_mask, interaction_mask_b, lam, alphas)
@@ -151,16 +154,17 @@ class Simulation:
         lam[:,:,3] = 0.
 
         nl3 = ((1-(x[:,2] + 27)/(2*27)))
-        nl3 = nl3**2/10.
+        nl3 = nl3**2 * 0.1
 
-        
-        lam[:,:,3] = nl3[:,None]
-        lam[:,:,0] = lam[:,:,0] - nl3[:,None]
+        lam[:,:,3] = torch.where(original_lams[:,:,3] == -1, nl3[:,None], 0.)
+        # lam[:,:,3] = nl3[:,None]
+        # lam[:,:,0] = lam[:,:,0] - nl3[:,None]
 
-        lam[interaction_mask == 2][:,3] = 0.
-        lam[interaction_mask_b == 2][:,3] = 0.
-        lam[interaction_mask == 3][:,3] = 0.
-        lam[interaction_mask == 4][:,3] = 0.
+        # lam[interaction_mask == 2][:,3] = 0.
+        # lam[interaction_mask_b == 2][:,3] = 0.
+        # lam[interaction_mask == 3][:,3] = 0.
+        # lam[interaction_mask == 4][:,3] = 0.
+
         
         # angle_dx = dx
         avg_q = (qi + qj)*0.5

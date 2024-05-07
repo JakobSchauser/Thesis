@@ -8,14 +8,24 @@ alpha = 0.2
 
 
                             
-interaction_data = [[l0, l1*1., l2, 0., 0.],        # green
-                    [l0, l1*0.55, l2, l3, 0.],        # red
-                    [0.2, l1, l2, 0.3*l3, alpha],     # blue  
-                    [l0, l1*1.7, l2, 0., alpha*0.0],        # yellow 
-                    [0., l1*1.2, l2, 0., alpha*0.8],     # baby blue from 0.8
-                    [0., l1*1.5, l2, 0., alpha*0.8], # pink
+# interaction_data = [[l0, l1*1., l2, 0., 0.],        # green
+#                     [l0, l1*0.55, l2, 0., 0.],        # red
+#                     [0., l1*1., l2, 0., alpha],     # blue  
+#                     [l0, l1*1.7, l2, 0., alpha*0.0],        # yellow 
+#                     [0., l1*1., l2, 0., alpha*0.8],     # baby blue from 0.8
+#                     [0., l1*1.5, l2, 0., alpha*0.8], # pink
+#                     # [l0, l1*1., l2, 0., -alpha*0.9] # black
+#                     ]
+
+interaction_data = [[l0, l1,     l2, -1, 0.],        # green
+                    [l0, l1,     l2, -1, 0.],        # red
+                    [l0, l1,     l2, 0.03, alpha],     # blue  
+                    [l0, l1*1.7, l2, 0., 0.],        # yellow 
+                    [l0, l1,     l2, 0., alpha*0.8],     # baby blue from 0.8
+                    [l0, l1*1.5, l2, -1, alpha*0.8], # pink
                     # [l0, l1*1., l2, 0., -alpha*0.9] # black
                     ]
+
 
 
 # l1, l2, l3 = 0.7, 0.1, 0.2
@@ -42,7 +52,7 @@ if __name__ == '__main__':
         # 'data'              : (make_random_sphere, [size, conc, 35]), #if tuple 2 long then data generation, if 4 long then data
         # 'continue'          : "random_baby_2",
         'continue'          : "stas_one_stripe",
-        "name"              : "inverse_anisotropy",
+        "name"              : "gradual_l3",
         'dt'                : 0.1,
         'eta'               : 0.002,
         'init_k'            : 100,

@@ -78,34 +78,12 @@ class Simulation:
         return z_mask
     
 
-    
-    
-    def calculate_interaction(self, dx, p, q, p_mask, idx, d):
-        # Making interaction mask
-        interaction_mask = p_mask[:,None].expand(p_mask.shape[0], idx.shape[1])#*5 + p_mask[idx]
-        interaction_mask_b = p_mask[idx]
-        # Calculate S
-        # l00, l01, l1, l2, l3 = self.lambdas
-
-        pi = p[:, None, :].expand(p.shape[0], idx.shape[1], 3)
-        pj = p[idx]
-        qi = q[:, None, :].expand(q.shape[0], idx.shape[1], 3)
-        qj = q[idx]
-
-        lam = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 4),
-                        device=self.device)                                                            # Initializing an empty array for our lambdas
-        alphas = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 3), 
-                        device=self.device)   # Initializing an empty array for our alphas
-
-        for k in range(len(self.interaction_data)):
-            lam[interaction_mask == k] = self.lambdas[k]
-            alphas[interaction_mask == k] = self.alphas[k]
-
-        ll = 0.5*self.lambdas[0] # used to be 0.5
-        ll[2] = 0
+    def get_lambds_from_interaction_mask(self, interaction_mask, interaction_mask_b, lam, alphas):
+        # ll = 0.5*self.lambdas[0] # used to be 0.5
+        # ll[2] = 0
         
-        lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = ll
-        lam[(interaction_mask == 1) * (interaction_mask_b == 0)] = ll
+        # lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = ll
+        # lam[(interaction_mask == 1) * (interaction_mask_b == 0)] = ll
 
         lam[(interaction_mask == 1) * (interaction_mask_b == 2)] = 0.5*self.lambdas[1]
         lam[(interaction_mask == 2) * (interaction_mask_b == 1)] = 0.5*self.lambdas[2]
@@ -144,8 +122,46 @@ class Simulation:
         alphas[(interaction_mask == 0)*(interaction_mask_b == 4)] = -self.alphas[4]
         alphas[(interaction_mask == 0)*(interaction_mask_b == 4)] = -self.alphas[4]
 
+        return lam, alphas
+    
+    def calculate_interaction(self, dx, p, q, p_mask, idx, d, x):
+        # Making interaction mask
+        interaction_mask = p_mask[:,None].expand(p_mask.shape[0], idx.shape[1])#*5 + p_mask[idx]
+        interaction_mask_b = p_mask[idx]
+        # Calculate S
+        # l00, l01, l1, l2, l3 = self.lambdas
+
+        pi = p[:, None, :].expand(p.shape[0], idx.shape[1], 3)
+        pj = p[idx]
+        qi = q[:, None, :].expand(q.shape[0], idx.shape[1], 3)
+        qj = q[idx]
+
+        lam = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 4),
+                        device=self.device)                                                            # Initializing an empty array for our lambdas
+        alphas = torch.zeros(size=(interaction_mask.shape[0], interaction_mask.shape[1], 3), 
+                        device=self.device)   # Initializing an empty array for our alphas
+
+        for k in range(len(self.interaction_data)):
+            lam[interaction_mask == k] = self.lambdas[k]
+            alphas[interaction_mask == k] = self.alphas[k]
+
+
+        lam, alphas = self.get_lambds_from_interaction_mask(interaction_mask, interaction_mask_b, lam, alphas)
+
+        lam[:,:,3] = 0.
+
+        nl3 = ((1-(x[:,2] + 27)/(2*27)))
+        nl3 = nl3**2/10.
+
         
-            
+        lam[:,:,3] = nl3[:,None]
+        lam[:,:,0] = lam[:,:,0] - nl3[:,None]
+
+        lam[interaction_mask == 2][:,3] = 0.
+        lam[interaction_mask_b == 2][:,3] = 0.
+        lam[interaction_mask == 3][:,3] = 0.
+        lam[interaction_mask == 4][:,3] = 0.
+        
         # angle_dx = dx
         avg_q = (qi + qj)*0.5
         ts = (avg_q*dx).sum(axis = 2)
@@ -240,7 +256,7 @@ class Simulation:
 
 
         # Calculate potential
-        S, parallels, perpendicularities = self.calculate_interaction(dx, p, q, p_mask, idx, d)
+        S, parallels, perpendicularities = self.calculate_interaction(dx, p, q, p_mask, idx, d, x)
 
         # bc_contrib = torch.zeros_like(S)
 

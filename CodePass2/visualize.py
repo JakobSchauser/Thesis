@@ -10,8 +10,7 @@ import h5py
 
 iterator = 0
 
-def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
-                     frame_every = 1, interval=1/30, save=True ):
+def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, interval=1/30, speed = 1):
     print('Animating')
 
     # Load the data
@@ -53,7 +52,7 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
         scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
         scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
-        iterator += 10
+        iterator += speed
         if iterator >= len(xs):
             iterator = len(xs)-1
     timer = app.Timer(interval=interval)
@@ -81,10 +80,13 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10,
 if __name__ == '__main__':
     # get command line argument
 
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
+        speed = int(sys.argv[2])
+    else:
+        speed = 1
         # loaded_cells = np.load(sys.argv[1])
         # loaded_properties = None
-
+    if len(sys.argv) > 1:
         with h5py.File("runs/" + sys.argv[1] + ".hdf5", 'r') as f:
             positions = f['x'][::1]
             loaded_properties = None
@@ -96,6 +98,6 @@ if __name__ == '__main__':
             
         print(loaded_properties)
         
-        interactive_animate(positions, ps, qs, loaded_properties[0])
+        interactive_animate(positions, ps, qs, loaded_properties[0], speed = speed)
     else:
         print('No file specified')

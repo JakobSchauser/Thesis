@@ -209,6 +209,8 @@ class Simulation:
 
         areas = self.get_projectioned_areas(x, p, q, interaction_mask, dx)
 
+        print(areas)
+
         
         # angle_dx = dx
         avg_q = (qi + qj)*0.5
@@ -316,7 +318,7 @@ class Simulation:
                 area += vor_vertices[i][0]*vor_vertices[(i+1)%len(vor_vertices)][1] - vor_vertices[(i+1)%len(vor_vertices)][0]*vor_vertices[i][1]
             areas.append(area/2)
 
-        return areas
+        return torch.tensor(areas, device=self.device, dtype=self.dtype)
 
             
     

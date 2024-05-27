@@ -1,7 +1,7 @@
 ### Imports ###
 import numpy as np
 import torch
-from scipy.spatial import cKDTree
+from scipy.spatial import cKDTree, Voronoi
 import os
 import itertools
 import gc
@@ -207,6 +207,8 @@ class Simulation:
         # lam[interaction_mask == 3][:,3] = 0.
         # lam[interaction_mask == 4][:,3] = 0.
 
+        areas = self.get_projectioned_areas(x, p, q, interaction_mask, dx)
+
         
         # angle_dx = dx
         avg_q = (qi + qj)*0.5
@@ -280,6 +282,44 @@ class Simulation:
         
         return v_add 
     
+        
+
+    def get_projectioned_areas(self, x, p, q, z_mask, dx):
+        # for each neighbour in z_mask 
+        areas = []
+        for point in range(x.shape[0]):
+            nbs = z_mask[point]
+
+            x_vec = q[point]
+            y_vec = torch.cross(p[point], q[point])
+
+            x_vec = x_vec / torch.sqrt(torch.sum(x_vec ** 2))
+            y_vec = y_vec / torch.sqrt(torch.sum(y_vec ** 2))
+
+            projected_positions = []
+            # project their positions onto the plane defined by the p vector
+            for nb in range(len(nbs)):
+                if dx[point][nb] > 10:
+                    continue
+                # pp_3d = nbs[nb] - torch.dot(nbs[nb] - x[point], p[point])*p[point]
+
+                # project the position onto the plane defined by the q vector
+                pp_2d = torch.tensor([torch.dot(nbs, x_vec), torch.dot(nbs, y_vec)])
+
+                projected_positions.append(pp_2d)
+
+            vor_vertices = Voronoi(projected_positions).vertices
+
+            # use shoe-lace formula to calculate the area of the voronoi cell
+            area = 0
+            for i in range(len(vor_vertices)):
+                area += vor_vertices[i][0]*vor_vertices[(i+1)%len(vor_vertices)][1] - vor_vertices[(i+1)%len(vor_vertices)][0]*vor_vertices[i][1]
+            areas.append(area/2)
+
+        return areas
+
+            
+    
     def potential(self, x, p, q, p_mask, idx, d):
         # Find neighbours
         full_n_list = x[idx]
@@ -299,8 +339,6 @@ class Simulation:
         # Normalise dx
         d = torch.sqrt(torch.sum(dx**2, dim=2))
         dx = dx / d[:, :, None]
-
-
 
         # Calculate potential
         S, parallels, perpendicularities = self.calculate_interaction(dx, p, q, p_mask, idx, d, x)

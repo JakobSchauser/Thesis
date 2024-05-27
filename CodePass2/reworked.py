@@ -22,7 +22,9 @@ def custom_progress(f : float, a : str = "X", b : str = "x", c : str = None) -> 
 #     ANGLE_ISOTROPIC = 3
 #     NON_INTERACTING = 4
 
-
+def lerp(v, d):
+    return v[0] * (1 - d) + v[1] * d
+    
 def printfull(x):
     torch.set_printoptions(profile="full")
     print(x) 
@@ -44,6 +46,16 @@ class Simulation:
         self.yield_every  = sim_dict['yield_every']
         self.d = None
         self.idx = None
+
+        self.alpha_scale = 1.
+        self.alpha_scale_speed = None
+        
+        if "alpha_scale_speed" in sim_dict:
+            self.alpha_scale_speed = sim_dict.pop('alpha_scale_speed')
+            if not self.alpha_scale_speed is None:
+                self.alpha_scale = 0.
+
+        self.start_xs = None
 
         # self.scaled_egg_shape = np.array([60., 60./3., 60./3.]) #TODO: make this a parameter
         self.scaled_egg_shape = np.array([80., 80./3., 80./3.])
@@ -84,12 +96,13 @@ class Simulation:
         
         # lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = ll
         # lam[(interaction_mask == 1) * (interaction_mask_b == 0)] = ll
+        nnnn = 0.7
+        
+        lam[(interaction_mask == 1) * (interaction_mask_b == 2)] = nnnn*self.lambdas[1]
+        lam[(interaction_mask == 2) * (interaction_mask_b == 1)] = nnnn*self.lambdas[2]
 
-        lam[(interaction_mask == 1) * (interaction_mask_b == 2)] = 0.5*self.lambdas[1]
-        lam[(interaction_mask == 2) * (interaction_mask_b == 1)] = 0.5*self.lambdas[2]
-
-        lam[(interaction_mask == 0) * (interaction_mask_b == 2)] = 0.5*self.lambdas[0]
-        lam[(interaction_mask == 2) * (interaction_mask_b == 0)] = 0.5*self.lambdas[2]
+        lam[(interaction_mask == 0) * (interaction_mask_b == 2)] = nnnn*self.lambdas[0]
+        lam[(interaction_mask == 2) * (interaction_mask_b == 0)] = nnnn*self.lambdas[2]
 
         lam[(interaction_mask == 0) * (interaction_mask_b == 5)] = 0.5*self.lambdas[0]
         lam[(interaction_mask == 5) * (interaction_mask_b == 0)] = 0.5*self.lambdas[5]
@@ -100,11 +113,11 @@ class Simulation:
         lam[(interaction_mask == 2) * (interaction_mask_b == 5)] = 0.5*self.lambdas[2]
         lam[(interaction_mask == 5) * (interaction_mask_b == 2)] = 0.5*self.lambdas[5]
         
-        lam[(interaction_mask == 0) * (interaction_mask_b == 4)] = 0.95*self.lambdas[0]
-        lam[(interaction_mask == 4) * (interaction_mask_b == 0)] = 0.95*self.lambdas[4]
+        lam[(interaction_mask == 0) * (interaction_mask_b == 4)] = 0.9*self.lambdas[0]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 0)] = 0.9*self.lambdas[4]
         
-        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.8*self.lambdas[1]
-        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.8*self.lambdas[4]
+        lam[(interaction_mask == 1) * (interaction_mask_b == 4)] = 0.9*self.lambdas[1]
+        lam[(interaction_mask == 4) * (interaction_mask_b == 1)] = 0.9*self.lambdas[4]
 
         lam[(interaction_mask == 0) * (interaction_mask_b == 3)] = 0.6*self.lambdas[0]
         lam[(interaction_mask == 3) * (interaction_mask_b == 0)] = 0.6*self.lambdas[0]
@@ -144,19 +157,48 @@ class Simulation:
                         device=self.device)   # Initializing an empty array for our alphas
 
         for k in range(len(self.interaction_data)):
-            lam[interaction_mask == k] = self.lambdas[k]
-            alphas[interaction_mask == k] = self.alphas[k]
+            a_s = 1.
+            lk_s = self.lambdas[k].clone()
+            
+            with torch.no_grad():
+                if k in (2, 999):
+                    sss = np.maximum((self.alpha_scale - 0.25), 0.)
+                    a_s = sss + 1.
+                    # lk_s[1] *= 1.-sss
+                    # lk_s[3] = sss
+                    pass
+
+            lam[interaction_mask == k] = lk_s
+            alphas[interaction_mask == k] = self.alphas[k]*a_s
             original_lams[interaction_mask == k] = self.lambdas[k]
 
 
         lam, alphas = self.get_lambds_from_interaction_mask(interaction_mask, interaction_mask_b, lam, alphas)
 
-        lam[:,:,3] = 0.
 
-        nl3 = ((1-(x[:,2] + 27)/(2*27)))
-        nl3 = nl3**2 * 0.1
+        if not self.alpha_scale_speed is None and self.alpha_scale < 0.9901:
+            self.alpha_scale = lerp((self.alpha_scale, 1.), self.alpha_scale_speed)
+            
+            if self.alpha_scale >= 0.99:
+                print("alpha scale = 1!")
+        
 
-        lam[:,:,3] = torch.where(original_lams[:,:,3] == -1, nl3[:,None], 0.)
+        with torch.no_grad():
+            nl3 = (x[:,2] + 27)/(2*27)
+            # nl3 = (self.start_xs[:,2] + 27)/(2*27)
+            # nl3 = torch.sqrt(torch.clamp(1.-nl3*2.,0., 1.))*0.1
+            nl3 = (1-nl3)*(1-nl3)*0.15
+
+            # nl3 = torch.where(torch.logical_and(self.start_xs[:,0] > -60, self.start_xs[:,0] < 50), nl3, 0.)
+            lam[:,:,3] = 0.
+            lam[:,:,3] = torch.where(original_lams[:,:,3] == -1, nl3[:,None], 0.)
+            lam[:,:,1] = torch.where(original_lams[:,:,3] == -1, lam[:,:,1] - 1.*nl3[:,None], lam[:,:,1])
+
+
+
+        # print(lam[:,:,3].max()) 
+        # print(lam[:,:,3].min()) 
+        
         # lam[:,:,3] = nl3[:,None]
         # lam[:,:,0] = lam[:,:,0] - nl3[:,None]
 
@@ -195,7 +237,7 @@ class Simulation:
         # S1[msk] = 0.
         
         
-        S = lam[:,:,1] * S1 + lam[:,:,2] * S2 + lam[:,:,3] * S3
+        S = lam[:,:,1] * S1 + lam[:,:,2] * torch.abs(S2) + lam[:,:,3] * torch.abs(S3)
 
         return S, ts, ts2
     
@@ -259,17 +301,19 @@ class Simulation:
         dx = dx / d[:, :, None]
 
 
+
         # Calculate potential
         S, parallels, perpendicularities = self.calculate_interaction(dx, p, q, p_mask, idx, d, x)
 
-        # bc_contrib = torch.zeros_like(S)
-
-        anisotropy = torch.where(p_mask[:,None] == 0, -0.1*(torch.abs(perpendicularities)), 0.)
+        # # bc_contrib = torch.zeros_like(S)
+        # with torch.no_grad():
+        #     aas = np.maximum((self.alpha_scale-0.1), 0.)
+        #     anisotropy_add = torch.where(p_mask[:,None] == 2, 5.*torch.abs(perpendicularities)*aas, 0.)
         
         # anisotropy = torch.where(p_mask[:,None] == 1, -0.05*(torch.abs(perpendicularities)), anisotropy)
-
-        anisotropy = anisotropy + 1
-        
+        anisotropy = 1.
+        # anisotropy = anisotropy_add + 1.
+        # 
         Vij = z_mask.float() * (torch.exp(-d/anisotropy) - S * torch.exp(-d/5))
 
         
@@ -285,6 +329,7 @@ class Simulation:
         assert len(q) == len(x)
         assert len(p_mask) == len(x)
 
+            
         x = torch.tensor(x, requires_grad=True, dtype=self.dtype, device=self.device)
         p = torch.tensor(p, requires_grad=True, dtype=self.dtype, device=self.device)
         q = torch.tensor(q, requires_grad=True, dtype=self.dtype, device=self.device)
@@ -293,13 +338,15 @@ class Simulation:
 
         self.scaled_egg_shape = torch.tensor(self.scaled_egg_shape, dtype=self.dtype, device=self.device)
 
-
+        
         self.lambdas = []
 
         for type in self.interaction_data:
             self.lambdas.append(torch.tensor(type[:4], device=self.device))
 
         self.alphas = [torch.tensor(type[4], device=self.device) for type in self.interaction_data]
+
+        self.start_xs = x.clone().detach()
         
         return x, p, q, p_mask
 
@@ -369,7 +416,7 @@ class Simulation:
     def simulation(self, x, p, q, p_mask):
         
         x, p, q, p_mask = self.init_simulation(x, p, q, p_mask)
-
+        
         tstep = 0
         while True:
             tstep += 1
@@ -453,7 +500,7 @@ def genetic_step(sim_dict, genetics):
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
         ss = custom_progress(i/yield_steps, "🌻 ", "🌰 ", "🌱 ")
-        print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
+        print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells) ', end = "\r")
 
     print(f'Simulation done')
     print('Took', time() - t1, 'seconds')
@@ -526,8 +573,8 @@ def run_simulation(sim_dict):
     
     for xx, pp, qq, pp_mask in itertools.islice(runner, yield_steps):
         i += 1
-        ss = custom_progress(i/yield_steps, "🌻 ", "🐸 ", "🌱 ")
-        print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells)', end = "\r")
+        ss = custom_progress(i/yield_steps, "✅ ", "🟩 ")
+        print(ss + f'  Running {i} of {yield_steps}   ({yield_every * i} of {yield_every * yield_steps})   ({len(xx)} cells) - scale : {sim.alpha_scale:.3}         ', end = "\r")
 
         x_lst.append(xx)
         p_lst.append(pp)

@@ -52,7 +52,7 @@ if __name__ == '__main__':
         # 'data'              : (make_random_sphere, [size, conc, 35]), #if tuple 2 long then data generation, if 4 long then data
         # 'continue'          : "random_baby_2",
         'continue'          : "stas_one_stripe",
-        "name"              : "gradual_l3",
+        "name"              : "elongation_test",
         'dt'                : 0.1,
         'eta'               : 0.002,
         'init_k'            : 100,
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         'interaction_data'  : interaction_data,
         'gamma'             : 5.0,
         'seethru'           : 1,
-        'device'            : 'cuda',
+        'device'            : 'cpu',
         'dtype'             : torch_float,
         'notes'             : f"trying stripes",
     }

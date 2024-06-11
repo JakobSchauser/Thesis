@@ -207,9 +207,9 @@ class Simulation:
         # lam[interaction_mask == 3][:,3] = 0.
         # lam[interaction_mask == 4][:,3] = 0.
 
-        areas = self.get_projectioned_areas(x, p, q, interaction_mask, dx)
+        # areas = self.get_projectioned_areas(x, p, q, interaction_mask, dx)
 
-        print(areas)
+        # print(areas)
 
         
         # angle_dx = dx
@@ -224,7 +224,7 @@ class Simulation:
         angle_dx = torch.where(interaction_mask[:,:,None] == 5, perps*ts2[:,:,None], angle_dx)
         # angle_dx = torch.where(interaction_mask[:,:,None] == 6, perps*ts2[:,:,None], angle_dx)
 
-        angle_dx = angle_dx*d[:,:,None]
+        # angle_dx = angle_dx*d[:,:,None]
         
         pi_tilde = pi + alphas*angle_dx
         pj_tilde = pj - alphas*angle_dx
@@ -286,47 +286,76 @@ class Simulation:
     
         
 
-    def get_projectioned_areas(self, x, p, q, z_mask, dx):
-        # for each neighbour in z_mask 
-        areas = []
-        for point in range(x.shape[0]):
-            nbs = z_mask[point]
+    # def get_projectioned_areas(self, x, p, q, z_mask, dx):
+    #     # for each neighbour in z_mask 
+    #     areas = []
+    #     for point in range(x.shape[0]):
+    #         nbs = z_mask[point]
 
-            x_vec = q[point]
-            y_vec = torch.cross(p[point], q[point])
+    #         x_vec = q[point]
+    #         y_vec = torch.cross(p[point], q[point])
 
-            x_vec = x_vec / torch.sqrt(torch.sum(x_vec ** 2))
-            y_vec = y_vec / torch.sqrt(torch.sum(y_vec ** 2))
+    #         x_vec = x_vec / torch.sqrt(torch.sum(x_vec ** 2))
+    #         y_vec = y_vec / torch.sqrt(torch.sum(y_vec ** 2))
 
-            projected_positions = []
-            # project their positions onto the plane defined by the p vector
-            for nb in range(len(nbs)):
-                if dx[point][nb] > 10:
-                    continue
-                # pp_3d = nbs[nb] - torch.dot(nbs[nb] - x[point], p[point])*p[point]
+    #         projected_positions = []
+    #         # project their positions onto the plane defined by the p vector
+    #         for nb in range(len(nbs)):
+    #             if dx[point][nb] > 10:
+    #                 continue
+    #             # pp_3d = nbs[nb] - torch.dot(nbs[nb] - x[point], p[point])*p[point]
 
-                # project the position onto the plane defined by the q vector
-                pp_2d = torch.tensor([torch.dot(nbs, x_vec), torch.dot(nbs, y_vec)])
+    #             # project the position onto the plane defined by the q vector
+    #             pp_2d = torch.tensor([torch.dot(nbs, x_vec), torch.dot(nbs, y_vec)])
 
-                projected_positions.append(pp_2d)
+    #             projected_positions.append(pp_2d)
 
-            vor_vertices = Voronoi(projected_positions).vertices
+    #         vor_vertices = Voronoi(projected_positions).vertices
 
-            # use shoe-lace formula to calculate the area of the voronoi cell
-            area = 0
-            for i in range(len(vor_vertices)):
-                area += vor_vertices[i][0]*vor_vertices[(i+1)%len(vor_vertices)][1] - vor_vertices[(i+1)%len(vor_vertices)][0]*vor_vertices[i][1]
-            areas.append(area/2)
+    #         # use shoe-lace formula to calculate the area of the voronoi cell
+    #         area = 0
+    #         for i in range(len(vor_vertices)):
+    #             area += vor_vertices[i][0]*vor_vertices[(i+1)%len(vor_vertices)][1] - vor_vertices[(i+1)%len(vor_vertices)][0]*vor_vertices[i][1]
+    #         areas.append(area/2)
 
-        return torch.tensor(areas, device=self.device, dtype=self.dtype)
+    #     return torch.tensor(areas, device=self.device, dtype=self.dtype)
 
             
     
     def potential(self, x, p, q, p_mask, idx, d):
         # Find neighbours
         full_n_list = x[idx]
-        dx = x[:, None, :] - full_n_list
+
+        # define the effective centrum
+        o = torch.cross(p, q)
+        o = o / torch.sqrt(torch.sum(o ** 2, dim=1))[:, None]
+
+        nb_o = o[idx]
+
+        # define the pairwise effective centrum
+        dx_normal = x[:, None, :] - full_n_list
+        dx_normal_lengths = torch.sqrt(torch.sum(dx_normal ** 2, dim=2))
+        dx_normal = dx_normal / dx_normal_lengths[:, :, None]
+
+
+        ec_add = torch.cross(o[:,None,:], dx_normal, dim=2) * torch.cross(nb_o, dx_normal, dim=2) 
+
+        ec_add = ec_add / torch.sqrt(torch.sum(ec_add ** 2, dim=2))[:, :, None]
+
+        ec = x[:, None, :] + ec_add 
+
+        dx_new = ec - full_n_list
+        dx_new_lengths = torch.sqrt(torch.sum(dx_new ** 2, dim=2))
+        dx_new = dx_new / dx_new_lengths[:, :, None]
+        
+        two = torch.cat([dx_normal_lengths[None,:,:], dx_new_lengths[None, :, :]], 0)
+        _, indices = torch.min(two, dim=0)
+
+        dx = torch.where(indices[:, :, None] == 0, dx_normal, dx_new)
+
+        d = torch.where(indices == 0, dx_normal_lengths, dx_new_lengths)
         z_mask = self.find_true_neighbours(d, dx)
+
 
         # Minimize size of z_mask and reorder idx and dx
         sort_idx = torch.argsort(z_mask.int(), dim=1, descending=True)
@@ -339,8 +368,8 @@ class Simulation:
         idx = idx[:, :m]
 
         # Normalise dx
-        d = torch.sqrt(torch.sum(dx**2, dim=2))
-        dx = dx / d[:, :, None]
+        # d = torch.sqrt(torch.sum(dx**2, dim=2))
+        # dx = dx / d[:, :, None]
 
         # Calculate potential
         S, parallels, perpendicularities = self.calculate_interaction(dx, p, q, p_mask, idx, d, x)
@@ -353,10 +382,15 @@ class Simulation:
         # anisotropy = torch.where(p_mask[:,None] == 1, -0.05*(torch.abs(perpendicularities)), anisotropy)
         anisotropy = 1.
         # anisotropy = anisotropy_add + 1.
-        # 
+        print(z_mask.shape)
+        print(S.shape)
+        print(d.shape)
         Vij = z_mask.float() * (torch.exp(-d/anisotropy) - S * torch.exp(-d/5))
 
-        
+        # stress_strain = torch.abs(Vij)*torch.abs(dx)
+
+        # stress_strain_sum = torch.sum(stress_strain, dim=1)
+
         bc = self.egg_BC(x)
         
         Vij_sum = torch.sum(Vij) + bc 
@@ -623,6 +657,7 @@ def run_simulation(sim_dict):
         
 
         if i % 100 == 0:
+            print("Saved!")
             save((p_mask_lst, x_lst, p_lst,  q_lst), name=name, sim_dict=sim_dict)
 
     print(f'Simulation done, saved {yield_steps} datapoints')

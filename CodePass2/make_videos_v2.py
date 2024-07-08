@@ -16,6 +16,16 @@ def make_videos(filename:str, interval :int):
     print('Loading data')
     assert os.path.isfile('runs/' + filename + '.hdf5'), "Please provide a valid run filename"
 
+    # if the video already exists, ask if the user wants to overwrite it
+    if os.path.isfile(filename + '.mp4'):
+        print('The video already exists, do you want to overwrite it? (y/n)')
+        if input() != 'y':
+            video_name = input('Please provide a new name for the video: ')
+        else:
+            video_name = filename
+    else:
+        video_name = filename
+
     size = 85
 
     limits = 45
@@ -26,8 +36,8 @@ def make_videos(filename:str, interval :int):
     with h5py.File('runs/' + filename + '.hdf5', 'r') as f:
         dat = f['x'][::5]
         properties = f['properties'][:][0]
+        pcp = f['q'][:][::5]
 
-    video_name = filename
     # positions = dat[:,]
     positions = dat
 
@@ -70,36 +80,7 @@ def make_videos(filename:str, interval :int):
         ax.set_zlim(-limits, limits)
 
         x, y ,z = positions[i, :, 0], positions[i, :, 1], positions[i, :, 2]
-        # x = x[z < 25]
-        # y = y[z < 25]
-        # z = z[z < 25]
-
-        # all_dists = squareform(pdist(positions[i]))
-
-        # # find the five closest points to each point
-
-        # closest = np.argsort(all_dists, axis=1)[:, 1:6]
-
-        # # find the mean distance to the closest points
-
-        # mean_dist = np.mean(all_dists[np.arange(all_dists.shape[0])[:,None], closest], axis=1)
-        # # color the points based on the mean distance to the three closest points
-
-
-
-        # n = np.clip((property_dists-mean_dist)*2., -1., 1.)
-        # colors = np.ones((positions[i].shape[0], 4))
-
-        # if has_energies:
-        #     colors = np.zeros((positions[i].shape[0], 4))
-            
-        #     n = np.clip((property_dists + energies[i])*4., -1., 1.)
-
-        #     colors[:, 0] = np.clip(1 + n, 0, 1)
-        #     colors[:, 1] = np.minimum(1 - n, 1 + n)
-        #     colors[:, 2] = np.clip(1 - n, 0., 1)
-        #     colors[:, 3] = 1
-
+      
 
         # plot white dots with black outlines
         ax.scatter(x, y, z, s=size,       c = colors, edgecolors='k')
@@ -108,6 +89,15 @@ def make_videos(filename:str, interval :int):
 
         ax.scatter(x, -z, y + dists, s=size, c=colors, edgecolors='k')
 
+
+        closey = y<0
+        ax.quiver(x[closey], y[closey], z[closey], pcp[i, :, 0][closey], pcp[i, :, 1][closey], pcp[i, :, 2][closey], length=2, normalize=True, color='r')
+
+        closez = z < 0
+        ax.quiver(x[closez], z[closez], y[closez] - dists, pcp[i, :, 0][closez], pcp[i, :, 2][closez], pcp[i, :, 1][closez], length=2, normalize=True, color='r')
+
+        closez = z > 0
+        ax.quiver(x[closez], -z[closez], y[closez] + dists, pcp[i, :, 0][closez], pcp[i, :, 2][closez], pcp[i, :, 1][closez], length=2, normalize=True, color='r')
  
         ax.set_axis_off()
 

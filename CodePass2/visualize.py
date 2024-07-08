@@ -10,7 +10,7 @@ import h5py
 
 iterator = 0
 
-def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, interval=1/30, speed = 1):
+def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, interval=1/30, speed = 1, stress_strain = None):
     print('Animating')
 
     # Load the data
@@ -42,9 +42,17 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, i
     scatter3.set_data(xs[0] + qs[0]/5, edge_width=0, face_color=(0.9,0.9,0), size=size)
 
 
+    if stress_strain is not None:
+        # color so we can see the direction of the stress_strain
+        scatter4 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
+        scatter4.set_data(xs[0] + stress_strain[0]/5, edge_width=0, face_color=(0.0,0.0,0), size=size*1.5)
+        # view.add(scatter4)
+
+
     view.add(scatter1)
     view.add(scatter2)
     view.add(scatter3)
+    
 
 
     def update(ev):
@@ -52,6 +60,12 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, i
         scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
         scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
         scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
+        if stress_strain is not None:
+            mags = np.clip(np.linalg.norm(stress_strain[int(iterator%len(xs))], axis = 1), 0., 1.)
+
+            colorss = [(mag, 0.0, 1-mag, 1) for mag in mags]
+            # scatter4.set_data(xs[int(iterator%len(xs))] + stress_strain[int(iterator%len(xs))], edge_width=0, face_color=colorss, size=size*1.)
+
         iterator += speed
         if iterator >= len(xs):
             iterator = len(xs)-1
@@ -93,11 +107,18 @@ if __name__ == '__main__':
             if 'properties' in f:
                 loaded_properties = f['properties'][:]
 
+            if "stress_strain" in f:
+                stress_strain = f['stress_strain'][:]
+                print(stress_strain.shape)
+                print(positions.shape)
+            else:
+                stress_strain = None
+
             ps = f['p'][::1]
             qs = f['q'][::1]
             
         print(loaded_properties)
         
-        interactive_animate(positions, ps, qs, loaded_properties[0], speed = speed)
+        interactive_animate(positions, ps, qs, loaded_properties[0], speed = speed, stress_strain = stress_strain)
     else:
         print('No file specified')

@@ -96,7 +96,7 @@ class Simulation:
         
         # lam[(interaction_mask == 0) * (interaction_mask_b == 1)] = ll
         # lam[(interaction_mask == 1) * (interaction_mask_b == 0)] = ll
-        nnnn = 0.7
+        nnnn = 0.8
         
         lam[(interaction_mask == 1) * (interaction_mask_b == 2)] = nnnn*self.lambdas[1]
         lam[(interaction_mask == 2) * (interaction_mask_b == 1)] = nnnn*self.lambdas[2]

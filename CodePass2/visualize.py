@@ -10,7 +10,7 @@ import h5py
 
 iterator = 0
 
-def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, interval=1/30, speed = 1, stress_strain = None):
+def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, interval=1/30, speed = 1, tosave = None):
     print('Animating')
 
     # Load the data
@@ -32,39 +32,47 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, i
 
     scatter1 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
     scatter1.set_data(xs[0], edge_width=0, face_color=(1, 1, 1, .5), size=size)
+    view.add(scatter1)
 
-    # color so we can see the direction of the particles
-    scatter2 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-    scatter2.set_data(xs[0] + ps[0]/5, edge_width=0, face_color=colors, size=size)
+    if tosave is None:
+        # color so we can see the direction of the particles
+        scatter2 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
+        scatter2.set_data(xs[0] + ps[0]/5, edge_width=0, face_color=colors, size=size)
+        view.add(scatter2)
 
         # color so we can see the direction of the particles
-    scatter3 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-    scatter3.set_data(xs[0] + qs[0]/5, edge_width=0, face_color=(0.9,0.9,0), size=size)
+        scatter3 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
+        scatter3.set_data(xs[0] + qs[0]/5, edge_width=0, face_color=(0.9,0.9,0), size=size)
+        view.add(scatter3)
 
 
-    if stress_strain is not None:
-        # color so we can see the direction of the stress_strain
-        scatter4 = visuals.Markers(scaling=True, alpha=alpha, spherical=True)
-        scatter4.set_data(xs[0] + stress_strain[0]/5, edge_width=0, face_color=(0.0,0.0,0), size=size*1.5)
-        # view.add(scatter4)
-
-
-    view.add(scatter1)
-    view.add(scatter2)
-    view.add(scatter3)
-    
-
+    daniel_stripe = (xs[0][:,0] > 35)*(xs[0][:,0] < 45)
 
     def update(ev):
         global iterator
-        scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=(1, 1, 1, .5), size=size)
-        scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
-        scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
-        if stress_strain is not None:
-            mags = np.clip(np.linalg.norm(stress_strain[int(iterator%len(xs))], axis = 1), 0., 1.)
 
-            colorss = [(mag, 0.0, 1-mag, 1) for mag in mags]
-            # scatter4.set_data(xs[int(iterator%len(xs))] + stress_strain[int(iterator%len(xs))], edge_width=0, face_color=colorss, size=size*1.)
+
+
+        if tosave is not None:
+            # tosave_c = tosave[int(iterator%len(xs))]
+            # # normalize colors
+            # min2, max2 = np.min(tosave_c[loaded_properties == 4]), np.max(tosave_c[loaded_properties == 4]) 
+
+            # nonz = np.maximum((max2 - min2), 1e-6)
+            # tosave_c = (tosave_c - min2)/nonz
+
+            # tosave_c[loaded_properties != 4] = 1.
+            # tosave_c = [(c, c, c) for c in tosave_c]
+
+            tosave_c = [(0,0,0,1) if d else (1,1,1,1) for d in daniel_stripe] 
+        else:
+            tosave_c = (1, 1, 1, .5)
+
+        scatter1.set_data(xs[int(iterator%len(xs))], edge_width=0, face_color=tosave_c, size=size)
+
+        if tosave is None:
+            scatter2.set_data(xs[int(iterator%len(xs))] + ps[int(iterator%len(xs))]/10, edge_width=0, face_color=colors, size=size)
+            scatter3.set_data(xs[int(iterator%len(xs))] + qs[int(iterator%len(xs))]/9, edge_width=0, face_color=(0.9,0.9,0), size=size)
 
         iterator += speed
         if iterator >= len(xs):
@@ -73,8 +81,39 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, i
     timer.connect(update)
     timer.start()
 
+
+    @canvas.connect
+    def on_key_press(event):
+        global iterator
+        if event.text == ' ':
+            if timer.running:
+                timer.stop()
+            else:
+                timer.start()
+
+        if event.text == 'r':
+            iterator = 0
+            update(1)
+        elif event.text == 'q':
+            iterator -= 51
+            update(1)
+        elif event.text == 'e':
+            iterator += 49
+            update(1)
+        elif event.text == ',':
+            iterator -= 2
+            update(1)
+        elif event.text == '.':
+            update(1)
+
+
     # We want to fly around
     view.camera = 'fly'
+
+    km = view.camera._keymap 
+    km.pop('E')
+    km.pop('Q')
+    view.camera._keymap = km
 
     # move the camera a bit back
     #view.camera.center = (100,0,0)
@@ -94,6 +133,11 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, i
 if __name__ == '__main__':
     # get command line argument
 
+    plot_tosave = 1
+
+
+
+
     if len(sys.argv) > 2:
         speed = int(sys.argv[2])
     else:
@@ -107,18 +151,18 @@ if __name__ == '__main__':
             if 'properties' in f:
                 loaded_properties = f['properties'][:]
 
-            if "stress_strain" in f:
-                stress_strain = f['stress_strain'][:]
-                print(stress_strain.shape)
+            if "tosave" in f:
+                tosave = f['tosave'][:]
+                print(tosave.shape)
                 print(positions.shape)
             else:
-                stress_strain = None
+                tosave = None
 
             ps = f['p'][::1]
             qs = f['q'][::1]
             
         print(loaded_properties)
         
-        interactive_animate(positions, ps, qs, loaded_properties[0], speed = speed, stress_strain = stress_strain)
+        interactive_animate(positions, ps, qs, loaded_properties[0], speed = speed, tosave = tosave if plot_tosave else None)
     else:
         print('No file specified')

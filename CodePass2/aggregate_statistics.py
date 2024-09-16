@@ -1,10 +1,11 @@
 import numpy as np
 from scipy.spatial import Delaunay
 import matplotlib.pyplot as plt
+from scipy.spatial import kdtree
 
 
 
-def get_rosettes(positions, properties, types = [-1]):
+def get_rosettes(positions, properties, types = [-1], scale = 100):
 
     def get_nbs(xs) -> set:
         tri = Delaunay(xs)
@@ -16,14 +17,20 @@ def get_rosettes(positions, properties, types = [-1]):
 
         return neighbors
 
+
+    if types == [-1]:
+        types = np.unique(properties)
     
+    scl = scale
     N_time_steps = int(len(positions)//scl)
         
     counts = np.zeros((N_time_steps, positions.shape[1]))
+    vecs_between = []
+
+    print("counts.shape", counts.shape)
 
 
-    scl = 100
-    for iii in range(N_time_steps):
+    for iii in range(N_time_steps-1):
 
         # vecs = []
         xx0 = positions[iii*scl]
@@ -38,52 +45,61 @@ def get_rosettes(positions, properties, types = [-1]):
 
         pairs = []
 
+        # for each cell
         for i in range(len(nbs_0)):
             if properties[i] not in types:
                 continue
 
-            if xx0[i,2] > 0:
-                continue
+            # if xx0[i,2] > 0:   wtf dude?
+            #     continue
             
             shouldbreak = False
             new_nbs = nbs_1[i] - nbs_0[i]
+
+            # for each newly aquired neighbor
             for new_nb in new_nbs:
-                if set([i, new_nb]) in pairs:
+                if set([i, new_nb]) in pairs:     # I think removing this will allow for N>2 rosettes to be counted but will also double count t1-transitions
                     continue
+
                 pairs.append(set([i, new_nb]))
 
 
                 dist = np.array([np.linalg.norm(positions[iii*scl+ scl,i] - positions[iii*scl+scl,new_nb])])
 
-                if dist > 6:
+                if dist > 6:  #TODO: whatnumber here?
                     continue
-
-                nb_nbs = nbs_1[new_nb]
-                overlap = nb_nbs & nbs_1[i]
                 
+                overlap = nbs_1[new_nb] & nbs_1[i]
+                overlap_old = nbs_0[new_nb] & nbs_0[i]
+
+                # for each cell that is a neighbor of both of the original cell and the new neighbor 
                 for common_nb in overlap:
                     common_ns_prev_nbs = nbs_0[common_nb]
                     common_nb_new_nbs = nbs_1[common_nb]
 
-                    overlapx2 = (common_ns_prev_nbs - common_nb_new_nbs) & overlap 
+                    # if the common neighbor has lost a neighbor that both are connected to
+                    overlapx2 = (common_ns_prev_nbs & overlap & overlap_old) - (common_nb_new_nbs & overlap & overlap_old ) - set([i, new_nb])
 
                     if len(overlapx2) > 0:
                         counts[iii,i] += 1
-                        vec_between = positions[iii*scl+scl,common_nb] - positions[iii*scl+scl,list(overlapx2)[0]]
-                        # vecs.append(vec_between)
+                        vec_between = xx1[new_nb] - xx1[i]
+                        vecs_between.append(vec_between)
 
                         shouldbreak = True
                         break
 
                 if shouldbreak:
                     break
-    return counts
+    return counts, vecs_between
 
 
-def make_rosette_images(positions, properties, types = [-1]):
-    rosettes = get_rosettes(positions, properties, types)
+def make_rosette_images(positions, properties, types = [-1], scale = 100):
+    rosettes, vecs_between = get_rosettes(positions, properties, types, scale)
     
     counts = rosettes.sum(axis=0)
+
+    # plt.hist(counts, bins=20)
+    # plt.show()
     xx, yy, zz = positions[1,:,0], positions[1,:,1], positions[1,:,2]
 
     fig = plt.figure(figsize=(13,3))
@@ -98,29 +114,63 @@ def make_rosette_images(positions, properties, types = [-1]):
     fig.tight_layout()
     plt.show()
 
-    sumcount = np.sum(counts, axis=1)
+    print(counts.shape)
+
+    sumcount = np.sum(rosettes, axis=1)
     plt.xlabel("Time")
     plt.ylabel("Sum of Rosettes")
     plt.plot(sumcount)
 
+    return rosettes, sumcount, vecs_between
 
 
 
-def germ_band_length(position, properties):
-    finalgb = position[-1][properties[0] == 1]
 
-    finalgb = (finalgb - np.min(finalgb, axis=0)) / (np.max(finalgb, axis=0) - np.min(finalgb, axis=0))*100
+def germ_band_length(position, properties, sensitivity = 5):
+    gb_types = np.logical_or(properties == 1, properties == 2)
+
+    n_timesteps = 5
+    intersections = np.zeros((n_timesteps, 360//3))
 
 
-    xx, yy, zz = finalgb[:,0], finalgb[:,1], finalgb[:,2]
+    for kkk in range(n_timesteps):
+        timeindex = int(len(position)//n_timesteps*kkk)
+        finalgb = position[timeindex]
 
-    dst = 2
-    final_furrow_mask = (yy > 50-dst) * (yy < 50+dst)
-    final_furrow = finalgb[final_furrow_mask]
+        finalgb = (finalgb - np.min(finalgb, axis=0)) / (np.max(finalgb, axis=0) - np.min(finalgb, axis=0))*100
 
-    print(final_furrow.shape[0],  "found")
+        print(finalgb.shape[0], "points in germ band")
+        print(np.max(finalgb, axis=0), "max")
+        print(np.min(finalgb, axis=0), "min")
 
-    dists_from_cephallic = np.linalg.norm(final_furrow - [0, 50, 0], axis=1)
+        center = np.array([50, 50, 50])
 
-    # np.sort(dists_from_cephallic)
-    return (final_furrow.shape[0], dists_from_cephallic.max() - dists_from_cephallic.min())
+        for iii, degangle in enumerate(range(0, 360, 3)):
+            angle = np.deg2rad(degangle)
+            # raycast from the center
+            ray = np.array([np.cos(angle), 0, np.sin(angle)])
+            
+            shouldbe = False
+            # find the intersection with the germ band
+            nsteps = 100
+            for step in range(nsteps):
+                point = center + step * ray / nsteps * 100.
+                if np.min(np.linalg.norm(finalgb[gb_types] - point, axis=1)) < sensitivity:
+                    shouldbe = True
+                    break
+                
+            intersections[kkk, iii] = shouldbe
+
+    # xx, yy, zz = finalgb[:,0], finalgb[:,1], finalgb[:,2]
+
+    # dst = 2
+    # final_furrow_mask = (yy > 50-dst) * (yy < 50+dst)
+    # final_furrow = finalgb[final_furrow_mask]
+
+    # print(final_furrow.shape[0],  "found")
+
+    # dists_from_cephallic = np.linalg.norm(final_furrow - [0, 50, 0], axis=1)
+
+    # # np.sort(dists_from_cephallic)
+    # return (final_furrow.shape[0], dists_from_cephallic.max() - dists_from_cephallic.min())
+    return intersections

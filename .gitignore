@@ -1,5 +1,6 @@
 *.zip
 Code/runs/*
+CodePass2/runs/*
 *.mp4
 3d/*
 Articles/*
@@ -7,3 +8,6 @@ Articles/*
 *.h5
 *.mat
 DeconstructingGastrulation-Data/Data analysis/Data analysis/*
+*.csv
+*.txt
+*.pptx

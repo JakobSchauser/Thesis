@@ -27,10 +27,10 @@ def get_rosettes(positions, properties, types = [-1], scale = 100):
     counts = np.zeros((N_time_steps, positions.shape[1]))
     vecs_between = []
 
-    print("counts.shape", counts.shape)
 
+    potential_rosettes = []
 
-    for iii in range(N_time_steps-1):
+    for iii in range(N_time_steps):
 
         # vecs = []
         xx0 = positions[iii*scl]
@@ -44,6 +44,25 @@ def get_rosettes(positions, properties, types = [-1], scale = 100):
         nbs_1 : set = get_nbs(xx1)
 
         pairs = []
+
+        potenial_to_look_at = [p for p in potential_rosettes if p[0] == iii-2]
+
+        for p in potenial_to_look_at:
+            # check if the cells are still neighbors
+            if p[1] not in nbs_0[p[2]] or p[2] not in nbs_0[p[1]]:
+                continue
+            # check if the common neighbor is still a neighbor of both
+            if p[3] not in nbs_0[p[1]] or p[3] not in nbs_0[p[2]]:
+                continue
+            # check if the common neighbor has lost the connection to the new neighbor
+            if p[4] in nbs_1[p[3]]:
+                continue
+
+            counts[iii-1, p[1]] += 1
+            vec_between = xx1[new_nb] - xx1[i]
+            vecs_between.append(vec_between)
+
+
 
         # for each cell
         for i in range(len(nbs_0)):
@@ -59,6 +78,8 @@ def get_rosettes(positions, properties, types = [-1], scale = 100):
             # for each newly aquired neighbor
             for new_nb in new_nbs:
                 if set([i, new_nb]) in pairs:     # I think removing this will allow for N>2 rosettes to be counted but will also double count t1-transitions
+                    continue
+                if properties[new_nb] not in types:
                     continue
 
                 pairs.append(set([i, new_nb]))
@@ -77,13 +98,11 @@ def get_rosettes(positions, properties, types = [-1], scale = 100):
                     common_ns_prev_nbs = nbs_0[common_nb]
                     common_nb_new_nbs = nbs_1[common_nb]
 
-                    # if the common neighbor has lost a neighbor that both are connected to
+                    # if the common neighbor has lost a neighbor that they both are connected to
                     overlapx2 = (common_ns_prev_nbs & overlap & overlap_old) - (common_nb_new_nbs & overlap & overlap_old ) - set([i, new_nb])
 
-                    if len(overlapx2) > 0:
-                        counts[iii,i] += 1
-                        vec_between = xx1[new_nb] - xx1[i]
-                        vecs_between.append(vec_between)
+                    if len(overlapx2) == 1:
+                        potential_rosettes.append([iii, i, new_nb, common_nb, list(overlapx2)[0]])
 
                         shouldbreak = True
                         break
@@ -96,15 +115,24 @@ def get_rosettes(positions, properties, types = [-1], scale = 100):
 def make_rosette_images(positions, properties, types = [-1], scale = 100):
     rosettes, vecs_between = get_rosettes(positions, properties, types, scale)
     
-    counts = rosettes.sum(axis=0)
+    # counts = rosettes.sum(axis=0)
+    counts = rosettes
+    per_cell_counts = rosettes.sum(axis=0) 
+    per_time_counts = rosettes.sum(axis=1)
+    print("counts")
+    print(counts.shape)
+    print("per cell")
+    print(per_cell_counts.shape)
+    print("per time step")
+    print(per_time_counts.shape)
 
     # plt.hist(counts, bins=20)
     # plt.show()
-    xx, yy, zz = positions[1,:,0], positions[1,:,1], positions[1,:,2]
-
     fig = plt.figure(figsize=(13,3))
-    plt.scatter(xx[yy<0], zz[yy<0], c = counts[yy<0], s=4)
-    plt.scatter(xx[yy>0]+ 1.1*(xx.max() - xx.min()), zz[yy>0], c = counts[yy>0], s=4)
+    xx, yy, zz = positions[1,:,0], positions[1,:,1], positions[1,:,2]
+    # xx, yy, zz = positions[1,:,0], positions[1,:,1], positions[1,:,2]
+    plt.scatter(xx[yy<0], zz[yy<0], c = per_cell_counts[yy<0], s=4)
+    plt.scatter(xx[yy>0]+ 1.1*(xx.max() - xx.min()), zz[yy>0], c = per_cell_counts[yy>0], s=4)
     plt.colorbar()
     # remove the yticks
     plt.yticks([])
@@ -114,14 +142,30 @@ def make_rosette_images(positions, properties, types = [-1], scale = 100):
     fig.tight_layout()
     plt.show()
 
-    print(counts.shape)
+    for kkk in range(5):
+        fig = plt.figure(figsize=(13,3))
+        xx, yy, zz = positions[kkk*scale,:,0], positions[kkk*scale,:,1], positions[kkk*scale,:,2]
+        # xx, yy, zz = positions[1,:,0], positions[1,:,1], positions[1,:,2]
+        print(xx.shape, counts.shape, counts[kkk].shape)
+        plt.scatter(xx[yy<0], zz[yy<0], c = counts[kkk][yy<0], s=4)
+        plt.scatter(xx[yy>0]+ 1.1*(xx.max() - xx.min()), zz[yy>0], c = counts[kkk][yy>0], s=4)
+        plt.colorbar()
+        # remove the yticks
+        plt.yticks([])
+        # remove the xticks
+        plt.xticks([])
 
-    sumcount = np.sum(rosettes, axis=1)
+        fig.tight_layout()
+        plt.title("Sum of events this time step: "+ str(sum(counts[kkk])))
+
+        plt.show()
+
+
     plt.xlabel("Time")
     plt.ylabel("Sum of Rosettes")
-    plt.plot(sumcount)
+    plt.plot(per_time_counts)
 
-    return rosettes, sumcount, vecs_between
+    return rosettes, per_time_counts, vecs_between
 
 
 

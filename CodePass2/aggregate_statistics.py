@@ -30,7 +30,7 @@ def get_rosettes(positions, properties, types = [-1], scale = 100):
 
     potential_rosettes = []
 
-    for iii in range(N_time_steps):
+    for iii in range(N_time_steps - 1):
 
         # vecs = []
         xx0 = positions[iii*scl]
@@ -48,18 +48,25 @@ def get_rosettes(positions, properties, types = [-1], scale = 100):
         potenial_to_look_at = [p for p in potential_rosettes if p[0] == iii-2]
 
         for p in potenial_to_look_at:
+            p_iii = p[0]
+            p_i = p[1]
+            p_new_nb = p[2]
+            p_common_nb = p[3]
+            p_lost_nb = p[4]
+
+
             # check if the cells are still neighbors
-            if p[1] not in nbs_0[p[2]] or p[2] not in nbs_0[p[1]]:
+            if p_i not in nbs_0[p_new_nb] or p_new_nb not in nbs_0[p_i]:
                 continue
             # check if the common neighbor is still a neighbor of both
-            if p[3] not in nbs_0[p[1]] or p[3] not in nbs_0[p[2]]:
+            if p_common_nb not in nbs_0[p_i] or p_common_nb not in nbs_0[p_new_nb]:
                 continue
             # check if the common neighbor has lost the connection to the new neighbor
-            if p[4] in nbs_1[p[3]]:
+            if p_lost_nb in nbs_1[p_common_nb]:
                 continue
 
-            counts[iii-1, p[1]] += 1
-            vec_between = xx1[new_nb] - xx1[i]
+            counts[p_iii, p_i] += 1
+            vec_between = xx0[p_new_nb] - xx0[p_i]
             vecs_between.append(vec_between)
 
 
@@ -85,9 +92,9 @@ def get_rosettes(positions, properties, types = [-1], scale = 100):
                 pairs.append(set([i, new_nb]))
 
 
-                dist = np.array([np.linalg.norm(positions[iii*scl+ scl,i] - positions[iii*scl+scl,new_nb])])
+                dist = np.array([np.linalg.norm(positions[iii*scl + scl,i] - positions[iii*scl+scl,new_nb])])
 
-                if dist > 6:  #TODO: whatnumber here?
+                if dist > 5.:  #TODO: whatnumber here?
                     continue
                 
                 overlap = nbs_1[new_nb] & nbs_1[i]
@@ -142,23 +149,23 @@ def make_rosette_images(positions, properties, types = [-1], scale = 100):
     fig.tight_layout()
     plt.show()
 
-    for kkk in range(5):
-        fig = plt.figure(figsize=(13,3))
-        xx, yy, zz = positions[kkk*scale,:,0], positions[kkk*scale,:,1], positions[kkk*scale,:,2]
-        # xx, yy, zz = positions[1,:,0], positions[1,:,1], positions[1,:,2]
-        print(xx.shape, counts.shape, counts[kkk].shape)
-        plt.scatter(xx[yy<0], zz[yy<0], c = counts[kkk][yy<0], s=4)
-        plt.scatter(xx[yy>0]+ 1.1*(xx.max() - xx.min()), zz[yy>0], c = counts[kkk][yy>0], s=4)
-        plt.colorbar()
-        # remove the yticks
-        plt.yticks([])
-        # remove the xticks
-        plt.xticks([])
+    # for kkk in range(5):
+    #     fig = plt.figure(figsize=(13,3))
+    #     xx, yy, zz = positions[kkk*scale,:,0], positions[kkk*scale,:,1], positions[kkk*scale,:,2]
+    #     # xx, yy, zz = positions[1,:,0], positions[1,:,1], positions[1,:,2]
+    #     print(xx.shape, counts.shape, counts[kkk].shape)
+    #     plt.scatter(xx[yy<0], zz[yy<0], c = counts[kkk][yy<0], s=4)
+    #     plt.scatter(xx[yy>0]+ 1.1*(xx.max() - xx.min()), zz[yy>0], c = counts[kkk][yy>0], s=4)
+    #     plt.colorbar()
+    #     # remove the yticks
+    #     plt.yticks([])
+    #     # remove the xticks
+    #     plt.xticks([])
 
-        fig.tight_layout()
-        plt.title("Sum of events this time step: "+ str(sum(counts[kkk])))
+    #     fig.tight_layout()
+    #     plt.title("Sum of events this time step: "+ str(sum(counts[kkk])))
 
-        plt.show()
+    #     plt.show()
 
 
     plt.xlabel("Time")
@@ -170,35 +177,43 @@ def make_rosette_images(positions, properties, types = [-1], scale = 100):
 
 
 
-def germ_band_length(position, properties, sensitivity = 5):
+def germ_band_length(position, properties, sensitivity = 5, n_timesteps = 5, scaled = False):
     gb_types = np.logical_or(properties == 1, properties == 2)
 
-    n_timesteps = 5
-    intersections = np.zeros((n_timesteps, 360//3))
+    intersections = np.zeros((n_timesteps, 360//2))
+
 
 
     for kkk in range(n_timesteps):
         timeindex = int(len(position)//n_timesteps*kkk)
         finalgb = position[timeindex]
 
-        finalgb = (finalgb - np.min(finalgb, axis=0)) / (np.max(finalgb, axis=0) - np.min(finalgb, axis=0))*100
+        max, min = np.max(finalgb, axis=0), np.min(finalgb, axis=0)
+
+
+
+        if not scaled:
+            # using max and min transform center into center of shape
+            center = (max + min)/2.
+            print(center)
+        else:
+            center = np.array([50,50,50])
+            finalgb = (finalgb-min)/(max - min)*100
 
         print(finalgb.shape[0], "points in germ band")
         print(np.max(finalgb, axis=0), "max")
         print(np.min(finalgb, axis=0), "min")
 
-        center = np.array([50, 50, 50])
-
-        for iii, degangle in enumerate(range(0, 360, 3)):
+        for iii, degangle in enumerate(range(0, 360, 2)):
             angle = np.deg2rad(degangle)
             # raycast from the center
-            ray = np.array([np.cos(angle), 0, np.sin(angle)])
+            ray = np.array([-np.cos(angle), 0, np.sin(angle)])
             
             shouldbe = False
             # find the intersection with the germ band
             nsteps = 100
             for step in range(nsteps):
-                point = center + step * ray / nsteps * 100.
+                point = center + step * ray / nsteps * 50.
                 if np.min(np.linalg.norm(finalgb[gb_types] - point, axis=1)) < sensitivity:
                     shouldbe = True
                     break
@@ -218,3 +233,5 @@ def germ_band_length(position, properties, sensitivity = 5):
     # # np.sort(dists_from_cephallic)
     # return (final_furrow.shape[0], dists_from_cephallic.max() - dists_from_cephallic.min())
     return intersections
+
+

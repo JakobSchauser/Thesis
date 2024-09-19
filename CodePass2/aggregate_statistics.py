@@ -179,6 +179,7 @@ def make_rosette_images(positions, properties, types = [-1], scale = 100):
 
 def germ_band_length(position, properties, sensitivity = 5, n_timesteps = 5, scaled = False):
     gb_types = np.logical_or(properties == 1, properties == 2)
+    non_gb_types = np.logical_not(gb_types)
 
     intersections = np.zeros((n_timesteps, 360//2))
 
@@ -213,7 +214,10 @@ def germ_band_length(position, properties, sensitivity = 5, n_timesteps = 5, sca
             # find the intersection with the germ band
             nsteps = 100
             for step in range(nsteps):
-                point = center + step * ray / nsteps * 50.
+                point = center - step * ray / nsteps * 50. + ray*100
+                if np.min(np.linalg.norm(finalgb[non_gb_types] - point, axis=1)) < sensitivity:
+                    shouldbe = False
+                    break
                 if np.min(np.linalg.norm(finalgb[gb_types] - point, axis=1)) < sensitivity:
                     shouldbe = True
                     break

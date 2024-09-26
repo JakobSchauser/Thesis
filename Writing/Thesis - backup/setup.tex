@@ -1,0 +1,55 @@
+% IMPORTANT! In order for the document to compile, one needs to use XeLaTeX or LuaLaTeX as compiler. This can be done in  Overleaf by Menu -> Settings -> Compiler -> Choose XeLaTeX/LuaLaTeX
+
+%% These are the packages and commands that I used, feel free to remove and edit them.
+
+%% Set the path for your images. Remember to edit all your includegrpahics to the correct location.
+ \graphicspath{ {images/} }
+
+%% Suggested Commands %%
+
+%% Personal favourite command if you want to number a single line in a series of equations. Use an align* environement and use \numberthis specifically on the line that you want to number rather than using an align environement and \notag on every line you don't want to number.  
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
+%% If you have Dutch names in your references 
+\DeclareRobustCommand{\VAN}[3]{#2} % proper Dutch 'van/de' capitalisation
+
+%% If you want your theorems to include the Chapter numbers in the nmumbering
+\usepackage{amsthm} %P ackage that gives the theorems environment
+
+\newtheorem{prop}{Proposition}[chapter]
+\newtheorem*{prop*}{Proposition}
+\newtheorem{example}{Example}[chapter]
+\newtheorem{proof_sketch}{Sketch of the Proof}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem*{lemma*}{Lemma}
+\newtheorem{remark}{Remark}[chapter]
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
+\newtheorem{notation}{Notation}[chapter]
+
+
+%% Other packages I typically use. 
+
+% \usepackage{geometry}
+% \usepackage{setspace} % Package for linespacing
+% \usepackage{tabularx} % Package for table
+% \usepackage{fontspec}
+
+% \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+% \usepackage{url}            % simple URL typesetting
+% \usepackage{booktabs}       % professional-quality tables
+% \usepackage{amsfonts}       % blackboard math symbols
+% \usepackage{nicefrac}       % compact symbols for 1/2, etc.
+
+
+% \usepackage{xcolor}         % colors
+% \usepackage{dsfont}
+% \usepackage{bm}
+% \usepackage{mathtools}
+% \usepackage{cleveref}
+% \usepackage{amsmath}
+% \usepackage{amssymb}
+% \usepackage{xifthen}
+% \usepackage[ruled]{algorithm2e}
+% \usepackage{algorithmic}

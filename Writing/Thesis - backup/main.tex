@@ -1,0 +1,177 @@
+%% Template by Chloé Rouyer, Aimed for theses written at DIKU. 
+%% This templaate is aimed to be easy to use and highly customizable. 
+%% Contact if questions at chloerouyer.ml@gmail.com
+
+%% Inspired from the template of Alex Jørgensen
+%% https://www.overleaf.com/latex/templates/thesis-and-project-ucph/jnvpqdzrhrzr
+
+%%%%% General Structure of the template %%%%%
+
+\documentclass[12pt, oneside]{book} 
+% The oneside option ensures that all pages are similar. the default option 'twosides' distinguishes between left and right pages.
+\usepackage{KUstyle}
+\usepackage[toc,page]{appendix}
+%% If you want to modify from the default margins
+% \usepackage[left= 1.1in, right = 1.1in, top = 1.5in, bottom = 1.5in]{geometry} % Set the margins
+% \usepackage{layouts} % Use in combination with the command %
+
+%%%% Personal setup %%%%%
+
+%% bibtex Important package to use full citations: bibentry
+\usepackage[super]{natbib}
+\usepackage{bibentry}
+\newcommand\citeAY[1]{\citeauthor{#1} (\citeyear{#1})}
+% \usepackage[autocite=superscript]{biblatex}
+% \usepackage{biblatex}
+\nobibliography*
+
+\bibliographystyle{plainnat}
+
+\definecolor{kurød}{rgb}{0.565, 0.102, 0.118}
+\hypersetup{colorlinks=true, urlcolor=kurød, citecolor = kurød, linkcolor = kurød}
+\usepackage{float}
+
+\usepackage{outlines}
+
+%% You can put all packages and personalized commands in the following document.
+\input{setup.tex}
+
+%%%% Template Related Setup %%%%%
+
+%%% Front Page %%%
+\ptype{Masters Thesis}
+\author{Jakob Hallundbæk Schauser}
+\title{Emergence and Something:\\ Simulating Gastrulation in Drosophila}
+\subtitle{Absolutely no idea for subtitle}
+\advisor{Advisor: Ala Trusina}
+\date{Handed in October 2024}
+%% This sentence is needed for PhD theses, but it can be replaced by the date for other projects.
+
+\renewcommand{\contentsname}{Table of Contents}
+
+%%% Report parameters %%%
+
+%% Table of contents %%
+% Set table of contents depth:  {1} only includes sections, {2} also includes subsections
+ \setcounter{tocdepth}{1}
+
+% Specific entries can be added manually with a command such as: 
+% \addcontentsline{toc}{section}{[Title of Section]}  %Use section or chapter to decide how this extra element should be displayed
+ 
+% remove the dots in the table of contents
+%  \makeatletter
+% \renewcommand\@dotsep{280}   % default value 4.5
+% \makeatother
+
+%% Section Numbering within the chapters %%
+% number sections until subsubsections (set to 2 to number until subsections, and to 4 to number paragraphs)
+ \setcounter{secnumdepth}{3}
+ 
+%% Set Chapter title in header %% 
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+% plain style so that the header does not appear in the abstract
+\fancypagestyle{plain}{         
+\fancyhf{}
+\fancyfoot[C]{\thepage}}%
+
+% new style for the mainmatter with the line under the title
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\newcommand\mymainpagestyle{%
+\fancyhf{}      
+\fancyhead[L]{\nouppercase{\footnotesize{\chaptername~ \thechapter~ |~ \leftmark}} \renewcommand{\headrulewidth}{0.4pt} \headrule \renewcommand{\headrulewidth}{0pt}}
+\setlength{\headheight}{25pt}
+\fancyfoot[C]{\thepage}
+}
+
+%% alternate style for the mainmatter without the line under the title
+% \renewcommand{\headrulewidth}{0pt}
+% \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+% \newcommand\mymainpagestyle{%
+% \fancyhf{}      
+% \fancyhead[L]{\nouppercase{\footnotesize{\chaptername~ \thechapter~ |~ \leftmark}} }
+% \setlength{\headheight}{25pt}
+% \fancyfoot[C]{\thepage}
+% }
+
+%% Note: if you want to use a different running title in the header, you can use the following structure when giving your title:
+% \chapter{Long chapter title}
+% \chaptermark{Short chapter title}
+
+
+%%%%% Main %%%%%
+
+\begin{document}
+
+% \pagevalues  % If you are using the package layouts and want to get the current layout margin values so you can tune them. They are displayed on the first page if you activate this option. Remember to uncomment the \usepackage{layouts} at the beginning of this document. 
+
+
+%%%% Introduction %%%%
+\maketitle
+\frontmatter % to get a different numbering of the frontmatter and mainmatter.
+\pagestyle{plain} % not to get a header in the introduction pages
+
+\newpage \ \newpage % to skip a page 
+
+% The Abstract, Danish Abstract and Acknowledgements are not numbered here but still appear in the table of contents.
+\section*{Abstract}
+\label{sec:abstract}
+\addcontentsline{toc}{section}{Abstract} 
+
+% \newpage
+% \section*{Resumé}
+% \label{sec:resume}
+% \addcontentsline{toc}{section}{Resumé}
+
+\newpage
+\section*{Acknowledgements}
+\label{sec:acks}
+\addcontentsline{toc}{section}{Acknowledgements}
+\newpage
+\tableofcontents
+\newpage
+
+
+%%%% Introduction %%%%
+\mainmatter 
+\mymainpagestyle{} % to get a header in the rest of the chapters (excpet the first page of the chapter)
+
+\chapter{Introduction}
+\label{chap:intro}
+\input{chapters/Introduction/Introduction}
+
+% place yourintroduction there
+
+% place your chapters there
+\chapter{Theory}
+\label{chap:theo}
+\input{chapters/Theory/Theory}
+
+
+\chapter{Results}
+\label{chap:res}
+\input{chapters/Results/Results}
+
+
+\chapter{Conclussion}
+\label{chap:con}
+\input{chapters/Conclussion/Conclussion}
+
+\chapter{Outlook}
+\label{chap:out}
+\input{chapters/Outlook/Outlook}
+
+
+
+% List of publications: The title appears as large as a Chapter header in the document, but as large as a section in the table of Contents, and there are no more page headers.
+
+\appendix
+\input{chapters/Appendix/Appendix}
+\addcontentsline{toc}{chapter}{Appendix}
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliography{references}
+
+\end{document}

@@ -2,11 +2,11 @@ Quick overview of things you'll need to understand while keeping me consistent w
 
 \begin{enumerate}
     \item Upper/Lower $\rightarrow$ Dorsal/Ventral
-    \item Front/Back  $\rightarrow$ Anteriot/Posterior
+    \item Front/Back  $\rightarrow$ Anterior/Posterior
     \item   $\rightarrow$
 \end{enumerate}
 \section{Drosophila Gastrulation in detail}
-In 1975 Bownes et al. split the development from  fertilised egg to hatched larvae into 17 distinct events. \cite{bownes1975photographic} These
+In 1975 Bownes et al. split the development of the fruit fly from fertilised egg to hatched larvae into 17 distinct events. \cite{bownes1975photographic} These
 We will be looking at stages 5 through 7, lasting about 15 minutes. These are characterized by having the first mesoscopic morphogenetic movements.
 
 The Drosophila morphogenesis consist of a series of interconnected localized cell movements. I will here present an abridged (The "Good Parts" Version) overview, roughly ordered in time:\\
@@ -26,16 +26,21 @@ The Drosophila morphogenesis consist of a series of interconnected localized cel
     \item profit
 \end{enumerate}
 
-Even though cells have been shown to have remarkably precise internal clocks\footnote{cool footnote with a remarkable number}\cite{}, the interplay between the different morphological event seem hard to YYY for, as real time 'global' information sharing is very limited.
 
 
-\section{Genetic patterning, encoded information and broken symmetries}
+
+\section{Broken Bymmetries and Genetic Patterning}
+% \section{Everything}
 \subsection{Broken Symmetries}
 
 Snak om snefnug?
 
-Almost all animals [Citation needed] start as a single, isotropic shell of epithelial cells. This shell will 'turn in on itself' and begin developing the basis for organogenesis. This process is called gastrulation. As this mechanism is preceding any cell differentiating, a number of symmetries need to be broken. The blastula has distinct inside-outside \textit{distinction} giving rise to the well-defined Apical-Basal polarity (AB-polarity from here on).
+Almost all animals [Citation needed] start as a single, isotropic shell of epithelial cells. This shell will 'turn in on itself' and begin developing the basis for organogenesis. This process is called gastrulation. As most animals are not spherically symmetric\footnote{haha din mor}, a number of symmetries need to be broken. 
 
+The blastula cells lie in a closely packed sphere with a distinct inside and outside, giving rise to the well-defined Apical-Basal polarity (AB-polarity from here on).
+
+YY off-equilibrium densities with the gradients. These are called morphogens and 
+In a W for computational biology, the mechanics of morphogens where predicted by none other than Alan Turing
 
 In general, most of the global large-scale cell migration seen during development of multicellular organisms stem from a handful of seemingly simple\footnote{albeit still not well understood} active single-cell actions \cite{walck2014cell}. These 'driving effects' are surprisingly under-understood with no paper claiming YYY without being disputed within the field. (This comes down to the fact, that experiments with living, moving cells are inherently intractable) Here is a list of the fundamental single-cell active forces that is undeniably happening, even if not essential for the final outcome:\footnote{As nature is remarkably resilient, there is clear and definite evidence of one action overtaking when another fails to deliver \cite{butler2009cell} \textbf{Rewrite}} 
 \begin{outline}
@@ -72,13 +77,48 @@ All multicellular organisms, will YYY need to go from the simple single cell to 
 Needs organization. Again, for humans and fruit fly alike, this is done via genetic patterning.\cite{veraksa2000developmental} 
 
 
+\begin{table}[]
+\begin{tabular}{llll}
+Morphogen & \begin{tabular}[c]{@{}l@{}}Genetically patterned \\ transcription factor proteins\end{tabular} & Location at gastrulation & Vital for development of \\ \hline
+Spätzle   & Twist \& Snail                                                                                 & Ventral                  & Mesoderm                 \\
+Trunk     & Huckebein \& Tailless                                                                          & Posterior                & Endoderm (Midgut)   \\
+
+YYY & Runt \& Even skipped & Germ Band & All of the above\\
+YYY & Buttonhead \& Even skipped  & Cephalic furrow & Chephalic furrow\\
+
+\end{tabular}
+\end{table}
+
+\noindent
+Now, to shake it up, \textit{Twist} \& \textit{Snail}, which might remind you of the beetles,\footnote{The species \textit{Tribozium} for example\cite{sommer1994expression}} are vital for the early development of a surviving fruit fly.
 
 
-\textit{Twist \& Snail} is vital for the early development of a successful fly, just like for the beetles\footnote{here of course refering to Tribozium \cite{sommer1994expression}},. [hjælp, frede] 
+During the development of our model, the data and ressources at \url{https://shiny.mdc-berlin.de/DVEX/} have been absolutely vital.
 
-MENTION: \url{shiny.mdc-berlin.de/DVEX/}
 \section{How cells move}
 Newtons first law of motion seems to prevent any internal movement
+
+Of course cell motility is important 
+
+
+Cytoskeleton
+
+Important: Fundamentally different from Chemotaxis 
+
+Main motor protein on our scale:  \textit{Myosin II} (driver of Apical constriction for example) 
+
+Membrane tethers connecting local neighborhoods.
+
+Anisotropic constricting at cell borders \url{https://www.youtube.com/watch?v=MO7x7R-m3Qk}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{chapters/Theory/figures/EM_constricting_proteins.png}
+    \caption{Electron microscopy of Myosin II meshwork at ventral side. Taken from \cite{martin2010integration}}
+    \label{fig:enter-label}
+\end{figure}
+
 
 
 \section{Previous attempts at simulation?}

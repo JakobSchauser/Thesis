@@ -18,7 +18,9 @@
 %%%% Personal setup %%%%%
 
 %% bibtex Important package to use full citations: bibentry
-\usepackage[super]{natbib}
+% \usepackage[super]{natbib}
+\usepackage[numbers]{natbib}
+% \usepackage{cite}
 \usepackage{bibentry}
 \newcommand\citeAY[1]{\citeauthor{#1} (\citeyear{#1})}
 % \usepackage[autocite=superscript]{biblatex}
@@ -30,7 +32,9 @@
 \definecolor{kurød}{rgb}{0.565, 0.102, 0.118}
 \hypersetup{colorlinks=true, urlcolor=kurød, citecolor = kurød, linkcolor = kurød}
 \usepackage{float}
-
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{graphicx}
 \usepackage{outlines}
 
 %% You can put all packages and personalized commands in the following document.
@@ -40,6 +44,7 @@
 
 %%% Front Page %%%
 \ptype{Masters Thesis}
+\fpimage{template/frontpage.png}
 \author{Jakob Hallundbæk Schauser}
 \title{Emergence and Something:\\ Simulating Gastrulation in Drosophila}
 \subtitle{Absolutely no idea for subtitle}

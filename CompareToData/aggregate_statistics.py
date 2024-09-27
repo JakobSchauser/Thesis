@@ -41,6 +41,7 @@ def get_rosettes(positions, properties, types = [-1], scale = 100, max_dist = 5)
     potential_rosettes = []
 
     for iii in tqdm(range(N_time_steps - 1)):
+        vecs_between_this_time_step = []
 
         # vecs = []
         xx0 = positions[iii*scl]
@@ -88,11 +89,12 @@ def get_rosettes(positions, properties, types = [-1], scale = 100, max_dist = 5)
 
             counts[p_iii, p_i] += 1
             vec_between = xx0[p_new_nb] - xx0[p_i]
-            vecs_between.append(vec_between)
+            vecs_between_this_time_step.append(vec_between)
             pairs.append(set([new_nb, common_nb, p_lost_nb]))
             # print(p)
             # print(iii*scl)
 
+        vecs_between.append(vecs_between_this_time_step)
 
 
 

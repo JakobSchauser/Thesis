@@ -93,17 +93,25 @@ YYY & Buttonhead \& Even skipped  & Cephalic furrow & Chephalic furrow\\
 Now, to shake it up, \textit{Twist} \& \textit{Snail}, which might remind you of the beetles,\footnote{The species \textit{Tribozium} for example\cite{sommer1994expression}} are vital for the early development of a surviving fruit fly.
 
 
-During the development of our model, the data and ressources at \url{https://shiny.mdc-berlin.de/DVEX/} have been absolutely vital.
+During the development of our model, the data and resources at have been absolutely vital. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.2\linewidth]{chapters/Theory/figures/patterning.png}
+    \caption{The data extracted from \url{https://shiny.mdc-berlin.de/DVEX/} as projected onto our embryo}
+    \label{fig:enter-label}
+\end{figure}
+
+
 
 \section{How cells move}
 Newtons first law of motion seems to prevent any internal movement
 
 Of course cell motility is important 
 
+The cytoskeleton is 
 
-Cytoskeleton
-
-Important: Fundamentally different from Chemotaxis 
+Important: Fundamentally different from Chemotaxis. 
 
 Main motor protein on our scale:  \textit{Myosin II} (driver of Apical constriction for example) 
 
@@ -119,9 +127,13 @@ Anisotropic constricting at cell borders \url{https://www.youtube.com/watch?v=MO
     \label{fig:enter-label}
 \end{figure}
 
-
-
 \section{Previous attempts at simulation?}
+While in silico models has provided multiple . most of the aforementioned events, their interplay has proven hard to study. 
+
+
+
+
+
 \section{Overdamped dynamics}
 
 \section{\textit{The Model}}
@@ -144,3 +156,7 @@ A works as follows:
     A_{ij}=\sum_{n=1}^{3}\lambda_n A_n
 \end{equation}
 where we sometimes keep the constraint $\sum_{n=1}^{3}\lambda_n=1$ but more often t
+
+
+
+For notes on the actual implementation see Section \ref{App:Code} in the Appendix.

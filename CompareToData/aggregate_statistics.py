@@ -129,10 +129,15 @@ def get_rosettes(positions, properties, types = [-1], scale = 100, max_dist = 5)
                     common_ns_prev_nbs = nbs_0[common_nb]
                     common_nb_new_nbs = nbs_1[common_nb]
 
+                    old_nb_nbs = (common_nb_new_nbs & (overlap | overlap_old) )
+                    new_nb_nbs =  (common_ns_prev_nbs & (overlap | overlap_old))
                     # if the common neighbor has lost a neighbor that they both are connected to
-                    overlapx2 = (common_ns_prev_nbs & overlap & overlap_old) - (common_nb_new_nbs & overlap & overlap_old ) - set([i, new_nb])
+                    overlapx2 = old_nb_nbs - new_nb_nbs
 
                     if len(overlapx2) == 1:
+                        # print(len(overlapx2))
+                        # print(old_nb_nbs)
+                        # print(new_nb_nbs)
                         potential_rosettes.append([iii, i, new_nb, common_nb, list(overlapx2)[0]])
 
                         shouldbreak = True

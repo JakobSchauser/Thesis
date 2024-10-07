@@ -1,4 +1,4 @@
-Quick overview of things you'll need to understand while keeping me consistent with the litterature:
+Before getting to all the fun graphs, we will need to introduce some concepts, so you\footnote{yes, \textit{you} specifically} can follow along while keeping me somewhat consistent with the literature:
 
 \begin{enumerate}
     \item Upper/Lower $\rightarrow$ Dorsal/Ventral
@@ -13,13 +13,9 @@ Whenever an diagram or image of the egg is show, the Anterior side is pointing t
 \label{sec:theory-polarity}
 \subsection{Broken Symmetries}
 
-Almost all animals [Citation needed] start as a single, isotropic shell of epithelial cells. This shell will 'turn in on itself' and begin developing the basis for organogenesis. This process is called gastrulation. As animals are not spherically symmetric\footnote{except for your mom}, a number of symmetries need to be broken. 
+Almost all animals [Citation needed] start as a single, isotropic sphere of epithelial cells. At one point, this ball will 'turn in on itself' and begin developing the basis for organogenesis. This process is called gastrulation. As animals are not spherically symmetric\footnote{except for your mom}, a number of symmetries need to be broken. 
 
-As the cells line the inside of the egg, their surfaces form distinct \textit{apical}, \textit{lateral} and \textit{basal} domains. Through preferential adhesion\footnote{heterophilic bonding} based on the surface orientation the cells can form a shell, thereby giving rise to the well-defined Apical-Basal polarity (AB-polarity from here on). 
-
-YY off-equilibrium densities with the gradients. These are called morphogens and 
-In a W for computational biology, the mechanics of morphogens where predicted by none other than Alan Turing
-
+In drosophila, after the first rounds of mitosis, the cells migrate to line the inside of their egg. This allows their surfaces form distinct "outside" and "inside" domains. Through preferential adhesion\footnote{explain  preferential adhesion} based on their individual surface orientation, the cells can maintain the shell-form, thereby giving rise to the well-defined Inside-Outisde polarity. In biology this is known as Apical-Basal polarity (AB-polarity from here on) and is seen in almost every multicellular system. 
 
 We will quickly outline the main morphological features of the gastrulation cycle of the embryo:
 \begin{outline}
@@ -44,42 +40,55 @@ Diffusion based concentration gradients along with the aforementioned polarities
 
 \subsection{Genetic Patterning}
 \label{sec:gen_patterns}
-All multicellular organisms, will YYY need to go from the simple single cell to forming the complex body plans we all know and love. This complicated interplay between cells will 
+All multicellular organisms, will YYY need to go from the simple single cell to forming the complex body plans we all know and love. This complicated interplay between cells will needs organization. Again, for humans and fruit fly alike, this is done via genetic patterning.\cite{veraksa2000developmental}
 
-Needs organization. Again, for humans and fruit fly alike, this is done via genetic patterning.\cite{veraksa2000developmental} 
+Thinking about this it top-down is inaccurate.
 
 
-\begin{table}[]
-\begin{tabular}{llll}
-Morphogen & \begin{tabular}[c]{@{}l@{}}Genetically patterned \\ transcription factor proteins\end{tabular} & Location at gastrulation & Vital for development of \\ \hline
-Spätzle   & Twist \& Snail                                                                                 & Ventral                  & Mesoderm                 \\
-Trunk     & Huckebein \& Tailless                                                                          & Posterior                & Endoderm (Midgut)   \\
+% Now, to shake it up, \textit{Twist} \& \textit{Snail}, which might remind you of the beetles,\footnote{The species \textit{Tribozium} for example\cite{sommer1994expression}} are vital for the early development of a surviving fruit fly.
 
-YYY & Runt \& Even skipped & Germ Band & All of the above\\
-YYY & Buttonhead \& Even skipped  & Cephalic furrow & Chephalic furrow\\
+
+During the development of our model, the data and resources at \url{https://shiny.mdc-berlin.de/DVEX/} have been absolutely vital.
+
+TODO: Maybe explain data-processing?
+
+This allowed us making maps. Where we initially defined areas of interes after hand-drawn cell-fate maps, we can now specify boundaries between cell types on the unperturbed morphology using interactions between maternal gradients. A selection fo some of the most vital morphogens can be seen in tabek \ref{tab:morphogens} and in Figure \ref{fig:MorphogenMap} their concentrations can be seen as mapped onto our virtual blastoderm.
+
+
+\begin{table}[H]
+\begin{tabular}{lll}
+ \begin{tabular}[c]{@{}l@{}}Genetically patterned \\ transcription factor proteins\end{tabular} & Location at gastrulation & Vital for development of \\ \hline
+ Twist \& Snail                                                                                 & Ventral                  & Mesoderm                 \\
+Huckebein \& Tailless                                                                          & Posterior                & Endoderm (Midgut)   \\
+
+ Runt \& Even skipped & Germ Band & All of the above\\
+Buttonhead \& Even skipped  & Cephalic furrow & Chephalic furrow\\
 
 \end{tabular}
+    \caption{The most important morphogens and their simplified reason of significance}
+    \label{tab:morphogens}
 \end{table}
 
+
 \noindent
-Now, to shake it up, \textit{Twist} \& \textit{Snail}, which might remind you of the beetles,\footnote{The species \textit{Tribozium} for example\cite{sommer1994expression}} are vital for the early development of a surviving fruit fly.
-
-
-During the development of our model, the data and resources at \url{https://shiny.mdc-berlin.de/DVEX/} have been absolutely vital. 
 
 \begin{figure}[H]
     \centering
     \makebox[\linewidth]{\includegraphics[width=1.2\linewidth]{chapters/Theory/figures/patterning.png}}
-    \caption{The data extracted from \url{https://shiny.mdc-berlin.de/DVEX/} as projected onto our embryo}
-    \label{fig:enter-label}
+    \caption{The data extracted from \url{https://shiny.mdc-berlin.de/DVEX/} as projected onto our embryo. A clear attest to the remarkable and stable pattern formation Turing predicted chemicals gradients capable of producing.}
+    \label{fig:MorphogenMap}
 \end{figure}
 
 Importantly, the interaction between the morphogens and the mechanical deformations go both ways. It has been shown (J. Schauser et al) that a mechanical stimulus can trigger a chemical signal, thereby reinducing patterning in a feedback loop. This is called mechanotransduction and is believed to be vital in stable PCP-orientation. [citation needed]
 
 
+\textbf{Important:}
+The PCP has been shown to be gradient of striping
+
+
 \section{How cells move}
 
-In general, most of the global large-scale cell migration seen during development of multicellular organisms stem from a handful of seemingly simple\footnote{albeit still not well understood} active single-cell actions \cite{walck2014cell}.\\
+In general, most of the global large-scale cell migration seen during development of multicellular organisms stem from a handful of seemingly simple\footnote{albeit still not well understood} active single-cell actions.\cite{walck2014cell}\\
 The cells internal structure is called the cytoskeleton with internal \textit{motor proteins} responsible for keeping and changing the cells shape.
 
 The motion we will be looking at, are of a type that is fundamentally different from Chemotaxis, with cells reacting to a local chemical concentration but not moving along a gradient [citation needed]. The global changes in physical structure we will be exploring all arise from cell actions with little to no discernible individual movement.
@@ -94,21 +103,44 @@ When we talk about the individual cells, this is a simplification. As can be see
     \label{fig:mysosinMeshwork}
 \end{figure}
 
-In Drosophila gastrulation, the role of these 'driving effects' are surprisingly under-understood with no paper claiming YYY with certainty.\footnote{This very much comes down to the fact, that experiments with living, moving cells are inherently intractable/hard} Here is a list of the fundamental single-cell active forces that is undeniably happening, even if not essential for the final outcome:\footnote{As nature is remarkably resilient, there is clear and definite evidence of one action overtaking when another fails to deliver \cite{butler2009cell} \textbf{Rewrite}} 
+In Drosophila gastrulation, the role of these 'driving effects' are surprisingly under-understood with no paper claiming YYY with certainty.\footnote{This very much comes down to the fact, that experiments with living, moving cells are inherently intractable/hard} Here is a list of the fundamental single-cell active forces that is undeniably happening, even if not essential for the final outcome:\footnote{As nature is remarkably resilient, there is clear and definite evidence of one action overtaking when another fails to deliver. \textbf{Rewrite} This will be expanded upon in Section \ref{sec:mutantNoGB}} 
 
 \subsection{Convergent Extension}
-For elongating the germ band Convergent Extension is king. Consisting of asymmetric cellular intercolations, tissue can change shape without the individual constituents looking any different.  
+For elongating the germ band Convergent Extension seems to be the main proprietor of movement. Consisting of asymmetric cellular intercolations, tissue can change shape without the individual constituents looking any different.  
 
-Wieshaus and [hende damen der] showed through laser ablation, Cell Intecolation. Anisotropic constriction of cell borders with deformations only happening  \url{https://www.youtube.com/watch?v=MO7x7R-m3Qk}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.45\linewidth}
+        \centering
+    \includegraphics[width=\linewidth]{chapters/Theory/figures/ConvergentExtensionDiagram.png}
+    \caption{A diagram showing how guided intercolation results in directional elongation}
+    \end{subfigure}
+        \begin{subfigure}{0.45\linewidth}
+        \centering
+        \caption{Dyed Germ Band tissue showing clear difference in horizontal and vertical protein expressions}
+    \includegraphics[width=\linewidth]{chapters/Theory/figures/bipolar-PCP.png}
+    \end{subfigure}
+    \caption{\cite{zallen2004patterned}\url{https://www.youtube.com/watch?v=MO7x7R-m3Qk}}
+    
+    \label{fig:ConvergentExtensionDiagram}
+\end{figure}
+
+Wieshaus and [hende damen der] showed through laser ablation, Cell Intecolation. Anisotropic constriction of cell borders with deformations only happening  
 
 
- TODO: Add figure
 
 We know that the signaling protein Wnt plays an important role in controlling Convergent Extension. For interesting writing, here is some foreshadowing: Wnt is also known as an inducer of Planar-Cell-Polarity.
-\subsection{ Apical Constriction }
-For creating wedges . Apical constriction functions exactly as you would think, the apical (outer) side of the cell constricts, creating a smaller surface area. Cells has been shown the ability to constrict both isotropically and anisotropically.
 
- TODO: Add figure
+\subsection{ Apical Constriction }
+When the cell sheet wants out-of-plane bending, they turn to Apical Constriction. Apical constriction functions exactly as you would think; Myosin rings constrict the apical (outer) side of the cell, creating a smaller surface area. This leads to bending and, when enough constriction is applied, invagination. (see Figure \ref{fig:apical-constriction}). Cells has been shown the ability to constrict both isotropically and anisotropically.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\linewidth]{chapters/Theory/figures/apical_constriction_schematic.png}
+    \caption{Schematic for how apical constriction works}
+    \label{fig:apical-constriction}
+\end{figure}
+
 
 \subsection{Cell Shape Change}
 If each part is long, the total is long. This one is self-evident.
@@ -173,7 +205,7 @@ $\cdots$
 where we sometimes keep the constraint $\sum_{n=1}^{3}\lambda_n=1$ but more often t
 
 
-Taking inspiration from the previous sections about YYY we introduce the two biologically founded polarities: Apical-Basal (ie. inside/outside) and Planar Cell Polarity. ABP and PCP from here on. As previously mentioned in Section \ref{sec:gen_patterns}, the interplay between cell-polarisation and physical orientation goes both ways. The terms:
+Taking inspiration from the previous sections about YYY we introduce the two biologically founded polarities: Apical-Basal (ie. inside/outside) and Planar Cell Polarity. ABP and PCP from here on. As previously mentioned in Section \ref{sec:gen_patterns}, the interplay between cell-polarisation and physical orientation goes both ways. This motivates the following three terms which I will quickly explain one by one:
 \begin{subequations}
 \begin{align}
 S_1&=\left(\hat{p}_i \times \hat{r}_{i j}\right) \cdot\left(\hat{p}_j \times \hat{r}_{i j}\right)\label{eq:s1}\\

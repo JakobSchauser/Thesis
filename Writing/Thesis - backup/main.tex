@@ -32,12 +32,18 @@
 \definecolor{kurød}{rgb}{0.565, 0.102, 0.118}
 \hypersetup{colorlinks=true, urlcolor=kurød, citecolor = kurød, linkcolor = kurød}
 \usepackage{float}
-\usepackage{caption}
+% \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{graphicx}
 \usepackage{outlines}
 \usepackage{amsmath}
 \setlength\parindent{0pt}
+\usepackage[font={small},labelfont=bf, format = hang,indention=-1.5cm]{caption}
+\newcommand{\todo}[1]{\textcolor{purple}{\textbf{TODO: #1}}}
+\newcommand{\note}[1]{\textcolor{orange}{\textbf{Note: #1}}}
+% \usepackage[font={small, sl},labelfont=bf]{caption}
+% \newcommand{}[]{}
+
 %% You can put all packages and personalized commands in the following document.
 \input{setup.tex}
 
@@ -48,7 +54,7 @@
 \fpimage{template/frontpage.png}
 \author{Jakob Hallundbæk Schauser}
 \title{Emergence and Mesoscopy:\\ Drosophila Gastrulation In Silico}
-\subtitle{Uncovering the macroscopic\\ from simulating the microscopic}
+\subtitle{Uncovering macroscopic morphogenisis\\ from simulating microscopic}
 \advisor{Supervisor: Ala Trusina}
 \date{October 2024}
 %% This sentence is needed for PhD theses, but it can be replaced by the date for other projects.
@@ -119,7 +125,7 @@
 \frontmatter % to get a different numbering of the frontmatter and mainmatter.
 \pagestyle{plain} % not to get a header in the introduction pages
 
-\newpage \ \\\\\\\\\\\\\textit{"Art and technology have been trying for decades, but in the world of physics, not a lot of complexity is needed for something akin to life to emerge"} - Goodiepal in the 11th hour (16:40) \newpage % to skip a page 
+\newpage \ \\\\\\\\\\\\\textit{"Art and technology have been trying for decades, but in the world of physics, not a lot of complexity is needed for something akin to life to emerge"} \\- Goodiepal in the 11th hour% (16:40) \newpage % to skip a page 
 
 % The Abstract, Danish Abstract and Acknowledgements are not numbered here but still appear in the table of contents.
 \section*{Abstract}
@@ -135,7 +141,7 @@
 \section*{Acknowledgements}
 \label{sec:acks}
 \addcontentsline{toc}{section}{Acknowledgements}
-I acknowledge seb
+
 
 \newpage
 \tableofcontents

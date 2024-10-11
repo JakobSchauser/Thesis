@@ -4,11 +4,42 @@ import matplotlib.pyplot as plt
 from scipy.spatial import kdtree
 from tqdm import tqdm
 
+seethru = 0
+
+# def find_neighbors_3d_with_threshold(coords, max_distance=15, seethru=1.0):
+#     # Step 1: Compute pairwise distances, but only for points within the max distance
+#     diff = coords[:, np.newaxis, :] - coords[np.newaxis, :, :]  # Broadcasting for pairwise differences
+#     distances = np.linalg.norm(diff, axis=2)  # Pairwise distance matrix
+    
+#     # Step 2: Apply the max distance threshold (ignores points beyond 15 units)
+#     distances[distances > max_distance] = np.inf  # Mark distances greater than the threshold as inf
+#     np.fill_diagonal(distances, np.inf)  # Set diagonal to inf to avoid self-neighbors
+
+#     # Step 3: Define the threshold distance as half of the valid distances
+#     thresholds = distances / 2
+
+#     # Step 4: Find neighbors using the threshold, skipping distant points
+#     neighbors = []
+#     for i in range(coords.shape[0]):
+#         print("looking @", i)
+#         # Apply the threshold and get neighbors within 15 units
+#         z_mask = find_true_neighbours_np_with_threshold(thresholds[i], distances, seethru)
+        
+#         # Exclude self and get valid neighbor indices
+#         neighbor_indices = np.where(z_mask)[0]
+#         neighbors.append(neighbor_indices[neighbor_indices != i])
+    
+#     return neighbors
+
+# def find_true_neighbours_np_with_threshold(threshold, distances, seethru):
+#     # Directly check for neighbors using the threshold
+#     z_mask = (distances < threshold) & (distances < 15)  # Boolean mask for neighbors below threshold and max distance
+#     return z_mask
 
 def get_rosettes(positions, properties, types = [-1], scale = 100, max_dist = 5):
 
     def get_nbs(xs) -> set:
-        tri = Delaunay(xs)
+        tri = Delaunay(xs, furthest_site = 1)
         indsx, all_neighbors = tri.vertex_neighbor_vertices
 
         neighbors = []
@@ -27,6 +58,8 @@ def get_rosettes(positions, properties, types = [-1], scale = 100, max_dist = 5)
 
         return actual_neighbors
 
+    # def get_nbs(xs):
+    #     return find_neighbors_3d_with_threshold(xs)
 
     if types == [-1]:
         types = np.unique(properties)
@@ -68,14 +101,14 @@ def get_rosettes(positions, properties, types = [-1], scale = 100, max_dist = 5)
             p_common_nb = p[3]
             p_lost_nb = p[4]
 
-            has_been_seen = False
-            for pair in pairs:
-                if p_i in pair and p_new_nb in pair:
-                    has_been_seen = True
-                    break
+            # has_been_seen = False
+            # for pair in pairs:
+            #     if p_i in pair and p_new_nb in pair:
+            #         has_been_seen = True
+            #         break
             
-            if has_been_seen and iii > 20:
-                continue
+            # if has_been_seen and iii > 20:
+            #     continue
 
             # check if the cells are still neighbors
             if p_i not in nbs_0[p_new_nb] or p_new_nb not in nbs_0[p_i]:

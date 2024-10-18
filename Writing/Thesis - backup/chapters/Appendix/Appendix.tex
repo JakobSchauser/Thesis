@@ -5,19 +5,7 @@
     \centering
     \includegraphics[width=1\linewidth]{chapters/Appendix/streamplot1.png}
 \end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{chapters/Appendix/streamplot2.png}
-    \caption{Cool but ultimately non-useful flow-field plots}
-    \label{fig:enter-label}
-\end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{chapters/Results/figures/movements.png}
-    \caption{\todo{Remove some of the cells -- it's cluttered. Change color over time}}
-    \label{fig:GBMovements}
-\end{figure}
 
 \begin{figure}[H]
     \centering
@@ -55,7 +43,6 @@ Every time a new pair 'touch' on the up-down axis, they release space for a pair
 \subsection*{Pressure from yolk}
 \section{Detailed morphogens}
 \label{App:morphogens}
-
 \begin{table}[H]
 \begin{tabular}{lll}
  \begin{tabular}[c]{@{}l@{}}Genetically patterned \\ transcription factor proteins\end{tabular} & Location at gastrulation & Vital for development of \\ \hline
@@ -69,6 +56,125 @@ Buttonhead \& Even skipped  & Cephalic furrow & Chephalic furrow\\
     \caption{The most important morphogens and their simplified reason of significance}
     \label{tab:morphogens}
 \end{table}
+
+
+\begin{lstlisting}
+# The germ band requires striping to be active [citation]
+GB = GE.or_gene(GE.gene("eve"), GE.gene("run"))
+
+# A cutoff was needed because of spotty coverage
+# As can be seen on all, the germ-band does not extend far up
+# we expect some inhibiting gene to be doing this IRL
+GB[GE.base[:,2] > 50] = 0
+
+# remove in the head domain
+GB = GE.not_gene(GB, GE.gene("fkh"))
+
+# ...
+GE.add_expression(GE.get_second_run_stripe(), 0.4, True, 5)  # Second Run Stripe
+
+GE.add_expression(GE.get_fifth_run_stripe(), 0.4, True, 5)  # Second Run Stripe
+
+GE.add_expression(GB, 0.2, True, 1)  # Germ Band
+
+# GE.add_expression(GE.not_gene(GE.or_gene(GE.gene("eve"), GE.gene("run")), GE.gene("Doc2")), 0.2, True, 1)  # Germ Band
+
+GE.add_expression(GE.gene("Dfd"), 0.6, True, 5)  # Cephalic Furrow
+
+
+# GE.add_expression(GE.not_gene(GE.and_gene(GE.gene("Kr"),GE.gene("run")), GE.gene("sna")), 0.2, True, 5)  # posterior fold
+
+twi = GE.gene("twi")
+
+twi[GE.base[:,1] > 25] = 0.
+twi[GE.base[:,1] < -25] = 0.
+
+# GE.add_expression(twi, 0.3, True, 4)  # Ventral Furrow (Daniel)
+
+
+twist_and_snail = GE.and_gene(GE.gene("twi"), GE.gene("sna"))
+
+# twist_and_snail[GE.base[:,0] > 140] = 0.
+
+GE.add_expression(twist_and_snail, 0.2, True, 2)  # Ventral Furrow
+
+
+GE.add_expression(GE.gene("hkb"), 0.25, True, 4)  # PMG
+# GE.add_expression(GE.gene("hkb",), 0.6, True, 3)
+
+
+GE.add_expression(GE.or_gene(GE.gene("croc"), GE.gene("oc")), 0.4, True, 0)  # Invert
+
+
+GE.save("no_q_from_runt", q_from_runt=False)
+\end{lstlisting}
+
+\subsubsection{Cell types extracted from data}
+When we say that the cell types were extracted from data, this comes with a couple asterisks:\\
+Any expression in the cephalic region was removed by hand.\\
+\textbf{Cephalic furrow}
+In the data-set there were no [Cephalic furrow gene], but using the website [website] we could see that it spatially coincided with [other gene] which was in the data-set and was therefore used as a proxy. 
+\textbf{Germ-band}
+The germ-band was cut off by hand as the [gene1] and [gene2] expressions were very spotty at the top and the germ-band would not extend correctly.\footnote{I am guessing a suppressing gene that we did not take into account is also at play} 
+
+\textbf{Ventral furrow}
+Even though all the cells expressing \textit{twist} \& \textit{snail} on the belly lower their apical surface area, they do not constrict indiscriminately. Instead they start out by constricting in the \textit{inner} 8x60 cells. [citation needed] It is believed to be a more stable way of wedging [citation needed] but is still strange and not fully understood. [citation needed]. This meant that a specific rule for the wedging in the ventral region was needed. The inner 8 cells has a wedging constant $\alpha = 0.5$ while the rest has $\alpha = 0.2$.
+
+\section*{Rosette analysis}
+Convergent Extension is seen as a vital part of the development of many different YYY. Therefore multiple different methods of analysis and YYY have been developed.
+One of the main quantifiers consist of looking at a cluster of neighboring cells that undergo convergent extension. These clusters are called Rosettes. Trough laser-ablation is has been shown that the Rosettes (as shown in the diagram on Figure \ref{fig:ConvergentExtensionDiagram}) can consist of up two twelve internally connected cells [citation needed].
+For drosophila gastrulation in particular, the direction between each newly acquired neighbor is \todo{finish thought}
+
+
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{chapters/Results/figures/rosettes_placeholder.png}
+%     \caption{Caption}
+%     \label{fig:enter-label}
+% \end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \makebox[\textwidth][c]{
+    \begin{subfigure}[b]{0.55\textwidth}
+    \centering
+        \includegraphics[width=\linewidth]{chapters/Results/figures/rosettes_angle_dist.png}
+
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    
+    \includegraphics[width=\linewidth]{chapters/Results/figures/rosettes_angle_dist_data.png}
+    \end{subfigure}
+    }
+    \caption{The angular distribution of the newly acquired neighbors in rosettes as found in (\textbf{left}) simulation (in radians) and (\textbf{right}) data (in degrees).}
+    \label{fig:roestte-angle-dist}
+    
+\end{figure}
+In Figure \ref{fig:roestte-angle-dist}, the distribution of angles of all found rosette-events can be seen. Strangely, the distribution is clearly bimodal in horizontal and vertical, where the ground truth has a single peak at the vertical axis. 
+
+We believe the lack of malleability in the contours of the cells might be to blame.
+
+
+% When speaking with Daniel, a researcher at the [Stas'] laboratory who did the original analysis, he said that this makes sense, as looking at neighboring nuclei is fundamentally different from edges. \todo{rephrase to make less bad}. 
+
+% I won't bore you the details, so a quick run-down of our thoughts and discussions can be found in Section \ref{App:why-rosettes} in the Appendix.\\
+
+% ... \\
+% Speaking of Daniel:
+\note{
+Not showing something good :( Keep for completeness or move to appendix?}
+
+% \subsection{Daniel-data?}
+% Nothing here yet...
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.7\linewidth]{chapters/Results/figures/daniel_placeholder.png}
+%     \caption{Some caption}
+%     \label{fig:enter-label}
+% \end{figure}
 
 \section*{Other efforts we have tried in vain}
 

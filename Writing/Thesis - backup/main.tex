@@ -30,6 +30,11 @@
 \bibliographystyle{plainnat}
 
 \definecolor{kurød}{rgb}{0.565, 0.102, 0.118}
+
+\definecolor{PMGcolor}{rgb}{0.0, 0.690, 0.314}
+\definecolor{VFcolor}{rgb}{0.0, 0.439, 0.753}
+% \definecolor{GBcolor}{rgb}{0.565, 0.102, 0.118}
+
 \hypersetup{colorlinks=true, urlcolor=kurød, citecolor = kurød, linkcolor = kurød}
 \usepackage{float}
 % \usepackage{caption}
@@ -39,14 +44,24 @@
 \usepackage{amsmath}
 \setlength\parindent{0pt}
 \usepackage[font={small},labelfont=bf, format = hang,indention=-1.5cm]{caption}
-
+\usepackage{wrapfig}
 % Reset indentation specifically for subfigures
 \captionsetup[subfigure]{format=hang, labelfont=bf, indention=0cm}
 
 
 \newcommand{\todo}[1]{\textcolor{purple}{\textbf{TODO: #1}}}
 \newcommand{\note}[1]{\textcolor{orange}{\textbf{Note: #1}}}
+\newcommand{\reph}[0]{\textcolor{red}{\textbf{Rephrase!}}}
 \interfootnotelinepenalty=10000
+
+
+
+\newcommand{\vf}[1]{\textcolor{VFcolor}{\textbf{#1}}}
+\newcommand{\gb}[1]{\textcolor{kurød}{\textbf{#1}}}
+\newcommand{\pmg}[1]{\textcolor{PMGcolor}{\textbf{#1}}}
+
+
+
 
 \usepackage{listings}  % For presenting code 
 \lstdefinestyle{mystyle}{

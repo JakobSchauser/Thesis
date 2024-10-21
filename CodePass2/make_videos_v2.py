@@ -14,7 +14,7 @@ from utils import voronoi_plot_2d
 def make_videos(filename:str, interval :int):
     # import the data
     print('Loading data')
-    assert os.path.isfile('runs/' + filename + '.hdf5'), "Please provide a valid run filename"
+    assert os.path.isfile('D:/' + filename + '.hdf5'), "Please provide a valid run filename"
 
     # if the video already exists, ask if the user wants to overwrite it
     if os.path.isfile(filename + '.mp4'):
@@ -33,7 +33,7 @@ def make_videos(filename:str, interval :int):
     dists = 55
     has_energies = False
 
-    with h5py.File('runs/' + filename + '.hdf5', 'r') as f:
+    with h5py.File('D:/' + filename + '.hdf5', 'r') as f:
         dat = f['x'][::5]
         properties = f['properties'][:][0]
         pcp = f['q'][:][::5]
@@ -90,14 +90,14 @@ def make_videos(filename:str, interval :int):
         ax.scatter(x, -z, y + dists, s=size, c=colors, edgecolors='k')
 
 
-        closey = y<0
-        ax.quiver(x[closey], y[closey], z[closey], pcp[i, :, 0][closey], pcp[i, :, 1][closey], pcp[i, :, 2][closey], length=2, normalize=True, color='r')
+        # closey = y<0
+        # ax.quiver(x[closey], y[closey], z[closey], pcp[i, :, 0][closey], pcp[i, :, 1][closey], pcp[i, :, 2][closey], length=2, normalize=True, color='r')
 
-        closez = z < 0
-        ax.quiver(x[closez], z[closez], y[closez] - dists, pcp[i, :, 0][closez], pcp[i, :, 2][closez], pcp[i, :, 1][closez], length=2, normalize=True, color='r')
+        # closez = z < 0
+        # ax.quiver(x[closez], z[closez], y[closez] - dists, pcp[i, :, 0][closez], pcp[i, :, 2][closez], pcp[i, :, 1][closez], length=2, normalize=True, color='r')
 
-        closez = z > 0
-        ax.quiver(x[closez], -z[closez], y[closez] + dists, pcp[i, :, 0][closez], pcp[i, :, 2][closez], pcp[i, :, 1][closez], length=2, normalize=True, color='r')
+        # closez = z > 0
+        # ax.quiver(x[closez], -z[closez], y[closez] + dists, pcp[i, :, 0][closez], pcp[i, :, 2][closez], pcp[i, :, 1][closez], length=2, normalize=True, color='r')
  
         ax.set_axis_off()
 

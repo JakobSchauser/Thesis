@@ -45,8 +45,10 @@
 \setlength\parindent{0pt}
 \usepackage[font={small},labelfont=bf, format = hang,indention=-1.5cm]{caption}
 \usepackage{wrapfig}
+\usepackage{etoc}
+
 % Reset indentation specifically for subfigures
-\captionsetup[subfigure]{format=hang, labelfont=bf, indention=0cm}
+\captionsetup[subfigure]{format=hang, labelfont=bf, indention=-0.3cm}
 
 
 \newcommand{\todo}[1]{\textcolor{purple}{\textbf{TODO: #1}}}
@@ -59,6 +61,7 @@
 \newcommand{\vf}[1]{\textcolor{VFcolor}{\textbf{#1}}}
 \newcommand{\gb}[1]{\textcolor{kurød}{\textbf{#1}}}
 \newcommand{\pmg}[1]{\textcolor{PMGcolor}{\textbf{#1}}}
+\newcommand{\cephalic}[1]{\textcolor{yellow}{\textbf{#1}}}
 
 
 
@@ -224,13 +227,13 @@
 \input{chapters/Results/Results}
 
 
-\chapter{Conclussion}
+\chapter{Conclusion}
 \label{chap:con}
 \input{chapters/Conclussion/Conclussion}
 
-\chapter{Outlook}
-\label{chap:out}
-\input{chapters/Outlook/Outlook}
+% \chapter{Outlook}
+% \label{chap:out}
+% \input{chapters/Outlook/Outlook}
 
 
 

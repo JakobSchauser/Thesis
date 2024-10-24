@@ -171,9 +171,6 @@ Now, what is a fruit fly?
 \section{The Drosophila Gastrulation in detail}
 In the literature, the development of the fruit fly from fertilised egg to hatched larvae is usually divided into 17 distinct events.\cite{bownes1975photographic} We will be looking at stages 5 through 7, lasting about 15 minutes. These are characterized by having the first mesoscopic morphogenetic movements and setting the stage for all morphology to come.
 
-The
-\todo{more}
-
 The egg has a radius of about 1/10th of a milimeter\footnote{Source: This wonderful website: \url{https://bionumbers.hms.harvard.edu/bionumber.aspx?id=111360}}
 After 12 rounds of cell division with about the egg now consist of about 5000 cells. 
 When looking at the embryo, the following parts will be the most active, important and relevant to our project:
@@ -237,7 +234,7 @@ When studying the biomechanics of morphogenesis there seems to be two primary st
 
 \textbf{Isolated Active Phenomenon:} In this approach, a single active phenomenon, such as convergent extension, is simulated "in a vacuum." This allows for a detailed comparison of the actions of individual cells against imaging of YYY. An example of this could be the YYY,.  This method can provide great insight into the underlying physics and chemistry at play. However, this method may fall short in shedding light on the any specific morphogenetic event or omit important context.\\
 
-It is mainly either vertex-based or continuum approximation-based simulations that have dominated the field. These are all great for accurately describing the minute changes in the physics of tubologenesis, tissue-folding etc., but they comes with some drawbacks. These  models focus on the pressure and tensile forces, simulating the strains in the cell walls. Finite-element models that look at sub-parts of cells are often computationally heavy. This often requires it to be done in 2D \cite{krajnc2018fluidization}, inherently loosing some particularities of the problem. A more computationally efficient approach is the cell-center based models. When looking for off-lattice center-based model, not many shows up. An example, but only using non-polar interactions, having a maximum of 600 cells is \citeAY{atwell2015mechano}, who modeled \todo{finish}.\\
+It is mainly either vertex-based or continuum approximation-based simulations that have dominated the field. These are all great for accurately describing the minute changes in the physics of tubologenesis, tissue-folding etc., but they comes with some drawbacks. These  models focus on the pressure and tensile forces, simulating the strains in the cell walls. Finite-element models that look at sub-parts of cells are often computationally heavy. This often requires it to be done in 2D \cite{krajnc2018fluidization}, inherently loosing some particularities of the problem. A more computationally efficient approach is the cell-center based models. When looking for off-lattice center-based model, not many show up. An example, but only using non-polar interactions is \citeAY{atwell2015mechano}. They modeled who modeled \todo{finish}.\\
 
 This all boils down to: No one has been able to simulate the formation of the posterior midgut (\pmg{A3}), as this requires a successful model of (\vf{A1}) and (\gb{A2}), and a way to combine them, almost necessitating a simulation of the full embryo.
 
@@ -286,7 +283,7 @@ where the sum over $j$ is over all Line of sight/Voronoi neighbors. Voronoi neig
 \begin{figure}
     \centering
     \includegraphics[width=0.25\linewidth]{chapters//Theory//figures/voronoi_explanation.png}
-    \caption{A Voronoi diagram. Every point within a region is closer to its respective \textit{cell} than to any other \textit{cell} in the space.\todo{some other word for cell}. The regions are drawn with rounded corner to make it look more biological.}
+    \caption{A Voronoi diagram. Every point within a region is closer to its respective \textit{cell} than to any other \textit{cell} in the space.\todo{some other word for cell}. The regions are drawn with rounded corner for no other reason than  to make it look more like biology.}
     \label{fig:voronoi-explanation}
 \end{figure}
 The interaction across cellular neighbors should remind you of the nearest-neighbor protein connections in Figure \ref{fig:mysosinMeshwork}. 

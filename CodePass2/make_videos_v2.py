@@ -14,7 +14,7 @@ from utils import voronoi_plot_2d
 def make_videos(filename:str, interval :int):
     # import the data
     print('Loading data')
-    assert os.path.isfile('D:/' + filename + '.hdf5'), "Please provide a valid run filename"
+    # assert os.path.isfile('D:/' + filename + '.hdf5'), "Please provide a valid run filename"
 
     # if the video already exists, ask if the user wants to overwrite it
     if os.path.isfile(filename + '.mp4'):
@@ -33,13 +33,14 @@ def make_videos(filename:str, interval :int):
     dists = 55
     has_energies = False
 
-    with h5py.File('D:/' + filename + '.hdf5', 'r') as f:
-        dat = f['x'][::5]
-        properties = f['properties'][:][0]
-        pcp = f['q'][:][::5]
-
+    # with h5py.File('D:/' + filename + '.hdf5', 'r') as f:
+    #     dat = f['x'][::5]
+    #     properties = f['properties'][:][0]
+    #     pcp = f['q'][:][::5]
+    positions = np.load("ffp.npy")[::5]
+    properties = np.load("ffproperties.npy")
     # positions = dat[:,]
-    positions = dat
+    # positions = dat
 
 
     # # make a 3d plot of the data

@@ -121,13 +121,13 @@
 %%%% Template Related Setup %%%%%
 
 %%% Front Page %%%
-\ptype{Masters Thesis}
+\ptype{Master's Thesis}
 
 \fpimage{evangelion.png}
 % \fpimage{template/frontpage.png}
 \author{Jakob Hallundbæk Schauser}
-\title{Emergence and Mesoscopy:\\ Drosophila Gastrulation In Silico}
-\subtitle{Uncovering macroscopic morphogenesis\\ from simulating microscopic biophysics}
+\title{Initial Conditions and Emergence:\\ Drosophila Gastrulation In Silico}
+\subtitle{Uncovering morphogenesis from single-cell biophysics}
 \advisor{Supervisor: Ala Trusina}
 \date{October 2024}
 %% This sentence is needed for PhD theses, but it can be replaced by the date for other projects.
@@ -198,13 +198,14 @@
 \frontmatter % to get a different numbering of the frontmatter and mainmatter.
 \pagestyle{plain} % not to get a header in the introduction pages
 
-\newpage \ \\\\\\\\\\\\\textit{"Art and technology have been trying for decades, but in the world of physics, not a lot of complexity is needed for something akin to life to emerge"} \\- Goodiepal in the 11th hour% (16:40) \newpage % to skip a page 
+% \newpage \ \\\\\\\\\\\\
+% \textit{"Art and technology have been trying for decades, but in the world of physics, not a lot of complexity is needed for something akin to life to emerge"} \\- Goodiepal in the 11th hour% (16:40) \newpage % to skip a page 
 
 % The Abstract, Danish Abstract and Acknowledgements are not numbered here but still appear in the table of contents.
 \section*{Abstract}
 \label{sec:abstract}
 \addcontentsline{toc}{section}{Abstract} 
-
+\input{chapters/Abstract}
 % \newpage
 % \section*{Resumé}
 % \label{sec:resume}
@@ -215,6 +216,11 @@
 \label{sec:acks}
 \addcontentsline{toc}{section}{Acknowledgements}
 
+Thanks to Arnulf for reading and giving notes ("It's better than House of Leaves") and \\
+
+
+Sunrise Parabellum
+ 
 
 \newpage
 \tableofcontents

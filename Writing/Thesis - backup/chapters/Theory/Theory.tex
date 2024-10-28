@@ -1,4 +1,4 @@
-To introduce our model and its biological basis this section we will start by introducing some fundamental biological concepts, before specializing in the science of fruit fly gastrulation. \\
+To establish our model and its theoretical basis this section we will start by introducing some fundamental biological concepts, before specializing in the science of fruit fly gastrulation. \\
 We we will go through a short, broad explanation of the amount of information that is kept on cell- and embryo-level. Afterwards you will be introduced to the fascinating biology that allows each cell to partake in the creation of a complex living animal. Finally we will use all these newly learned concepts to introduce the model that our work will revolve around. By the end, we hope for every term and parameter in the model to seem sensible and biologically justified. 
 
 
@@ -40,32 +40,28 @@ To get a feel for the amazingly complicated and remarkably precise patterning of
 \begin{figure}[H]
     \centering
     \makebox[\linewidth]{\includegraphics[width=1.\linewidth]{chapters/Theory/figures/patterning.png}}
-    \caption{The spacial distribution of a small subset of morphogens. A clear attest to the remarkable and stable pattern formation Turing predicted chemicals gradients capable of producing.}
+    \caption{The spacial distribution of a small subset of morphogens. A clear attest to the remarkable and stable pattern formation Turing predicted simple interactions between chemicals gradients capable of producing.}
     \label{fig:MorphogenMap}
 \end{figure}
 
+The cells in an embryo can, using internal mechanisms, react to their local concentration of these chemicals, allowing them to act accordingly. These local reactions can consist of everything from a simple mechanical activity, to information-retaining(?) changes its internal composition:
 
+Each cell maintains its own distribution of these chemical gradients, providing a second, local basis for directed responses and collective organization. These individual gradients are intrinsically connected to the polarizations discussed in the last section, and play a big role, both in natural processes and in the model we will be introducing later. In the next section the different biomechanical actions the the cells are capable of will be discussed, but first we will have to how signaling and mechanical changes interact.\\
 
-
-
-For the complexity of macro scale morphology changes we observe, having off-equilibrium protein concentrations are not enough.  Luckily, the interaction between morphogens and mechanical deformations go both ways. This means, that when cells move according to some defined polarity, they can move the signal with them and break other cells' symmetries along the way. 
-
-Each cell has local distribution YYY \todo{lay down base for polarizations}
-
-It has been shown [citation needed] that a mechanical stimulus can trigger a chemical signal, thereby reinducing patterning in a feedback loop. This is called \textbf{mechanotransduction} and is believed to be vital in (for example) stable PCP-orientation. A relevant example of mechanotransduction is how cells can sense movement from a particular direction and respond by aligning themselves accordingly. This alignment can trigger a cascading effect, ultimately contributing to the overall shaping of the tissue.\\
+The link between morphogens and mechanical deformations go both ways. This means, that when cells move according to some defined polarity, they can move the signal with them and break other cells' symmetries along the way. It has been shown [citation needed] that a mechanical stimulus can trigger a chemical signal, thereby re-inducing patterning in a feedback loop. This is called \textbf{mechanotransduction} and is vital in stable morphogenesis\cite{bidhendi2019mechanical} by. A relevant example of mechanotransduction is how cells can sense movement from a particular direction and respond by aligning their \textit{Planar-Cell Polarity} accordingly.\cite{gray2011planar} This local alignment can trigger a cascading effect, ultimately contributing to the overall shape of the tissue.\\
 
 
 Let us take a small step back and think how extraordinary this all is. Every individual action is transcribed from the same string of DNA, where nothing happens except building one of 20-ish amino acids to form proteins. These proteins can then either help or delay the transcription of the same DNA string. It is the order in which these simple proteins are created that, together with the simple physical self-interaction, allows for the exponentially more complex cell to emerge.
 
 
-And now, the same thing happens on the next level: Individual cells will each be making simple mechanical alterations to their shape. The interplay between these can somehow arrive at a cohesive bigger picture. To understand this behaviour, we will need to look at the individual mechanisms:
+And now, the same thing happens on the next level: Individual cells will each be making simple mechanical alterations to their shape. The interplay between these can somehow arrive at a cohesive bigger picture. To understand this behavior, we will need to look at the individual mechanisms:
 
 \section{How Cells Move}
 \label{sec:howmove}
 Most of the global, large-scale motion seen during development of any multicellular organisms stem from a handful of seemingly simple, albeit still not well understood, active single-cell actions.\cite{walck2014cell}\\
 
 In most cases, cell migration consist of chemotaxis. That is, individual cells moving in the direction of a chemical gradient.\\
-What we will be looking at is fundamentally different. In embryogenesis, where cells are closely bound together in epithelial sheets, the cells are able to exert forces on \textit{each other}. As can be seen on Figure \ref{fig:mysosinMeshwork}, the cells stay interconnected using membrane tethers connecting local neighborhoods. This means every cell can change its shape relative to its bordering cells allowing for combined motion more efficient than any single cell could achieve on their own.[cite video] 
+What we will be looking at is fundamentally different. In embryogenesis, where cells are closely bound together in epithelial sheets, the cells are able to exert forces on \textit{each other}. As can be seen on Figure \ref{fig:mysosinMeshwork}, the cells stay interconnected using membrane tethers connecting local neighborhoods. This means every cell can change its shape relative to its bordering cells allowing for combined motion more efficient than any single cell could achieve on their own.\cite{pare2020cellular}
 % When thinkin of cell motility, chemotaxis 
 
 % The motion we will be looking at, are of a type that is fundamentally different from Chemotaxis, with cells reacting to a local chemical concentration but not moving along a gradient [citation needed].
@@ -79,13 +75,13 @@ What we will be looking at is fundamentally different. In embryogenesis, where c
 \end{figure}
 
 
-Studying these 'local motions with global consequences' is the main point of focus for us. Unfortunately experimenting with living cells is inherently hard, which means that in Drosophila gastrulation, these 'driving effects' are surprisingly under-understood with no paper claiming to have an exhaustive list. Here is some of the fundamental single-cell active forces that are undeniably happening:
+Studying these "local motions with global consequences" is the main point of focus for us. Unfortunately experimenting with living cells is inherently hard, which means that in Drosophila gastrulation, the driving effects are surprisingly under-understood with no paper claiming to have an exhaustive list. Here is some of the fundamental single-cell active forces that are undeniably happening:
 
 \textbf{Convergent Extension} and \textbf{Apical Constriction}
 
 \subsection{Convergent Extension}
 \label{sec:ConvergentExtension}
-For elongating of sheets in a single direction, \textit{Convergent Extension} seems to be one of the most common proprietors of movement. It is made up of asymmetric cellular intercalations. In layman's terms: Cells squeezing in between each other, but mainly in one direction. 
+For elongating sheets of tissue, \textit{Convergent Extension} is one of the most common driving forces. It is made up of asymmetric cellular intercalations. In layman's terms: Cells squeezing in between each other, but mainly in one direction. 
 In Figure  \ref{fig:cellIntercolation} a schematic of how cell intercalation can lead to extension can be seen.
 \begin{figure}[H]
     \centering
@@ -101,7 +97,7 @@ In Figure  \ref{fig:cellIntercolation} a schematic of how cell intercalation can
         \caption{}
     \label{fig:dyedDifferentialWall}
     \end{subfigure}
-    \caption{\textbf{(a)}: A diagram showing how guided intercolation of blue cells can results in horizontal elongation of the cluster \\\textbf{(b)}: Dyed Germ Band tissue showing clear difference in horizontal and vertical protein expressions (Source: \citeAY{zallen2004patterned})}
+    \caption{\\\textbf{(a)}: A diagram showing how guided intercalation of the blue cells in the vertical direction can results in horizontal elongation of the cluster. \\\textbf{(b)}: Dyed germ-band tissue showing a clear difference in horizontal and vertical protein expressions (Source: \citeAY{zallen2004patterned}) The individual cells can utilize this anisotropy to direct their intercalation.}
     
     \label{fig:ConvergentExtensionDiagram}
 \end{figure}
@@ -119,8 +115,8 @@ When the cell sheet wants out-of-plane bending, they turn to Apical Constriction
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.3\linewidth]{chapters/Theory/figures/apical_constriction_schematic.png}
-    \caption{Schematic for how apical constriction works (Source:\todo{})}
+    \includegraphics[width=0.4\linewidth]{chapters/Theory/figures/apical_constriction_schematic.png}
+    \caption{Schematic for how apical constriction works. A number of cells mechanically lower their surface area on their outer (apical) side resulting in a large-scale invagination.} 
     \label{fig:apical-constriction}
 \end{figure}
 
@@ -135,11 +131,10 @@ Now, the fact that nature is thrifty with its creations, means, the few actions 
 
 
 To summarize what we have learned:
-Through \textit{genetic patterning} and other \textit{broken symmetries} both the embryo on the whole and each each cell has protein gradients, and, through the distribution of these, well-defined \textit{polarities}.
-Through \textit{mechanotransduction}, \textit{local movements} can be tied to these polarities and vice versa, allowing for stable, global morphological changes to occur. Examples of these local driving forces are \textit{convergent extension} and \textit{apical constriction}. \todo{cut?}
+Through \textit{genetic patterning} and other \textit{broken symmetries} both the embryo on the whole and each each cell contain off-equilibrium protein densities, and, through the distribution of these, well-defined \textit{polarities}.
+Through \textit{mechanotransduction}, \textit{local movements} can be tied to these polarities and vice versa, allowing for stable, global morphological changes to occur. Examples of these local driving forces are \textit{convergent extension} and \textit{apical constriction}.
 
 
-Now, what is a fruit fly? 
 
 % \section{Drosophila in Detail}
 % Before we can get to the model it is necessary to introduce the star of the show. We will start out by YYY the features of the embryo before we move on to the motions it undergoes. 
@@ -169,16 +164,15 @@ Now, what is a fruit fly?
 
 \newpage
 \section{The Drosophila Gastrulation in detail}
-In the literature, the development of the fruit fly from fertilised egg to hatched larvae is usually divided into 17 distinct events.\cite{bownes1975photographic} We will be looking at stages 5 through 7, lasting about 15 minutes. These are characterized by having the first mesoscopic morphogenetic movements and setting the stage for all morphology to come.
-
-The egg has a radius of about 1/10th of a milimeter\footnote{Source: This wonderful website: \url{https://bionumbers.hms.harvard.edu/bionumber.aspx?id=111360}}
-After 12 rounds of cell division with about the egg now consist of about 5000 cells. 
-When looking at the embryo, the following parts will be the most active, important and relevant to our project:
+In the literature, the development of the fruit fly from fertilised egg to hatched larvae is usually divided into 17 distinct events.\cite{bownes1975photographic} We will be looking at stages 5 through 7, lasting about 15 minutes. These are characterized by having the first mesoscopic morphogenetic movements and setting the stage for all the [something] to come.\\
+A quick run down of the first 5 stages.
+The Drosophila egg has a diameter of about 1/10th millimeter\footnote{Source: This wonderful website: \url{https://bionumbers.hms.harvard.edu/bionumber.aspx?id=111360}} and YYY, 
+Rather than immediately dividing into separate cells, the fertilized egg first undergoes several rounds of nuclear division within one large cell. This unique arrangement results in about 5000 nuclei lining the shell of the egg. Eventually, each nucleus becomes encased in its own membrane, marking the cellular blastoderm stage, where distinct cells finally emerge.
 
 
 % \begin{figure}[H]
 %     \centering
-%     \includegraphics[width = 0.9\linewidth]{chapters/Theory/figures/morphogenic_events.jpg}
+    % \includegraphics[width = 0.9\linewidth]{chapters/Theory/figures/morphogenic_events.jpg}
 %     \caption{Taken from \citeAY{gheisari2020gastrulation}. \\
 %     VF: Ventral Furrow\\
 %     PMG: Posterior Midgut\\
@@ -186,12 +180,10 @@ When looking at the embryo, the following parts will be the most active, importa
 %     Germ-band: A band of germs}
 %     \label{fig:enter-label}
 % \end{figure}
+Now these cells will need to move around, defining the different [smth] and layers of the fly. This next step, called the gastrulation, is the focus of this [thesis]:
 
-Now, the gastrulation can begin.
-The Drosophila gastrulation consist of a series of interconnected but independent cell movements.\\
-We will now present an abridged overview, roughly ordered in time:
-
-
+The Drosophila gastrulation consist of a series of interconnected but independent cell movements. It has YY and YYY, and YYY. \\
+We will now present an abridged overview, roughly ordered in time. In it three events have been highlighted, chosen for being both instrumental for the final morphological outcome and relating to spatially different domains of the embryo. \todo{where 2 put}
 
 
 
@@ -207,14 +199,13 @@ We will now present an abridged overview, roughly ordered in time:
 \addtocounter{figure}{-1}
 \begin{figure} [t!]
   \caption{
-  \textit{(Previous page.) }\\ 
-  A somewhat comprehensive explanations of the most important parts of the early Drosophila gastrulation. The three events (\vf{A1}, \gb{A2} and \pmg{A3}) have been highlighted by us. These has been chosen as being both fundamental for the final morphological outcome and relating to different domains of the embryo.\todo{Add reference?}\\
-  \textbf{A:} A diagram of the drosophila embryo as it is usually depicted: The front side (what will become the head) facing left. The primary domains of interest are depicted. (Source: )\\
-  \textbf{B:} An electron miscroscope image of the at around 30 sec. On the anterior (back) tip, a number of germ cells (called pole cells) can be seen. These were not part of our simulation even though it has been shown that that have both mechanical and chemical interactions during gastrulation. (Source: )\\
-  \textbf{C-F:} Electron microsopy of the \vf{ventral furrow} closing off. (Source: )\\
-  \textbf{G:} A diagram of the motion of the \gb{germ-band} as it extends. The locations of auxiliary folds are also highlighted. (Source: )\\
-  \textbf{H:} A [type of microspcopy] showing the \pmg{posterior midgut} as it invaginates and combines with the ventral furrow.
-
+      \textit{(Previous page.) }\\ 
+      A somewhat comprehensive explanations of the most important parts of the early Drosophila gastrulation. The three events (\vf{A1}, \gb{A2} and \pmg{A3}) have been highlighted by us for later referencing.\\
+      \textbf{A:} A diagram of the drosophila embryo as it is usually depicted: The front side (what will become the head) facing left. The primary domains of interest are depicted.\\
+      \textbf{B:} An electron microscope image of the embryo around 30 seconds after initialized gastrulation. The early signs of the cephalic furrow and ventral furrow are visible. On the anterior (back) tip, a number of germ cells (called pole cells) can be seen. (Source: )\\
+      \textbf{C - F:} Electron microscopy of a cross section of the {ventral furrow} closing off (\vf{A1}). (Source: \citeAY{sweeton1991gastrulation})\\
+      \textbf{G:} A diagram of the motion of the {germ-band} as it extends (\gb{A2}). The locations of auxiliary folds are also highlighted. (Source: \citeAY{kong2017forces})\\
+      \textbf{H:} Imaging of the embryo with highlighted cell walls. We can see the {posterior midgut} as it invaginates and combines with the ventral furrow (\pmg{A3}). (Source: \citeAY{stern2022deconstructing})
   }
 
 \end{figure}
@@ -230,7 +221,7 @@ As we now have the basis for understanding how ...
 In silico models has already provided multiple working examples of all the aforementioned embryogenetic events with multiple different approaches since the 1970's.\\
 When studying the biomechanics of morphogenesis there seems to be two primary strategies:\\
 
-\textbf{Top-Down Approach:} This strategy focuses on a single morphogenetic event, modeling it in detail. For instance, ventral furrow formation can be simulated as an elastic sheet subjected to pulling forces \todo{find reference}. This approach can enhance our understanding of the physical forces or biological systems required for the event to occur but may limit generalization to other morphogenetic processes.\\
+\textbf{Isolated Active Event:} This strategy focuses on a single morphogenetic event, modeling it in detail. For instance, ventral furrow formation can be simulated as an elastic sheet subjected to pulling forces \todo{find reference}. This approach can enhance our understanding of the physical forces or biological systems required for the event to occur but may limit generalization to other morphogenetic processes.\\
 
 \textbf{Isolated Active Phenomenon:} In this approach, a single active phenomenon, such as convergent extension, is simulated "in a vacuum." This allows for a detailed comparison of the actions of individual cells against imaging of YYY. An example of this could be the YYY,.  This method can provide great insight into the underlying physics and chemistry at play. However, this method may fall short in shedding light on the any specific morphogenetic event or omit important context.\\
 
@@ -282,18 +273,18 @@ where the sum over $j$ is over all Line of sight/Voronoi neighbors. Voronoi neig
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.25\linewidth]{chapters//Theory//figures/voronoi_explanation.png}
-    \caption{A Voronoi diagram. Every point within a region is closer to its respective \textit{cell} than to any other \textit{cell} in the space.\todo{some other word for cell}. The regions are drawn with rounded corner for no other reason than  to make it look more like biology.}
+    \includegraphics[width=0.3\linewidth]{chapters//Theory//figures/voronoi_explanation.png}
+    \caption{A Voronoi diagram. Every point within a region is closer to its respective \textit{cell} than to any other \textit{cell} in the space. The regions are drawn with rounded corner for no other reason than to mimic biology.}
     \label{fig:voronoi-explanation}
 \end{figure}
-The interaction across cellular neighbors should remind you of the nearest-neighbor protein connections in Figure \ref{fig:mysosinMeshwork}. 
+The interaction with the neighbors should remind you of the nearest-neighbor protein connections in Figure \ref{fig:mysosinMeshwork}. 
 \todo{Reexplain myosin or remove note}\\
 
 To get a feeling for $S_{ij}$ (Equation \ref{eq:main-pot}), the potential can be seen in Figure \ref{fig:potential} for $A_{ij}=1$.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.\linewidth]{chapters/Theory/figures/potential.png}
-    \caption{The potential well our point particles lie in, with the minimum (i.e. effective cell size) drawn in. Here we also see the role of $\beta$ as responsible for regulating the relaxation-distance}
+    \includegraphics[width=1.\linewidth]{chapters/Theory/figures/potential_annotated.png}
+    \caption{The potential as defined in Equation \ref{eq:main-pot} for a single particle and neighbor, with the minimum (i.e. effective cell size) drawn in. On the inset axis an example of a cell with two neighbors, one with a distance that would result in a repulsive force and one attractive. Here we also see the role of $\beta$ as responsible for regulating the relaxation-distance.}
     \label{fig:potential}
 \end{figure}
 
@@ -312,13 +303,10 @@ Running the simulation at this point, the cells would simply converge to a spher
 
 
 Now, just like in nature, some symmetries needs to be broken to allow for interesting morphologies to emerge.\\
-The principal idea is to elevate the Apical-Basal and Planar-Cell polarities (as described in previous sections) by seeing them as explicitly stated polarization vectors with rules for intra- and inter-cell interactions. 
 
-Mechanotransduction refers to the process by which cells convert mechanical stimuli into biochemical signals.
+As explained in the last section, internal protein aggregates allow each cell to have their own polarizations. Through mechanotransduction and nearest-neighbor interactions, these polarizations can shape the cell and vice-versa. The idea is now to elevate the Apical-Basal and Planar-Cell polarities (as described previously) by seeing them as explicitly stated polarization vectors with rules for intra- and inter-cell interactions. \\
 
 The first symmetry that is broken is the inside-outside symmetry. Introducing the (normalized) $\hat{p}$ vector for each cell allows for emulation of the \textit{Apical-Basal} polarity.
-As previously mentioned the interplay between cell-polarisation and physical orientation goes both ways (the mechanotransduction as described in section \ref{sec:theory-polarity}).
-\todo{reexplain mechanotransduction adn hwo cells have polarities etc}
 This motivates the following term which I will explain after introducing:
 
 \begin{equation*}
@@ -340,36 +328,37 @@ In the case of $S_1$, it encourages cells to lie in a plane, perpendicular to th
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{chapters//Theory//figures/explainS1.png}
-    \caption{Enter Caption}
+    \caption{A visualization of the effects of the $S_1$-term.}
     \label{fig:explain-S1}
 \end{figure}
-\todo{An itroductpry sentence}
+
 The second symmetry break is the planar polarization. We introduce the Planar-Cell-Polarities $\hat{q}$ (PCP from here on), and define the dynamics as follows:
 \begin{equation*}
     S_2=\left(\hat{p}_i \times \hat{q}_{i}\right) \cdot\left(\hat{p}_j \times \hat{q}_{j}\right)
 \end{equation*}
-This term keeps the PCP and AB polarities perpendicular within each cell, but aligned across cells. This gives a stable and consistent, but changeable in-plane orientation vector for each cell. A diagram can be seen in Figure \ref{fig:explain-S2}.\\
+This term keeps the PCP and AB polarities perpendicular within each cell, but aligned across cells. This gives a stable and consistent, but changeable in-plane orientation vector for each cell. A diagram can be seen in Figure \ref{fig:explain-S2}. Importantly, the $\hat{p}_i$'s and $\hat{q}_i$'s are unit vectors and are therefore constrained to being normalized.\\
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{chapters//Theory//figures/explainS2.png}
-    \caption{Enter Caption}
+    \caption{A visualization of the effects of the $S_2$-term.}
     \label{fig:explain-S2}
 \end{figure}
-To take advantage of the this possible direction of motion, we will take inspiration from the Convergent Extension (Section \ref{sec:ConvergentExtension}) and introduce the final step of the dynamics, coupling the cells relative positions with their PCP-vectors. While we \todo{something about not being completely like bio. From Nissen: our assumption of anisotropic, planar polarized adhesion.}
+To take advantage of this well-defined direction of motion, we will take inspiration from the Convergent Extension (Section \ref{sec:ConvergentExtension}) and introduce the final step of the dynamics, coupling the cells relative positions with their PCP-vectors.
 
 \begin{equation*}
     S_3=\left(\hat{q}_i \times \hat{r}_{i j}\right) \cdot\left(\hat{q}_j \times \hat{r}_{i j}\right)
 \end{equation*}
 
-This term is lowest when the Planar-Cell-polarities are aligned but perpendicular to their relative direction-vector. In the realm where this term dominates, the cell sheets created by $S_1$ and $S_2$ are exchanged for lines of cells perpendicular to their PCP-vectors. 
+This term is lowest when the Planar-Cell-polarities are aligned but perpendicular to their relative direction-vector. In the realm where this term dominates, the cell sheets created by $S_1$ and $S_2$ are exchanged for lines of cells perpendicular to their PCP-vectors.  Below (Figure \ref{fig:expl-s3}) the effects are represented graphically.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{chapters//Theory//figures/explainS3.png}
-    \caption{Enter Caption}
-    \label{fig:enter-label}
+    \caption{A visualization of the effects of the $S_3$-term.}
+    
+    \label{fig:expl-s3}
 \end{figure}
 
-While not biologically \todo{Write how this makes CE}
+While the mechanics are not capturing the explicit deformations that drive  convergent extension, this term allows for directed cell intercalation.\\
 
 The full array is therefore:
 
@@ -389,7 +378,7 @@ We can now finally introduce the more complicated $A_{ij}$-parameter as teased i
 \end{equation}
 
 
-If the constraint $\sum_{n=1}^{3}\lambda_n=1$ is not fulfilled, the relaxed cell size is not constant. Importantly in implementation, the $\hat{p}_i$'s and $\hat{q}_i$'s are unit vectors and are therefore constrained to being normalized.\reph\\
+If the constraint $\sum_{n=1}^{3}\lambda_n=1$ is not fulfilled, the relaxed cell size is not constant. \\
 
 To round off our array of actions the cells can take \reph, we introduce the second dynamical [smth],\footnote{Checkov's active single-cell biomechanics} described earlier: Apical constriction (Section \ref{sec:ApicalConstriction}). In our model, this is done via \textbf{Wedging}
 
@@ -404,34 +393,34 @@ with $\alpha\in [0,0.5]$
 \todo{add drawing}
 
 
-A similar expression can be made for anisotropic wedging, taking  $\hat{q}_i$'s into account. All cells can now be defined by a cell type, which simply means they have a $\lambda$-array and a $\alpha$ associated with them. \todo{foreshadow?}\\
+A similar expression can be made for anisotropic wedging, taking  $\hat{q}_i$'s into account.\\
+All cells can now be defined by a cell type, which simply means they have a $\lambda$-array and a $\alpha$ associated with them. \todo{foreshadow?}\\
 
 
-We will now, diverging from the original papers, and morph the basic model into something that is useful in for our specific case.\\
+We will now be diverging from the original papers, and update the model for our specific case:\\
 
-\textbf{Boundary conditions} where parameterized by hand from visual references and added as a simple term in the potential 
+As the shape of the egg shell is proposed to be defining for the gastrulation, \textbf{boundary conditions} where parameterized by hand from visual references and added as a term in the potential.\\
 
-A slight \textbf{differential adhesion} was needed for the simulation to run smoothly. The interaction between the ventral furrow cells (cell type 2) and cells of other types where scaled by a factor of 5\% (multiplied by 0.95) so as to discourage unnecessary mixing. This is a phenomenon often seen in nature and is many ways already part of our model.\\
+A slight \textbf{differential adhesion} was added to simulation. This covers the concept that some cell types have preferences (encouraging or discouraging) about which other cell types to adhere to.
+The interaction between the ventral furrow cells (cell type 2) and cells of other types where scaled by a factor of 5\% (multiplied by 0.95) so as to discourage unnecessary mixing. This is a phenomenon often seen in nature.\\
 
-To emulate the lowering of apical surface area \textbf{better emulation of apical constriction} was introduced. Invaginating cells ($\alpha > 0$) got an increase in their $\lambda_1$'s (in Equation \ref{eq:s1}) making their relaxation distance shorter. This had the added benefit of echoing the tighter bonds in constricting cell clusters. [citation maybe needed]\\
+To emulate the lowering of apical surface area \textbf{better emulation of apical constriction} was introduced. Invaginating cells ($\alpha > 0$) got an increase in their $\lambda_1$'s (in Equation \ref{eq:s1}) making their relaxation distance shorter. This had the added benefit of echoing the tighter bonds in constricting cell clusters.\\
 
-\textbf{S1 -- S0}\\
-When any of the invaginating tissue 'closed off' it forced cells on either side to have their AB-vectors pointing towards each other. A line of code was added, to combat this: When two apical sides interacted and  they were only allowed to interact as non-polar, i.e. their $S_1$-terms where changed into $S_0$.
-
-
-\textbf{Nematic $S_2$ and $S_3$} write this
-
-And finally, the most important contribution -- \textbf{Patterning}:\\
-As we have about 5000 cells with four $\lambda$'s and a wedging constant $\alpha$ for each, this effectively gives 25000 parameters.
-
-To combat this, we again look to nature and remember the patterning Section \ref{sec:gen_patterns}. Somehow all the information a cell needs will be in these boundary conditions.\\
-Luckily for us, straight from Wikipedia:
-"Some of the earliest and best-studied morphogens are transcription factors that diffuse within early Drosophila Melanogaster (fruit fly) embryos."\\
+We removed penalization for "outside-touching-outside", i.e. two \textbf{apical sides touching}. When any of the invaginating tissue 'closed off' it forced cells on either side to have their AB-vectors pointing towards each other. This would get penalized in their $S_1$-terms (Equation \ref{eq:s1}) making any folds unstable. A line of code was added, to combat this: When two apical sides interacted they were only allowed to interact non-polar'ly, i.e. their $\lambda_1$-values where changed into $\lambda_0$.\\
 
 
-In \citeAY{shinyDVEX} they map out the relative gene expression for the drosophila embryo. We can then take this spatial data, project it onto our embryo and cross reference with known molecular activators of developmental processes.  This approach enables us to identify specific cell types based on their gene expression profiles and their corresponding roles in key morphogenetic events. By cross-referencing in this way, we establish a pipeline that connects morphogen gradients to the simulation of morphogenesis. This not only enhances our simulation by justifying cell roles, but also helps shed light on how the spatial patterning of gene expression orchestrates the complex choreography of embryogenesis.\\
+Taking inspiration from \citeAY{kirkegaard2019self}, a \textbf{nematic planar-cell polarity} were implemented. This was mainly done so as to better mimic natural [something]. This means changing the definition of $A_{ij}$ in the following way:
+\begin{align*}
+    A_{ij}&=\sum_{n=0}^{3}\lambda_n  S_n\\ \downarrow \\A_{ij}&=\lambda_0S_0+\lambda_1S_1+\lambda_2|S_2|+\lambda_3|S_3|
+\end{align*}
 
-In Section \ref{App:morphogens} in the Appendix the exact choices made and justifications can be seen.
+This allowed for \todo{finish}\\
+
+And finally, the most important contribution -- \textbf{patterning}:\\
+As we have about 5000 cells with four $\lambda$'s and a wedging constant $\alpha$ for each, this effectively gives 25000 parameters.To combat this, we again look to nature and remember the patterning Section \ref{sec:gen_patterns}. Somehow all the information a cell needs is available in these initial conditions.\\
+
+
+In \citeAY{shinyDVEX} they map out the relative gene expression for the drosophila embryo. We can then take this spatial data, project it onto our embryo and cross reference with known molecular activators of developmental processes.  This approach enables us to identify specific cell types based on their gene expression profiles and their corresponding roles in key morphogenetic events. By cross-referencing in this way, we establish a pipeline that connects morphogen gradients to the simulation of morphogenesis. This not only enhances our simulation by justifying cell roles, but might also shed some light on how the spatial patterning of gene expression orchestrates the choreography of embryogenesis. In Section \ref{App:morphogens} in the Appendix the exact choices made and justifications can be seen.\\
 
 Having established the pipeline, a demonstration of how to define the initial conditions can be seen here:
 
@@ -451,10 +440,7 @@ GE.save("name_of_expression_profile",)
 
 \end{lstlisting}
 
-Given we choose 4 different cell types and no non-polar interaction, we have cut down to only have 16 parameters.
-
-Is it possible to accurately simulate the origin of life using 6 parameters? Read on to find out! \todo{dumb, remove?}
-
+Given 5 different cell types and no non-polar interaction, we have cut our parameter space down to 20.
 
 
 
@@ -469,7 +455,7 @@ where $\eta$ is uncorrelated Gaussian noise and U is the total potential as defi
 
 The gradient is calculated via an automatic differentiation engine (The PyTorch-framework specifically) and the simulation time steps are calculated via Euler integration.\\
 
-Every fram the positions, AB-vectors and PCP-vectors are saved. As the model is purely point-based, whenever we speak of inter-cellular junctions, neighbors, areas or angles, everything is inferred from the modeled point cloud and Voronoi-neighbors. \todo{move this to someplace else}
+Every frame, the positions, AB-vectors and PCP-vectors are saved. As the model is purely point-based, whenever we speak of inter-cellular junctions, neighbors, areas or angles, everything is inferred from the modeled point cloud and Voronoi-neighbors. 
 
-This is not interesting to read about, so extensive notes on the actual implementation along with pseudocode, can be found in Section \ref{App:Code} in the Appendix.
+Implementation is not interesting to read about, so extensive notes on the actual implementation along with pseudocode can be found in Section \ref{App:Code} in the Appendix.
 

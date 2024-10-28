@@ -1,11 +1,9 @@
-After building up intuition on the biological features of a Drosophila embryo and a model capable of (crudely) mimicking it, we can now begin probing our model for interesting phenomena.\\
-\todo{Give me all the questions again}\\
-We know nature has a handful symmetry breaks which are kept enacted through self-[interacting] feedback loops. Having added a minimal number of these, we would simply like to see whether vivo-like gastrulation can emerge. Focusing not just the final structures; but also the individual events leading up to it. \todo{Flet\textit{ No explicit timing (BC, IC)} ind}\\
- 
-Once we have assessed the phenomenological validity of our model, we will look onward for intriguing natural phenomena to study. Given our full embryo model from [individual constituents], simulating separate events, we will be looking into the interplay between these [constituents] and events. This will be compared to known examples of domain-interaction in vivo.\reph\\
+After building up intuition on the biological features of a Drosophila embryo and a model capable of (somewhat crudely) mimicking it, we can now begin probing our model for interesting phenomena. We know that cells in nature act by relatively simple, local rules. Having added [versions of] a minimal number of these in our simulation, we would like to see whether it can model gastrulation reminiscent of what is seen in vivo. Focusing not just the final structures, but also the individual events leading up to it. \\
+
+Once we have assessed the phenomenological validity of our model, we will look onward for [intriguing] phenomena to study. Given our full embryo model from we will be looking into the interplay between the different active domains and events. This will be compared to known examples of domain-interaction in vivo.\reph\\
 
 
-On the structure: In the following sections we will go through the similarities between simulation and reality, starting from simple visual comparisons, ending in detailed quantifications. We will do these for the different events (A1-A3) and embryo domains. Afterwards, we will be looking at removing different active parts of the simulated embryo, comparing the results to known real-life mutants. This will finally lead us to a purely in-silico analysis of the event-interactions, including a parameter sensitivity analysis and [something more i hope].\\ 
+On the structure: In the following sections we will go through the similarities between simulation and reality, starting from simple visual comparisons, ending in detailed quantifications. We will do these for the different events (\vf{A1}, \gb{A2} and \pmg{A3}) and embryo domains. Afterwards, we will be looking at removing different active parts of the simulated embryo, comparing the results to known real-life mutants. This will finally lead us to a purely in-silico analysis of the interaction between spatially distinct [domains] of the embryo.\\ 
 
 \renewcommand{\contentsname}{Results Section Table of Contents}
  \setcounter{tocdepth}{3}
@@ -36,11 +34,11 @@ On the following page, we [compare] our best in silico model and corresponding f
 \newpage
 \addtocounter{figure}{-1}
 \begin{figure} [t!]
-  \caption{(Previous page.) \\A full page visual comparison between three time steps of the simulation and in vivo imaging. 
-  Each row consists of a single time-step. For the sake of comparison, the colors have been matched.\\
-  \textbf{Left:} In vivo. \textbf{Right:} In silico.\\Within each row, the embryo is show from the top (dorsally), bottom (ventrally) and side (laterally), with the back end (posterior) pointing downwards.}
+  \caption{(Previous page.) \\A full page visualization of three time steps of the simulation and corresponding point from in vivo imaging. 
+  Each row consists of a single time-step and corresponds roughly to the three previously highlighted primary events (\vf{A1}, \gb{A2} and \pmg{A3}). Within each row, the embryo is show from the top (dorsally), bottom (ventrally), and side (laterally), with the back end (posterior) pointing downwards.
+  A cursory comparison reveals a general alignment in the overall morphologies.\\
+  \textbf{Left:} In vivo imaging with cell walls highlighted by use of a membrane marker (Source: \citeAY{stern2022deconstructing}).\\ \textbf{Right:} In silico visualization. For ease of comparison the colors have been made to match the data.}
 \end{figure}
-
 
 
 It is easy to hide behind numbers and advanced analytical methods, so for completeness sake we have started by presenting a visually unaltered full-scale comparison. Our analyses will soon be more sophisticated, but from a naive inspection, the general dynamics, timing and shape seems to generally have been recapitulated. Given the relatively simple model and few specific alterations, this is already notable! we can see that ... \\ 
@@ -51,71 +49,72 @@ To completely understand the agreements between data and simulation we will need
 
 \subsection{(\vf{A1}) Ventral Furrow }
 The the first sign of movement on the embryo is on the belly where a distinct cleft begins forming. \\
-This is called the \vf{ventral furrow} and is the first point of creation for the tubes that will become the gastrointestinal tract.
+This is called the \vf{ventral furrow} and is an important part of creating the gastrointestinal tract.
 
-Closes off in just over three minutes
-\textit{A rapid, membrane-dependent pathway directs furrow formation through RalA in the early Drosophila embryo}
+From Figure \ref{fig:big-visual-comparison} we have from an external perspective seen the characteristic cleft form on the bottom side, mirroring the initial stages of invagination. The furrow closes off in just over three minutes.\cite{holly2015rapid}
 As the furrow closes, the internalized cells form a tube with a recognizable light bulb-shape in the cross section. \\
-\todo{Add outside-imaging?}\\
-
 
 Below, in Figure \ref{fig:VFComparison}, a comparison between a cross section of our simulation and in vivo imaging can be seen.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{chapters/Results/figures/VF_comparison.png}
-    \caption{A comparison of simulation and frames from video of live growth. For making it visually more alike, each cell in the simulation is displayed as a rectangle with the longer side aligning with its simulated apical-basal-axis. The blue and red dots are approximations of the inner and outer cell walls. $\textbf{r} + a\textbf{p}$ and $\textbf{r}-a\textbf{p}$ respectively (for position $\textbf{r}$ and AB-vector $\textbf{p}$ and some scale constant \textit{a}).  \\\textbf{Upper row}: Simulation at four different, equally spaced time points. \\\textbf{Lower row}: Multi-photon microscopy of cell walls during ventral furrow formation (Source: \citeAY{conte2012biomechanical}). \\}
+    \caption{A comparison of cross sections showing the dynamic morphology of the ventral furrow formation (\vf{A1}) in simulation (\textbf{upper row} and frames from video of live growth (\textbf{lower row}). For ease of comparison, each cell in the simulation is displayed as a rectangle with the longer side aligning with its simulated apical-basal-axis. The blue and red dots are approximations of the inner and outer cell walls, also calculated using their apical-basal polarities. The cutting plane used in simulation can be seen in Figure \ref{fig:cutplane}. The video is multi-photon microscopy of cell walls (Source: \citeAY{conte2012biomechanical})}
     \label{fig:VFComparison}
 \end{figure}
-
-\begin{figure}[H]
+%  $\textbf{r} + a\textbf{p}$ and $\textbf{r}-a\textbf{p}$ respectively (for position $\textbf{r}$ and AB-vector $\textbf{p}$ and some scale constant \textit{a}). 
+\begin{figure}
     \centering
-    \includegraphics[width=0.65\linewidth]{chapters/Results/figures/planecut2.png}
-    \caption{The cutting plane used in Figure \ref{fig:VFComparison} visualized.}
+    \includegraphics[width=0.8\linewidth]{chapters/Results/figures/planecut2.png}
+    \caption{The cutting plane used for visualization in Figure \ref{fig:VFComparison} visualized.}
+    \label{fig:cutplane}
 \end{figure}
 Overall, both the motion observed during development and the final shape of the structure appear to be well aligned with the in-vivo observations.\\
 
-In simulation, we can visually observe the same dynamic process of ventral furrow formation, with remarkable parallels to what occurs in the embryo (\vf{A1}). From Figure \ref{fig:big-visual-comparison} we have from an external perspective seen the characteristic cleft form on the bottom side, mirroring the initial stages of cell invagination. In Figure \ref{fig:VFComparison} we can now see, that as the simulation progresses, the closure of the furrow and internalization of cells produce the familiar tube-like structure, with the cross-section displaying the previously mentioned light bulb-shaped profile. While our simulation progresses about 50\% too fast (the closing takes 2 minutes instead of 3), we notice that the [relative] timing is [very] accurately captured. Adding to this, the directions of movement and rotation closely match what is observed in real embryos, further validating its accuracy. \\
+In simulation, we can visually observe the same dynamic process of ventral furrow formation, with remarkable parallels to what occurs in the embryo (\vf{A1}). In Figure \ref{fig:VFComparison} we can now see, that as the simulation progresses, the closure of the furrow and internalization of cells produce the familiar tube-like structure, with the cross-section displaying the previously mentioned light bulb-shaped profile. While our simulation progresses about 50\% too fast (the closing takes 2 minutes instead of 3), we notice that the relative/interal timing is accurately captured. Adding to this, the directions of movement and rotation of apical- and basal sides of each cell closely match what is observed in real embryos, further validating its accuracy. \\
 
-In our simulation, the invaginating tissue extends slightly more towards the center. This is especially noticeable closer to the head (anterior tip) (see Section \ref{App:VF} in the Appendix).\todo{Add to appendix!} This problem also plagues the state of the art \citeAY{allena2010simulation} who did a full vertex-based simulation focusing on the ventral furrow. This common [trouble] might stem from the fact that. After closing, the ventral furrow starts 'pinching off' disconnecting the interalized cells which includes some dynamics not present in our simulations.\textit{Quantitative imaging of the collective cell movements shaping an embryo} \\
-In general, we find the first key morphogenetic event (\vf{A1}) -- the formation of the ventral furrow --  to have been more than adequately recreated.
+In our simulation, the invaginating tissue extends slightly more towards the center. This is especially noticeable closer to the head (anterior tip) (see Section \ref{App:VF} in the Appendix).\todo{Add to appendix!} This problem also plagues the state of the art \citeAY{allena2010simulation} who did a full vertex-based simulation focusing on the ventral furrow. This common difficulty might stem from the fact that after closing, the ventral furrow starts 'pinching off' disconnecting the internalized cells which includes some dynamics not present in the simulations.\cite{supatto2008quantitative}\\
+In general, we find the first key morphogenetic event (\vf{A1}) -- the formation of the ventral furrow --  to have been adequately recreated.
 
 \subsection{(\gb{A2}) Germ-band}
-The most numerous cell group we are interested in is the \gb{germ-band} which fills most of the lateral sides. As mentioned in Section \ref{sec:ConvergentExtension}, it is generally agreed that the germ-band is one of the main drivers of horizontal motion, although it remains disputed how.
+The most numerous cell group we are interested in is the \gb{germ-band} which fill most of the lateral sides. As mentioned in Section \ref{sec:ConvergentExtension}, it is generally agreed that the germ-band is one of the main drivers of horizontal motion, although it remains disputed how.
 
 In Figure \ref{fig:germbandCompare} a text-book diagram of the motion of the germ-band can be compared with the shape of the germ-band in the first and last frame of our simulation. 
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.3\textwidth}
         \includegraphics[width=\textwidth]{chapters/Results/figures/compareGB.png}
-    \caption{A diagram of the germ-band and its motion (Source: \citeAY{kong2017forces}). The purple shaded area is the region of interest. }
+    \caption{}
     \end{subfigure}
      % \hfill
     \begin{subfigure}[b]{0.61\textwidth}
     \includegraphics[width=\textwidth]{chapters/Results/figures/gb_firstframe_lastframe.png}
-    \caption{Simulation with colored in germ-band at \\ $t = 0 \text{ min}$ and $t \approx 15 \text{ min}$\\Note: The blue line separating the germ-band in the initial frame is a quirk of the gene-expression-cutoff as described in Section \ref{App:morphogens}.}
+    \caption{}
     \end{subfigure}
-    \caption{A visual comparison between a diagram of the germ-band cells and the cells as defined in our simulation\\}
+    \caption{\\
+    \textbf{(a)} A diagram of the germ-band (purple shaded area) and its motion when extending (\gb{A2}) (Source: \citeAY{kong2017forces})\\
+    \textbf{(b)} Simulation with colored in germ-band at $t = 0 \text{ min}$ and $t \approx 15 \text{ min}$\\Note: The blue line separating the germ-band in the initial frame is a quirk of the gene-expression-cutoff as described in Section \ref{App:morphogens}.}
     \label{fig:germbandCompare}
 \end{figure}
 
 
 
-To [reiterate], the motion of the germ-band is as follows:\\Firstly, the tissue moves downward towards the invaginating ventral furrow (\vf{A1}), then extends horizontally, and ultimately curve upwards as it encounters the back (posterior) tip of the embryo.\\
+To reiterate, during gastrulation, the motion of the germ-band is as follows:\\Firstly, the tissue moves downward towards the invaginating ventral furrow (\vf{A1}), then extends horizontally, before ultimately curving upwards as it encounters the back (posterior) tip of the embryo.\\
 
-In general, we see great agreement between simulation and data in the final shape and placement of the germ-band, hinting that the movement towards the belly, back, and top side. This says nothing about the timing and [cooperation] of these [activities]. To get a better understanding of the agreement, we will need to look at the dynamics during this germ-band extension:\\
+In general, we see great agreement between simulation and data in the final shape and placement of the germ-band. This says nothing explicit about the timing and interaction of these activities present, but it hints at the fact that the movement towards the belly, back, and top side can also found in our model.\reph To get a better understanding of the agreement, we will need to look at the active aspect of the germ-band extension.\\
 
-Later we will have quantitative measures, but for now, we can focus on a neat observation: The cells in the germ-band that start further towards the back will migrate much further horizontally than the cells closer to the head, with cells next to the \cephalic{cephalic furrow} only moving downwards (dorsally). \todo{Rephrase + make figure?} This is a result of the extension being the sum of many small contributions adding to the global motion. 
+Later we will have quantitative measures allowing for studying the temporal aspect, but for now, we can focus on a neat observation: The cells in the germ-band that start further towards the back will migrate much further horizontally than the cells closer to the head, with cells next to the \cephalic{cephalic furrow} only moving downwards (ventrally). This is a result of the extension being the sum of many small contributions adding to the global motion. 
 
 For a representation of the motion of individual cells in the germ-band, a random selection can be seen in Figure \ref{fig:GBMovements} below:
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{chapters/Results/figures/movements.png}
-    \caption{\todo{Remove some of the cells -- it's cluttered. Change color over time?}}
+    \caption{A number of cells from the germ-band with their migration over time visualized. The arrows correspond to movement in equally spaced time intervals during the germ-band extention (\gb{A2}).
+    It can be seen that -- like in real embryos -- cells that are formed closer to the posterior tip migrate more in the horizontal than vertical direction.}
     \label{fig:GBMovements}
 \end{figure}
 
-It can be seen that we have captured the [unequal] cell migration, where cells that starts further along the horizontal axis along also moves more horizontally. 
+It can be seen that we have captured the uneven cell migration, where cells that starts further along the horizontal axis along also moves more horizontally. 
 
 For completeness sake, we have also made a stream-plot where, the flow field which is a way to visualize the individual motion of all cells at once. This can be seen in Figure \ref{fig:streamplot}:
 
@@ -127,50 +126,51 @@ For completeness sake, we have also made a stream-plot where, the flow field whi
     \label{fig:streamplot}
 \end{figure}
 
-Without any basis of comparison YYY.  but it looks cool.
-Looking at the sum of these single-cell movements and behaviors can anyway give us a deeper insights into the global dynamics of the tissue.\todo{finish}\\
+Without any basis of comparison this flow-field is not [smth], but it looks cool so we kept it in.
+We hope, that by capturing some of the aspects of the single-cell movements we have also caught some of the deeper, global dynamics of the tissue.\todo{finish or cut}\\
 
-To summarize: We have a great visual agreement in the change of tissue-scale morphology of the germ band. The migration downwards towards the belly (ventral side) due to the furrow formation, the germ-band actuating horizontal motion, and finally the 'rise' at the back (posterior tip) due to the boundary condition, all seems to have been captured by the model. Through single-cell analysis we see a general correspondence between simulation and reality, [preliminarily] supporting that the tissue behaves as expected.\\  
+To summarize: We have a great visual agreement in the change of tissue-scale morphology of the germ band. The migration downwards towards the belly (ventral side) due to the furrow formation, the germ-band actuating horizontal motion, and finally the 'rise' at the back (posterior tip) due to the boundary condition, all seems to have been captured by the model. In the single-cell case we also see a general correspondence between simulation and reality, preliminarily supporting that the tissue behaves as expected.\\  
 
 
-An examination of the dynamical timeline will have to wait till later sections, but in general, we find that the morphological changes of the second main event, the germ-band extension (\gb{A2}), with reasonable hesitancy has been recapitulated.
+An examination of the dynamical timeline will have to wait till later sections, but in general, we find that the morphological changes of the second main event, the germ-band extension (\gb{A2}), with reasonable [smth] has been recapitulated.
 
 
 \subsection{(\pmg{A3}) The Posterior Midgut Invagination }
-Now, this final point of focus is harder to visualize neatly. Looking at electron microscopy as below in Figure \ref{fig:PMG-IRL}, we can get a rough idea of the motion:
-The back tip moves slightly upwards. Once it reaches a certain point, the tip folds in on itself as the ventral furrow reaches it, connecting the tube with the invaginating cavity. \textit{The Embryonic Development of Drosophila Melanogaster}
+Now, our final point of focus is also the hardest to visualize neatly. Looking at electron microscopy as below in Figure \ref{fig:PMG-IRL}, we can get a rough idea of the motion:
+The back tip moves slightly upwards. Once it reaches a certain point, the tip folds in on itself as the ventral furrow reaches it, connecting the tube with the invaginating cavity.\cite{campos2013embryonic}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.\linewidth]{chapters/Results/figures/4stepPMG_annotated.png}
-    \caption{An overview of the \textit{posterior midgut invagination} (\pmg{A3}) as viewed from the top (dorsal) side. \\The pole cells -- which are clearly visible at the posterior tip (\textbf{A})-- are moved to the top and towards the front of the embryo (\textbf{B}). As the tissue beneth them apically cinstrict, the newly formed indent merge with the \vf{ventral furrow} as this reaches the posterior tip (\textbf{C}). Finally the pole cells are internalized as the furrow closes off (\textbf{D}).The time points are not linearly [distributed].}
+    \caption{An overview of the \textit{posterior midgut invagination} (\pmg{A3}) as viewed from the top (dorsal) side. \\The pole cells -- which are clearly visible at the posterior tip (\textbf{A}) -- are moved to the top and towards the front of the embryo (\textbf{B}). As the tissue beneath them apically constrict, the newly formed indent merge with the \vf{ventral furrow} as this reaches the posterior tip (\textbf{C}). Finally the pole cells are internalized as the furrow closes off (\textbf{D}).The time points are not linearly spaced.\\
+    (Sources: \textbf{A \&} \textbf{C}: \citeAY{sweeton1991gastrulation}, \textbf{B \&} \textbf{D}: \citeAY{gibert1994genetics}}
     \label{fig:PMG-IRL}
 \end{figure}
 Zooming in on the very back of our simulated embryo, we can see much of the same dynamics represented:
 \begin{figure}[H]
     \centering
     \includegraphics[width=1.\linewidth]{chapters/Results/figures/VisualPMG.png}
-    \caption{A zoom-in on the the top side of the posterior tip of the embryo. To to be compared with Figure \ref{fig:PMG-IRL}. \\The PMG-event (\pmg{A3}) goes as follows: The cells in the tip starts tightening (\textbf{A}), the tip then is pushed upwards (\textbf{B}) and invaginates as the ventral furrow comes from below (\textbf{C}) before being moved further up (\textbf{D}) }
+    \caption{A zoom-in on the the top side of the posterior tip of the embryo. To to be compared with Figure \ref{fig:PMG-IRL}. \\The PMG-event (\pmg{A3}) goes as follows: The cells in the tip starts tightening (\textbf{A}), the tip then is pushed upwards (\textbf{B}), it then invaginates meeting the ventral furrow comes from below (\textbf{C}) before being moved further up (\textbf{D}).}
     \label{fig:visual-pmg-external}
 \end{figure}
 
-The formation of the \pmg{posterior midgut} is an intensely studied phenomenon in Drosophila gastrulation, but has, to the best of our knowledge, not previously been simulated. \todo{One more sentence}.
+The formation of the posterior midgut (\pmg{A3}) is an intensely studied phenomenon in Drosophila gastrulation, but has, to the best of our knowledge, not previously been simulated.
 
-It can be hard to see what happens in vivo, as there is a distinct lack of good imaging of this phenomenon. This is likely caused by the [action] happening very quickly (the fold buckles as a release of pressure) and that much of the interesting cellular dynamics happens inside the embryo.\reph This point will return shortly, but visually we seem to be agreeing with the imaging for the most part. In general we capture the motion upwards followed by both a folding and a fusion. Unfortunately, in our simualtion the upwards momentum is slowed to a halt -- in vivo, the posterior is moved much further after invagination. Once again, the lack of pressure coming from the belly-region of the embryo seems to be to blame. \todo{mention dorsal folds?}\\
+Visually grasping what happens in vivo can be tricky, as there is a distinct lack of good imaging of this phenomenon. This is caused by two things: The action happens very quickly (the fold buckles as a release of pressure) and much of the interesting cellular dynamics happens inside, or on the border of an invagination. This point will return shortly, but visually we seem to be agreeing with the external imaging for the most part. In general we capture the motion upwards followed by both a folding and a fusion. Unfortunately, in our simulation the upwards momentum is slowed to a halt -- in vivo, the posterior is moved much further after invagination. In dialogue with Nobel laureate Erik Wieschaus, we have found that the isotropy of our cell size might be to blame, as phenotypes with less cell-deformation experiences the same trouble.\todo{Keep? Remove?} This might be caused by the top (dorsal) part of the embryo not "moving out of the way" or the bottom (ventral) part not having the correct amount of pressu/force.\todo{Important - finish}\\
 
-Our frustration with a lack of good reference images comes down to the fact that once invaginated, cells are impossible capture by ordinary microscopy and hard to focus \todo{finish sentence}. This is except for a single visualization of a meticulously \textit{hand-tracked} vertical band around the posterior tip. The approximate extend of this band can be seen here:\todo{explain slightly more}
-
+Our frustration with a lack of good reference images extends to the fact, that once invaginated, cells are impossible capture by ordinary microscopy and hard to automatically [define]. The only usable visualization of internalized cells, is of a meticulously \textit{hand-tracked} vertical band around the posterior tip. The approximate extend of this band can be seen here:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{chapters//Results//figures/daniel_band_pos.png}
+    \caption{The approximate band as used in the following section for analyzing the deformations around the posterior midut.}
 \end{figure}
 
-As looking 'inside' our virtual embryo is trivial compared to real life, we have extracted the band of cells, trying to recreating the framing of the data. In Figure \ref{fig:daniel-cells} the collected data can be seen and in Figure \ref{fig:comparetodaniel} an [imitation(?)] of the same cells can be seen in simulation. 
+As looking 'inside' our virtual embryo is trivial compared to real life, we have extracted the band of cells, trying to recreating the framing of the data. In Figure \ref{fig:daniel-cells} the collected data can be seen and in Figure \ref{fig:comparetodaniel} the geometrically[?] corresponding cells can be seen in simulation. 
 \newpage
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7 \linewidth]{chapters/Results/figures/DanielCut.png}
-    \caption{A 3d mesh of hand tracked cells from in vivo imaging. Each row is from a constant angle. (Source: Daniel Alber. Not yet published. Reproduced with permission)}
+    \caption{A 3D mesh of cells from in vivo imaging. Each row is a constant angle. (Source: Daniel Alber. Not yet published. Reproduced with permission)}
     \label{fig:daniel-cells}
 \end{figure}
 \begin{figure}[H]
@@ -180,7 +180,7 @@ As looking 'inside' our virtual embryo is trivial compared to real life, we have
     \label{fig:comparetodaniel}
 \end{figure}
 
-The combined invagination of the PMG and the ventral furrow (\pmg{A3}), is easily visible in \textbf{2C-}\textbf{2D}. For the first 5-6 minutes of the timeline, simulation and reality are relatively well aligned. We see a push from the extending germ-band moving the cells towards the posterior tip. The trouble begins in \textbf{1C} and \textbf{1D} where the orientation of the cell-band should be almost horizontal. As Figure \ref{fig:comparetodaniel} shows, our model has not moved the cells far enough towards the top. In spite of this, as the posterior closes off, a YY right morphology emerge. It should also be noted that the closing happens at a reasonably YYY timing. In general a we have a respectable qualitative agreement, albeit the trouble the lack of upwards (dorsal) motion is visually evident.\\
+The combined invagination of the PMG and the ventral furrow (\pmg{A3}), is now easily visible in \textbf{2C-}\textbf{2D}. For the first 5-6 minutes of the timeline, simulation and reality are relatively well aligned. We see a push from the extending germ-band moving the cells towards the posterior tip. The trouble begins in \textbf{1C} and \textbf{1D} where the orientation of the cell-band should be almost horizontal. As Figure \ref{fig:comparetodaniel} shows, our model has not moved the cells far enough towards the top. In spite of this, as the posterior closes off, a YY right morphology emerge. It should also be noted that the closing happens at a reasonably YYY timing. In general a we have a respectable qualitative agreement, albeit the trouble the lack of upwards (dorsal) motion is visually evident.\\
 
 
 
@@ -190,7 +190,7 @@ Our model clearly has some fundamental flaw or inconsistency, but barring the la
  
 
 \subsection{General morphology}
-In the literature, a common way of visualizing changes in both local and global structure, consist of virtually drawing straight lines on an embryo at the onset of gastrulation. How these lines translate and skew over time is very descriptive for how the form changes. An example in both data and simulation can be seen in Figure \ref{fig:band-movements-stas}.
+In the literature, a way of visualizing changes in both local and global structure, consist of drawing virtual lines on an embryo at the onset of gastrulation. How these lines translate and skew over time is very descriptive for the general changes in form. An example in both data and simulation can be seen in Figure \ref{fig:band-movements-stas}.
 
 \begin{figure}[H]
     \centering
@@ -201,7 +201,9 @@ In the literature, a common way of visualizing changes in both local and global 
 \begin{figure}[H]
     \centering
     \makebox[\textwidth][c]{\includegraphics[width=1.\linewidth]{chapters/Results/figures/compareStasGBShape.png}}
-    \caption{Positions of specific bands over time. \\ \textbf{Top row:} Simulation. Three time steps from two different angles.\\ \textbf{Bottom row:}  Segmented images (Source: \citeAY{stern2022deconstructing}). \\\todo{write more!}}
+    \caption{Positions of specific colored-in bands at two differnt time points.\\ 
+    As can be seen, the general movements align quite well, albeit with some discrepancies around the posterior tip.
+    \\ \textbf{Top row:} Simulation.\\ \textbf{Bottom row:}  Segmented images (Source: \citeAY{stern2022deconstructing}). \\\todo{write more!}}
     \label{fig:band-movements-stas}
 \end{figure}
 
@@ -211,7 +213,7 @@ As is evident, there is a general agreement between both local and large-scale c
 Going through the lines, color by color we might be able to surmise [smth] about the differences in dynamics between our model and [in vivo]:\todo{finish}
 
 \begin{description}
-   \item[\lightblue{Blue}] The biggest problem is also very evident plaguing our simulation is evident. The pressure from the bottom (ventral) side of the model cannot YY. The blue line acts as a stand-in for the germ-band. Much of the analysis from its section applies with two exceptions:
+   \item[\lightblue{Blue}] The biggest problem is also very evident plaguing our simulation is evident. The pressure from the bottom (ventral) side of the model cannot push the posterior tip. The blue line acts as a stand-in for the germ-band. Much of the analysis from its section applies with two exceptions:
    \begin{itemize}
        \item In simulation, close to the (deliberate) lack cephalic furrow (the \lightyellow{yellow} line), the blue line breaks up. \todo{write something about lack of pressure relief}   
        \item The second image is later than what we previously compard the germ-band to. Here the lack of upwards motion is (much like all the woke left) pronounced.\todo{make professional}
@@ -241,30 +243,26 @@ Quickly summarizing all the qualitative comparisons we have seen in this section
 \subsection{Timing}
 One of the key question we propose is whether precise timing mechanisms are necessary to drive the complex morphogenetic processes we see, or if they can emerge purely from initial conditions and cell interactions.\\
 Cells have been shown to have remarkably precise internal clocks\footnote{cool footnote with a remarkable number\cite{cellinternal}} and chemical gradients in the embryo changing across timescales from seconds to hours\cite{shvartsman2008dynamics}. There is also the "biological clock"\cite{johanolsen2} that proteins themselves have dynamic structure that can change over time.\cite{johanolsen1}. But there is no evidence for any specific timing in stages 5-7 [citation needed]. We would like to stress the importance of the result that we seem to have recapitulated some of the long-term dynamics completely without any explicit time-dependent parameters. \textit{The fact  that the processes can exhibit accurate emergent behavior through local rules, rather than requiring external temporal control. }This could be seen to corroborate our thesis that initial conditions and an inter-cellular rule set is sufficient for some of natures more complex morpologies to arise. 
-
+\newpage
 \section{Quantitative Agreement}
 
-While visual inspection of our simulation is interesting -- and a clear result in itself, given that morphology is the target -- we would like some quantification of the model performance. Having a numerical framework will allow for optimizing model parameters, performing parameter sensitivity analysis, and in other ways objectively defining the accuracy of our solution. It also allows for statistical checks on the consistency between simulation and experimental data, helping to quantify the degree of alignment between the two. Additionally, this framework would provide a foundation for testing various hypotheses regarding cellular behavior and tissue mechanics, ultimately leading to more robust YYY of models and insights maybe into the underlying biological processes.\\
+While visual inspection of our simulation is interesting -- and a clear result in itself, given that morphology is the target -- we would like some quantification of the model performance. Having a numerical framework will allow for optimizing model parameters and in other ways objectively defining the accuracy of our solution. It also allows for statistical checks on the consistency between different runs of the simulation, helping quantify the degree of stability. Additionally, this framework would provide a foundation for testing various hypotheses regarding cellular behavior and tissue mechanics, ultimately leading to more a robust inspection of the model and maybe into insights to the underlying biological processes.\\
 
 
-We set out with a handful of core YY we would like to [explore]. First, we want to determine the minimal set of rules necessary for 'in vivo-like' gastrulation to [emerge]. Next, we aim to explore whether the boundary and initial conditions alone are sufficient to drive these processes i.e. whether timing that [stretch over] multiple minutes is a results of [something else]. Finally, with a (hopefully somewhat validated) model in hand, we seek to understand what insights could be drawn about the interaction between domains.\\
+We set out with a handful of core areas we would like to explore. First, we want to determine the minimal set of rules necessary for capturing the overall gastrulation. Next, we aim to explore whether the boundary and initial conditions alone are sufficient to drive these processes i.e. whether the timing that cross multiple minutes is a results of [something else]. Finally, with a (hopefully somewhat validated) model in hand, we seek to understand what insights could be drawn about the interaction between domains.\\
 
 
-We have already begun to address these questions, but our conclusions have largely relied on visual observations rather than quantitative analysis.\todo{better start} We have seen how the boundary condition impact the overall shape, and we've visually confirmed that the process unfolds in a manner consistent with what is observed in vivo. However, we have yet to rigorously quantify how these conditions affect key aspects such as tissue displacement, velocity, or strain involved. And, while we have [found use] for the interplay between the different parts of the embryo, we have yet to uncover the nature of the spatial domain interactions in an any way systematic or measurable way.\reph \\
+We have already begun to address the validity of the model. We have seen how the boundary condition impact the overall shape (the posterior tip diverting the extending germ-band), and we have visually confirmed that the process unfolds in a manner consistent with what is observed in vivo. However, we have yet to rigorously quantify how these conditions affect key aspects such as tissue displacement, velocity, or strain involved. And, while we have [found use] for the interplay between the different parts of the embryo, we have yet to uncover the nature of the spatial domain interactions in an any way systematic or measurable way.\reph \\
 
 
-\\
-We will now take a step back from the individual morphological events from the last section and focus on large-scale analytics. We can then perturb these individual events and see how this affects the [process].
+We will now take a step back from the individual morphological events and focus on large-scale analytics again. We can then return to the individual event, perturbing them to see how this affects the process.
 
-
-
-We will now go through \textit{quantitative} explorations of the agreement between our model and data collected in vivo. 
 
 
 \subsection{Movement}
-Although the final result of a successfully simulated morphogenesis is a three-dimensional structure, our primary focus lies in understanding the dynamics of the system. We will therefore be going away from still-image comparisons, trying to capture the [dynamics] of the system instead. We will get to strain analyses and [other analysis], but much of the biomechanics of the system can simply be captured in its granular cellular motions.\\
+Although the final result of a successfully simulated morphogenesis is a three-dimensional structure, our primary focus lies in understanding the kinetics of the system. We will therefore be going away from still-image comparisons, trying to capture the \textit{dynamics} of the system instead. We will get to strain analyses and [other analysis] later, but much of the biomechanics of the system can simply be captured surveying its granular cellular motions.\\
 
-It has been stated multiple times that usable quantitative data is tough to come by. But very recent technical advancements in both microscopy and cell-segmentation has given rise to the possibility of large-scale, automated analyses. \cite{stern2022deconstructing} We will take our onset in data collected in \citeAY{stern2022deconstructing}. This dataset includes machine-tracked 3D positions of every visible cell’s center, recorded across approximately 30 time steps.\\
+It has been stated multiple times that usable quantitative data is tough to come by. But very recent technical advancements in both microscopy and cell-segmentation has given rise to the possibility of large-scale, automated analyses.\cite{stern2022deconstructing} We will take our onset in data collected in \citeAY{stern2022deconstructing}. This dataset includes machine-tracked 3D positions of every visible cell’s center, recorded across approximately 30 time steps during gastrulation.\\
 
 Since there is no standard method for labeling individual cells, we cannot make direct one-to-one comparisons between cells. To address this, we developed the following measure:\\
 
@@ -289,14 +287,14 @@ Now in the same way as Equation \ref{eq:displacement} we calculate $\boldsymbol{
 We now have an angle between cell $i$'s motion and the in-vivo "average motion vector" at this position.
 The resulting (acute) angle difference is between 0 and $\pi$. 
 
-Below (in Figure  \ref{fig:motionAgreementExample}), the resulting analysis can be seen at [random] point in the simulation. At each point, the motion vector is drawn in, and, in data, every cell $i$ is colored according to $\alpha_i$:
+Below (in Figure  \ref{fig:motionAgreementExample}), the resulting analysis can be seen at [random] point in the simulation. 
 
 \begin{figure}[H]
     \centering
     \makebox[\textwidth][c]{
     \includegraphics[width=0.9\linewidth]{chapters/Results/figures/movement_vectors_example.png}
     }
-    \caption{Snapshot of motion vectors for each cell in simulation and average motion at each cells position. \todo{larger label to colorbar, write time point somewhere}}
+    \caption{Snapshot of motion vectors for each cell in simulation and corresponding $\boldsymbol{\mu}_i$. In the simulation each cell is colored according to the angular agreement $\alpha_i$.}
     \label{fig:motionAgreementExample}
 \end{figure}
 
@@ -311,28 +309,24 @@ Now, for ease of parsing, do the following transformation, introducing the metri
     \xi_i(t=\tau) = 1-\alpha_i(t=\tau)/\pi
 \end{equation}
 
-This allows us to score the particles on a scale of 0 to 1, where 0 is no overlap and 1 being perfect alignment.\\
+This allows us to score the particles on a scale of 0 to 1, where 0 is no overlap and 1 being perfect alignment with data.\\
 
 Averaging this score over the whole embryo for every time point we get the following relation:
 
 \begin{equation}
-     \Lambda(t=\tau) = \frac{1}{N_{cells}} \sum_{i=1}^{N_{cells}}\xi_i(t=\tau)
+     \delta(t) = \frac{1}{N_{cells}} \sum_{i=1}^{N_{cells}}\xi_i(t)
 \end{equation}
-This number quantifies the average agreement for the embryo at a specific time point. Plotting this  might be able to give us an estimate of the agreement to the general kinematics of the embryo.\reph In Figure \ref{fig:motionAgreement}, the $\Lambda$-measure can be seen for every time point in the data:
+This number quantifies the average agreement for the embryo at a specific time point. Plotting this we get an estimate of the agreement to the general kinematics of the embryo. In Figure \ref{fig:motionAgreement}, the $\Lambda$-measure can be seen for every time point in the data:
 
 \begin{figure}[H]
     \centering
     \makebox[\textwidth][c]{
     \includegraphics[width=1.3\linewidth]{chapters/Results/figures/movement_vectors_normal.png}
     }
-    \caption{The average motion-vector agreement across the full embryo as a function of time\\
-    The red \textit{random}-line is a simulated embryo where every direction of motion is uniformly randomly chosen. \todo{explain x-axis}}
+    \caption{The average motion-vector agreement across the full embryo $\delta(t)$ as a function of time. On the inset axes three snapshots of the spatial distribution of error along with the in-simulation motion can be seen.\\
+    The red \textit{random}-line corresponds to a simulated embryo where every direction of motion is uniformly randomly chosen.}
     \label{fig:motionAgreement}
 \end{figure}
-
-\todo{describe \textit{random}}
-
-
 
 
 In general, we see a consistent, well-above random overlap between data and simulation. 
@@ -355,7 +349,9 @@ Furrows are bad, but to fully understand this, we will need some additional [ana
 To [find] the places on the embryo that [volder os problemer], we will be looking at the integrated error over the full run, summing over every time step $N_t$.
 
 \begin{equation}
-     \Lambda_i = \frac{1}{N_t}\sum_{\tau = 1}^{N_t}\xi_i(t=\tau)
+     \label{eq:Delta-measure}
+     \Delta_i = \frac{1}{N_{timesteps}}\sum_{\tau = 1}^{N_{timesteps}}\xi_i(t=\tau)
+     
 \end{equation}
 
 Mapping the resulting "average lifetime error" $\Lambda_i$ back onto the initial position for cell $i$ we can see how the error is spatially distributed:
@@ -363,13 +359,13 @@ Mapping the resulting "average lifetime error" $\Lambda_i$ back onto the initial
     \centering
     \makebox[\textwidth][c]{
     \includegraphics[width=0.8\linewidth]{chapters/Results/figures/movement_mapped_normal.png}}
-    \caption{The motion-vector agreement across the full run mapped back onto their original positions \todo{colorbar label}}
+    \caption{The motion-vector agreement across the full run $\Delta_i$ for each cell $i$ mapped back onto its original positions. Some domains, especially the on the back and belly sides of the embryo, are performing much worse than the rest.  \todo{colorbar label}}
     \label{fig:}
 \end{figure}
 
 
 
-Good in regions where boundary conditions are more tightly constrained, to predictably bad in areas where complex, less predictable behavior occurs, such as near the posterior tip.  A low $\alpha$ indicates a strong match between simulated motions and the mean motion observed at the corresponding position on the embryo surface. Higher $\alpha$-values correspond to areas where the simulation struggles to capture the intricacies of cellular interactions, where boundary effects may be misrepresented(?) or, in turbulent domains for example, where the mean motion is not a good representation of a good motion(?).\\
+Good in regions where boundary conditions are more tightly constrained, to predictably bad in areas where complex, less predictable behavior occurs, such as near the posterior tip.  A low $\Delta$ indicates a strong match between simulated motions and the mean motion observed at the corresponding position on the embryo surface. Higher $\Delta$-values correspond to areas where the simulation struggles to capture the intricacies of cellular interactions, where boundary effects may be misrepresented(?) or, in turbulent domains for example, where the mean motion is not a good representation of a good motion(?).\\
 
 Going domain by domain:\\
 
@@ -389,7 +385,7 @@ This all gives us the idea of looking at the agreement for specific parts of the
 \subsubsection{Movement across domains}
 \todo{intro}
 
-We calculate the mean agreement-score $\Lambda(t)$ just like in Figure \ref{fig:motionAgreement}, but this time excluding cells, in the \cephalic{cephalic} area, in the \vf{ventral furrow}, or both:
+We calculate the mean agreement-score $\delta(t)$ just like in Figure \ref{fig:motionAgreement}, but this time excluding cells, in the \cephalic{cephalic} area, in the \vf{ventral furrow}, or both:
 
 
 
@@ -397,7 +393,7 @@ We calculate the mean agreement-score $\Lambda(t)$ just like in Figure \ref{fig:
     \centering
     \makebox[\textwidth][c]{
     \includegraphics[width=1\linewidth]{chapters/Results/figures/movement_vectors_normal_subsets.png}}
-    \caption{The motion-vector agreement across the full embryo as a function of time. For confidence is the stability of the current solution, all lines and shaded areas are averages and and standard deviations of three runs using identical parameters but different seeds.}
+    \caption{The motion-vector agreement across the full embryo $\delta$ but with certain domains excluded from the calculation. For confidence in the stability of the solution, all lines and shaded areas are averages and and standard deviations of three runs using identical parameters but different seeds.\\It is clear that excluding some domains improves the general agreement.}
     \label{fig:vector-subsets}
 \end{figure}
 
@@ -420,19 +416,18 @@ To summarize: Focusing on the parts of the embryo with a good possibility of ove
 As the tissue warps and skews, the cells are both subject to- and drivers of- stress and strain on the cell walls. This is one of the most widely studied parts of structural changes in morphogenesis.
 
 While our simulation neither includes cell walls nor explicit strain calculations, a method has been developed that only requires positions of cell-centers -- and that we have! The Green-Lagrangre algorithm (implemented as described in \citeAY{butler2009cell}), can be applied to find local deformations in tissue. In Figure \ref{fig:strain} the results of an implementation can be seen and compared to a graph on data.
-
 \begin{figure}[H]
     \centering
     \begin{subfigure}{0.45\linewidth}
         \centering
-        \includegraphics[width = \linewidth]{chapters/Results/figures/strain_rate_extrinsic.png}
+        \includegraphics[width = \linewidth]{chapters/Results/figures/strain_rate_extrinsic2.png}
     \end{subfigure}
         \begin{subfigure}{0.45\linewidth}
         \centering
         \includegraphics[width = \linewidth]{chapters/Results/figures/strain_smoothedpng.png}
     \end{subfigure}
-    \caption{(Source: \citeAY{butler2009cell}) (\textbf{left}) and the inferred strain in our simulation (\textbf{right}).\\
-    We both see a quick rise followed by a fall-off at time of invagination of the posterior\\\todo{Explain the leftmost plot or find another that shows the same with only one line}}
+    \caption{A comparison of estimated strain-rates as a function of time between in-vivo data and our simulation.In both cases we see a quick rise followed by a fall-off at the time of invagination of the posterior (\pmg{A3}). \\\textbf{Left}: A plot of the inferred strain rate (black line) in the germ-band (Source: \citeAY{butler2009cell}). \\\textbf{Right}: The inferred strain rate in simulation using the the Green-Lagrangre algorithm.\\
+   }
     \label{fig:strain}
 \end{figure}
 
@@ -443,15 +438,7 @@ This section was kept in for comparison purposes, as it highlights a fundamental
 Despite the overall success of the simulation, this divergence in strain accumulation further suggests that the mechanical/viscoelastic properties of the tissue are not fully captured and might require further refinement. 
 
 
-\subsection{Ventral Furrow}
-I would love to quantify the accuracy of our simulated ventral furrow.\\
-I am guessing we can do a cell-center fit of Figure \ref{fig:VFComparison}.\\
-Is this out of scope? Yes. Would it be cool? Also yes.
 
-\subsection{Cell surface area}
-I am sure I could get the data and would love to quantify the agreement.
-I am guessing we can do a neighbor-distance measure.\\
-Is this out of scope? Yes. Would it be cool? Also yes.
 \newpage
 \section{In Silico Mutants}
 Having a complete simulated pipeline from (simplified) morphogen to (approximate) morphogenesis, opens the door for some intriguing explorations into our model and its relation to nature. \\
@@ -465,9 +452,9 @@ Our model also allows for the creation of genetically-variant embryos by changin
 To introduce this section we will need to shortly explain the most interesting "mutants" that incidentally hinder \vf{A1}, \gb{A2} and \pmg{A3} respectively. Their mechanics and morphologies will be briefly explained, and the implications for our model briefly explored. 
 
 \subsection{The mutants}
+Videos of the individual runs can be found in Section \ref{App:videos} in the Appendix. \todo{more}
 
-
-\subsubsection{No Ventral Furrow (\vf{A1})}
+\subsubsection{(\vf{A1}) No Ventral Furrow }
 When knocking out the \textit{Twist} and \textit{Snail} genes, which are primary organizers of apical constriction, the ventral furrow fails to form (stage \vf{A1} on Figure \ref{fig:big-timeline}).\cite{leptin1991twist} \\
 
 Due to the interconnectedness of the different parts of the embryogenesis, the lack of invagination on the belly (\vf{A1}) also disrupts posterior midgut invagination (\pmg{A3}), altering the expected shape. Surprisingly, the resulting organism remains viable.\cite{conte2012biomechanical} This comes down to the fact, that nature is resilient and the embryo still manage to invaginate the pole cells at the posterior, although the timing and morphogenetic movements are significantly disrupted. In \citeAY{zusman1988short}, it is shown that an activation of the gene \textit{sog} delays the process by approximately six minutes in an attempt to compensate for the disrupted gastrulation, further highlighting both the temporal sensitivity and interconnectedness of these developmental events.\\
@@ -477,12 +464,12 @@ We were unable to find any videos of this mutant, but our simulation can be seen
 \begin{figure}[H]
     \centering
 
-    \makebox[width = 1.\linewidth]{
+    \makebox[width = 1.\linewidth][c]{
     \centering
     \hspace{-2cm}
     \includegraphics[width=1.3\linewidth]{chapters/Results/figures/noVF.png}
     }
-    \caption{\todo{make not ugly 2x2}}
+    \caption{Three snapshots of the model simulating gastrulation, but the without the virtual gene activating ventral furrow formation (\vf{A1}). The colors correspond to different cell types. It can be seen that the germ-band still extends horizontally (\gb{A2}), but the posterior midgut does not invaginate correctly (\pmg{A3}) and is not moved upwards, away from the belly.}
     \label{fig:VFmutant}
 \end{figure}
 
@@ -526,15 +513,15 @@ Again, unable to find any videos of this mutant, Figure \ref{fig:VFmutant} simpl
     \hspace{-2cm}
     \includegraphics[width=1.3\linewidth]{chapters/Results/figures/noGB.png}
     }
-    \caption{Caption}
+    \caption{Three snapshots of the model simulating gastrulation, but the without the virtual gene activating germ-band exension (\gb{A2}). The ventral furrow forms as normal (\vf{A1}), but the posterior midgut is not internalized (\pmg{A3}) and neither it nor the germ-band are moved upwards.}
     \label{fig:germ-band-mutant}
 \end{figure}
 
-Especially interesting is the following: As the \pmg{posterior} contracts in an attempt to internalize, the posterior is not moved away from the BC on the tip, making the invagination impossible. This is a clear testament to the importance of not only having  connections to the surrounding tissue, but also having an full-3D model of the boundary condition, as the resulting morphological movements are highly spacial in nature and therefore non-trivial to capture [more abstract] simulations. In a moment of hybris we might even propose the above behavior as a qualitative prediction for a possible biological experiment.\\  
+Especially interesting is the following: As the posterior contracts in an attempt to internalize, it is not moved away from the narrow boundary condition on the tip, making the invagination impossible. This is a clear testament to the importance of not only having  connections to the surrounding tissue, but also having an full-3D model of the boundary condition, as the resulting morphological movements are highly spacial in nature and therefore non-trivial to capture [more abstract] simulations. In a moment of hybris we might even propose the above behavior as a qualitative prediction for a possible biological experiment.\\  
 A final thing to note: As the posterior is not moved upwards, we observe slight twisting of the tissue during the process (this is a clever way to segue to the next section). 
 
 
-\subsubsection{No Posterior Midgut Invagination(PMG) (\pmg{A3})}
+\subsubsection{(\pmg{A3}) No Posterior Midgut Invagination(PMG)}
 The PMG is the name for the invagination that happens at the posterior to internalize the pole cells (\pmg{A3} on Figure \ref{fig:big-timeline}).
 
 In [cite Stas], they show that a chemical signal from the protein \textit{Hkb} initiates constriction on the posterior tip. In \textit{Hkb}-deficient mutants the lack of posterior invagination has a clear effect: The built up pressure from the extending germ-band causes the whole to twist. This has given the \textit{Hkb}-mutant the nickname "Corkscrew".\\
@@ -545,9 +532,9 @@ This time we are lucky as there is a full video of the resulting mutant availabl
 \begin{figure}[H]
     \centering
     \makebox[\textwidth][c]{\includegraphics[width=1.2\linewidth]{chapters/Results/figures/corkscrew_comparison.png}}
-    \caption{A purely visual comparison between our simulation \\
-    \textbf{Top:}) and the \textit{Corkscrew} phenotype \\
-    \textbf{Bottom:} \todo{describe}  (Source:\citeAY{smits2023maintaining}).\\ In both cases we see a "twisting" motion.}
+    \caption{A purely visual comparison of the \textit{Corkscrew} phenotype.\\
+    \textbf{Top:} Simulation colored by cirtual cell type. \\
+    \textbf{Bottom:} Light sheet imaging of cell walls (Source: \citeAY{smits2023maintaining})\\ In both cases  a "twisting" motion can be seen. This is most noticeable when paying attention to the line formed by the ventral furrow.}
     \label{fig:corkscrew-comparison}
 \end{figure}
 % Twist and shout
@@ -577,11 +564,19 @@ Given that we have the world’s first [citation needed] full embryo model, we c
 We will be doing this analysis in two ways: Firstly by comparing the different virtual 'phenotypes' to our in silico baseline. Secondly by comparing to the in vivo motion data.  
 
 \subsubsection{Pole Cell Migration}
-We will start out by introducing the metric \textit{Pole Cell Migration} as a virtual quantification for the success of the gastrulation. The Pole Cell Migration is defined as the angle change of the posterior tip in the lateral plane. That is, in degrees, how far around the embryo the posterior has moved.\todo{make figure?}\\
+We will start out by introducing the metric \textit{Pole Cell Migration} as a virtual quantification for the success of the gastrulation. The Pole Cell Migration (PCM) is defined as the angle change of the posterior tip in the lateral plane. That is, in degrees, how far around the embryo the posterior has moved. In Figure \ref{fig:PCM_diagram} this has been \\
 
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{chapters//Results//figures/PCM_diagram.png}
+    \caption{A diagram of the calculation of the PCM-metric.\\
+    The primary domains are drawn in in. The dotted line is initial position.\\
+    PCM is calculated as the angle between center from center of embryo and inital and final positon of the posterior tip respectively.}
+    \label{fig:PCM_diagram}
+\end{figure}
 
-In Figure \ref{fig:PCM-mutants} a comparison of multiple runs of the known mutants described earlier can be seen and compared to the wild-type.
+Using the above metric, we can condense one of the main motions of the gastrulation (the translation of the posterior tip to the back-side) down to a single number. In Figure \ref{fig:PCM-mutants} a comparison of multiple runs of the known mutants described earlier can be seen and compared to the wild-type.
 
 \begin{figure}[H]
     \centering
@@ -601,7 +596,7 @@ In Figure \ref{fig:PCM-mutants} a comparison of multiple runs of the known mutan
 \end{figure}
 
 
-Videos of the individual runs can be found in Section \ref{App:videos} in the Appendix, the mutants has been explained earlier, but a lot of the dynamics of the system can be gathered from the motion of the posterior tip. At risk of repeating ourselves, we can see that:\\
+The mutants has been individually explained earlier, but a lot of the dynamics of the system can be gathered from the motion of the posterior tip. At risk of repeating ourselves, we can see that:\\
 \begin{description}
     \item[Normal (\textcolor{darkgray}{grey}):] This is the normal run. A ramping movement until reaching the point of posterior invagination just below 20 degrees. 
     \item[No germ-band (\gb{red}):] At first the tip moves towards the invaginating ventral furrow. As this expands slightly there is still a tendency to move the tip dorsally, but there is not enough force for the posterior tip to progress more than 5 degrees. 
@@ -637,34 +632,27 @@ But when are the different parts important? To figure this out we have the follo
 \begin{figure}[H]
     \centering
     \makebox[\textwidth][c]{\includegraphics[width=1.3\linewidth]{chapters/Results/figures/Compare_all_movements_annotated.png}}
-    \caption{Average over three runs. Top row has different color scale whre white is high disagreement.}
+    \caption{The diference in the $\Delta$ measure (as defined in Equation \ref{eq:Delta-measure}) for three virtual mutants and the unperturbed gastrulation. Top row has different color scale where white is high disagreement. 
+    It can be seen that disrupting a morphogenetic event has cascading errors that greatly affect the accuracy of other, separate events.}
     \label{fig:compare-motionAgreement-space}
 \end{figure}
-
+\newpage
 
 
 Row by row:
 
-The normal run we have already discussed\\
+\begin{description}
+    \item[Normal:] The \textit{normal} run has already been discussed. We are here using it as a be a benchmark/reference to see where the different []
+    \item[\gb{No germ-band}:] The absence of an active germ-band proved to be less problematic than initially expected. In previous sections, it was clear that this mutation disrupted the posterior midgut (PMG), leading to observable changes. However, the current analysis reveals that a large part of the germ-band's agreement with reality was due to its downward motion. It is very clear though, that the posterior tip --  which had a great agreement in the \textit{normal} run -- is [moving] much [worse] when comparing to data. Curiously, the small diagonal band between germ-band and posterior that originally had now agreement (as can be seen in \textbf{A3}) has improved. This might be some complex interaction between [smth] and [smth else], but could be a sign that our implementation of the active germ-band has some improvement. \textit{This highlights the flexibility of the model in reproducing certain morphogenetic behaviors, even when significant components are removed, pointing to the role of global tissue dynamics in maintaining developmental structure}.\\
+    \item[\vf{No ventral furrow}:] As already seen in Figure \ref{fig:compare-motionAgreement-time}, removing the ventral furrow has by far the most severe impact for the simulation’s ability to reproduce "normal" gastrulation. The ventral furrow is critical in the first large-scale movement and, in our simulation YYY  cellular rearrangements, and without it, our model struggles to simulate the correct spatial deformations. It has been experimentally shown that the active convergent extension in the germ-band is in neither dependent on nor affected by the pulling force from the invagination on the lower side of the embryo.\cite{lye2024polarised} 
+    \item[\pmg{No PMG}:] Removing \pmg{PMG} leads, unsurprisingly, to significant simulation errors at the posterior end -- a place where our simulation so far has seemed to be quite well aligned with data. Surprisin gis it, that it seems as if the performance in the head area (left of the \cephalic{cephalic} furrow) is quite significantly improved. \todo{The GB error is more pronounced on the side, where the epithelium twists 'the wrong way'}
+\end{description}
 
-The absence of an active germ-band proved to be less problematic than initially expected. In previous sections, it was clear that this mutation disrupted the posterior midgut (PMG), leading to observable changes. However, the current analysis reveals that a large part of the germ-band's agreement with reality was due to its downward motion. It is very clear though, that the posterior tip --  which had a great agreement in the \textit{normal} run -- is [moving] much [worse] when comparing to data. 
-Curiously, the small diagonal band between germ-band and posterior that originally had now agreement (as can be seen in \textbf{A3}) has improved. This might be some complex interaction between [smth] and [smth else], but could be a sign that our implementation of the active germ-band has some improvement. 
-\textit{This highlights the flexibility of the model in reproducing certain morphogenetic behaviors, even when significant components are removed, pointing to the role of global tissue dynamics in maintaining developmental structure}.\\
-
-As already seen in Figure \ref{fig:compare-motionAgreement-time}, removing the ventral furrow has by far the most severe impact for the simulation’s ability to reproduce "normal" gastrulation. The ventral furrow is critical in the first large-scale movement and, in our simulation YYY  cellular rearrangements, and without it, our model struggles to simulate the correct spatial deformations. t has been experimentally shown that the active convergent extension in the germ-band is in neither depentent on nor affected by the pulling force from the invagination on the lower side of the embryo.\cite{lye2024polarised} 
-
-Removing PMG gives , very ynsuprisingly, a big error at the posterior end ...\\
-
-\textit{The normal run has already been discussed. We can use it as a benchmark/reference, showcasing the 'expected' error for a non-mutant morphogenetic events in a fully functional simulation. This forms the benchmark for evaluating how different mutations in the model deviate from the ideal, with respect to both timing and spatial accuracy across the embryo.
+\todo{Add \vf{A1}, \gb{A2} and \pmg{A3} to the text above}
 
 
+The fact that loosing \vf{A1} gave a much higher error in the germ-band, and loosing \gb{A2} a lot higher error in the PMG, helps elucidate the fact of complementary and interdependent domain- and event- interactions!!!
 
-Removing the ventral furrow, as anticipated, has the most severe impact on the simulation’s ability to reproduce "normal" gastrulation. The ventral furrow is critical for initiating large-scale cellular rearrangements, and without it, our model struggles to simulate the correct spatial deformations. The breakdown of this feature in the simulation is reflected in the metric, where the accuracy drops sharply, particularly in regions like the invagination shown in the top right of \textbf{c3}. The model fails to capture the correct invagination morphology, showing the sensitivity of our simulation to the loss of critical early-stage events. This underscores the importance of early mechanical triggers in setting the stage for downstream morphogenetic events in our model.
-
-The removal of the PMG, as expected, leads to significant simulation errors at the posterior end. Our model heavily relies on the posterior midgut to anchor and guide tissue movements, particularly for coordinating invagination. When the PMG is absent, the simulation fails to reproduce the correct posterior morphogenesis, resulting in notable discrepancies in both timing and shape. The model’s posterior region, without the proper guidance from the PMG, shows a clear breakdown in invagination, which is a critical failure mode. This is in line with our model’s design, which predicts a high sensitivity to the PMG due to its role in driving coordinated tissue movements during these later stages of gastrulation.}
-
-
-\todo{I feel like there is a lot of meat on this figure. Discuss!}
 
 \textbf{We are in a way the first who can simulate the posterior invagination (PMG) \pmg{A3} as this requires both successful modelling of \vf{A1} and \gb{A2}. Each of which has had multiple YYY before, but never in a way where combining them was possible}?
 % \section{Interaction Matrix}

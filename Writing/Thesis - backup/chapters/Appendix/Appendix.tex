@@ -70,43 +70,37 @@ GB[GE.base[:,2] > 50] = 0
 # remove in the head domain
 GB = GE.not_gene(GB, GE.gene("fkh"))
 
-# ...
+# Add to embryo
+GE.add_expression(GB, 0.2, True, 1)  # Germ Band
+
+
+# Dorsal fold 1
 GE.add_expression(GE.get_second_run_stripe(), 0.4, True, 5)  # Second Run Stripe
 
+# Dorsal fold 2
 GE.add_expression(GE.get_fifth_run_stripe(), 0.4, True, 5)  # Second Run Stripe
-
-GE.add_expression(GB, 0.2, True, 1)  # Germ Band
 
 # GE.add_expression(GE.not_gene(GE.or_gene(GE.gene("eve"), GE.gene("run")), GE.gene("Doc2")), 0.2, True, 1)  # Germ Band
 
+# add cephalic furrow
 GE.add_expression(GE.gene("Dfd"), 0.6, True, 5)  # Cephalic Furrow
 
 
-# GE.add_expression(GE.not_gene(GE.and_gene(GE.gene("Kr"),GE.gene("run")), GE.gene("sna")), 0.2, True, 5)  # posterior fold
-
-twi = GE.gene("twi")
-
-twi[GE.base[:,1] > 25] = 0.
-twi[GE.base[:,1] < -25] = 0.
-
-# GE.add_expression(twi, 0.3, True, 4)  # Ventral Furrow (Daniel)
-
-
+# combine twist and snail (twist overlaps snail completely)
 twist_and_snail = GE.and_gene(GE.gene("twi"), GE.gene("sna"))
-
-# twist_and_snail[GE.base[:,0] > 140] = 0.
 
 GE.add_expression(twist_and_snail, 0.2, True, 2)  # Ventral Furrow
 
-
+# add posterior midgut
 GE.add_expression(GE.gene("hkb"), 0.25, True, 4)  # PMG
-# GE.add_expression(GE.gene("hkb",), 0.6, True, 3)
 
-
+# hkb is expressed both for the Anterior and Posterior invagination
+# croc and oc are in the cephalic domain, so I use these to set 
+# everything in head region back to cell type 0
 GE.add_expression(GE.or_gene(GE.gene("croc"), GE.gene("oc")), 0.4, True, 0)  # Invert
 
-
-GE.save("no_q_from_runt", q_from_runt=False)
+# Define the PCP from the gradient of the runt gene and save
+GE.save("no_q_from_runt", q_from_runt=True)
 \end{lstlisting}
 
 \subsubsection{Cell types extracted from data}
@@ -177,4 +171,18 @@ Not showing something good :( Keep for completeness or move to appendix?}
 % \end{figure}
 
 \section*{Other efforts we have tried in vain}
+\section*{For eftertiden}
+\subsection{Ventral Furrow}
+I would love to quantify the accuracy of our simulated ventral furrow.\\
+I am guessing we can do a cell-center fit of Figure \ref{fig:VFComparison}.\\
+Is this out of scope? Yes. Would it be cool? Also yes.
+
+\subsection{Cell surface area}
+I am sure I could get the data and would love to quantify the agreement.
+
+\subsection{Interaction matrix}
+Wish I had time
+
+\subsection{Without gene-defined pcp}
+Wish I had time
 

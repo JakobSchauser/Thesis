@@ -145,8 +145,8 @@ if __name__ == '__main__':
         # loaded_cells = np.load(sys.argv[1])
         # loaded_properties = None
     if len(sys.argv) > 1:
-        # path = "runs/"
-        path = "D:/"
+        path = "runs/"
+        # path = "D:/"
         with h5py.File(path + sys.argv[1] + ".hdf5", 'r') as f:
             positions = f['x'][::1]
             loaded_properties = None

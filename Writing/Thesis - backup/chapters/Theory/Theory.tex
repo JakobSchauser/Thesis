@@ -18,8 +18,8 @@ Thus our first symmetry break occurs, as this gives rise to the well defined emb
 
 The second symmetry break is for breaking the up/down-symmetry. This happens differently for different animals, but the most well known example is found in the frog Xenopus, where the rotation of the egg, relative to the point of sperm entry, establishes this axis. In ways like this, the belly and back (Dorsal-Ventral axis) can be defined from fertilization.\\
 
-Finally, we need some way of getting every cell to know an in-plane "forward" and "backward" direction. This polarity is called \textbf{Planar-Cell Polarity} and is almost as ubiquitous as the Apical-Basal polarity. In Drosophila, \textit{PCP} is defined through morphogens giving a clear (nematic) direction of high gradient. Morphogens, as predicted by Turing, are signaling molecules that help establish these asymmetries. These morphogens have distinct and stable patterning of low and high concentrations. When sensing these, cells can, using the previously broken symmetries, contribute to the creation of new morphogens. This coordination allows the cells to locally contribute to organizing global polarities and patterns.\\
-
+Finally, we need some way of getting every cell to know an in-plane "forward" and "backward" direction. This polarity is called \textbf{Planar-Cell Polarity} and is almost as ubiquitous as the Apical-Basal polarity. In Drosophila, \textit{PCP} is defined through morphogens giving a clear (nematic) direction of high gradient. Morphogens, as predicted by Turing, are signaling molecules that help establish these asymmetries. These morphogens have distinct and stable patterning of low and high concentrations which the cells can sense and rect to. \\
+% When sensing these, cells can, using the previously broken symmetries, contribute to the creation of new morphogens. This coordination allows the cells to locally contribute to organizing global polarities and patterns.
 The next step is to understand how these morphogen patterns emerge and how they lead to coordinated development across the embryo:
 
 
@@ -44,11 +44,11 @@ To get a feel for the amazingly complicated and remarkably precise patterning of
     \label{fig:MorphogenMap}
 \end{figure}
 
-The cells in an embryo can, using internal mechanisms, react to their local concentration of these chemicals, allowing them to act accordingly. These local reactions can consist of everything from a simple mechanical activity, to information-retaining(?) changes its internal composition:
+The cells in an embryo can, using internal mechanisms, react to their local concentration of these chemicals, allowing them to act accordingly. These local reactions can consist of everything from a simple mechanical activity, to making changes to its internal composition:
 
 Each cell maintains its own distribution of these chemical gradients, providing a second, local basis for directed responses and collective organization. These individual gradients are intrinsically connected to the polarizations discussed in the last section, and play a big role, both in natural processes and in the model we will be introducing later. In the next section the different biomechanical actions the the cells are capable of will be discussed, but first we will have to how signaling and mechanical changes interact.\\
 
-The link between morphogens and mechanical deformations go both ways. This means, that when cells move according to some defined polarity, they can move the signal with them and break other cells' symmetries along the way. It has been shown [citation needed] that a mechanical stimulus can trigger a chemical signal, thereby re-inducing patterning in a feedback loop. This is called \textbf{mechanotransduction} and is vital in stable morphogenesis\cite{bidhendi2019mechanical} by. A relevant example of mechanotransduction is how cells can sense movement from a particular direction and respond by aligning their \textit{Planar-Cell Polarity} accordingly.\cite{gray2011planar} This local alignment can trigger a cascading effect, ultimately contributing to the overall shape of the tissue.\\
+The link between morphogens and mechanical deformations go both ways. This means, that when cells move according to some defined polarity, they can move the signal with them and break other cells' symmetries along the way. It has been shown that a mechanical stimulus can trigger a chemical signal, thereby re-inducing patterning in a feedback loop. This is called \textbf{mechanotransduction} and is vital in stable morphogenesis\cite{bidhendi2019mechanical} by. A relevant example of mechanotransduction is how cells can sense movement from a particular direction and respond by aligning their \textit{Planar-Cell Polarity} accordingly.\cite{gray2011planar} This local alignment can trigger a cascading effect, ultimately contributing to the overall shape of the tissue.\\
 
 
 Let us take a small step back and think how extraordinary this all is. Every individual action is transcribed from the same string of DNA, where nothing happens except building one of 20-ish amino acids to form proteins. These proteins can then either help or delay the transcription of the same DNA string. It is the order in which these simple proteins are created that, together with the simple physical self-interaction, allows for the exponentially more complex cell to emerge.
@@ -126,7 +126,7 @@ When the cell sheet wants out-of-plane bending, they turn to Apical Constriction
 % \subsection{Proliferation}
 % If cells are dividing in-plane, they can apply a pressure. In the stages of we are looking at, cell-division is shown to not be a driving force except in the head-region. [citation needed] As this has not been simulated in the final iteration.\\
 
-Now, the fact that nature is thrifty with its creations, means, the few actions described above is used in the creation of almost every type of organ in almost every type of organism. The hope is, that understanding these fundamentals in one system might allow for lessons to be learned in another. In this thesis we will focus on the motility required for Drosophila gastrulation to [arise]. As explained in the introduction, The fruit fly is a model organism, and the fact that it has been observed by biologists for years makes it a great onset for probing the intricacies of biomechanics.\\
+Now, the fact that nature is thrifty with its creations, means, that versions of the few actions described above are used in the creation of almost every type of organ in almost every type of organism. The hope is, that understanding these fundamentals in one system might allow for lessons to be learned in another. In this thesis we will focus on the motility required for Drosophila gastrulation to arise. As explained in the introduction, The fruit fly is a model organism, and the fact that it has been observed by biologists for years makes it a great onset for probing the intricacies of biomechanics.\\
 
 
 
@@ -164,9 +164,9 @@ Through \textit{mechanotransduction}, \textit{local movements} can be tied to th
 
 \newpage
 \section{The Drosophila Gastrulation in detail}
-In the literature, the development of the fruit fly from fertilised egg to hatched larvae is usually divided into 17 distinct events.\cite{bownes1975photographic} We will be looking at stages 5 through 7, lasting about 15 minutes. These are characterized by having the first mesoscopic morphogenetic movements and setting the stage for all the [something] to come.\\
-A quick run down of the first 5 stages.
-The Drosophila egg has a diameter of about 1/10th millimeter\footnote{Source: This wonderful website: \url{https://bionumbers.hms.harvard.edu/bionumber.aspx?id=111360}} and YYY, 
+In the literature, the development of the fruit fly from fertilised egg to hatched larvae is usually divided into 17 distinct events.\cite{bownes1975photographic} We will be looking at stages 5 through 7, lasting about 15 minutes. These are characterized by having the first mesoscopic morphogenic movements and setting the stage for all the action to come.\\
+A quick run down of the first 5 stages:
+The Drosophila egg has an oblong shape with a diameter of about 1/10th millimeter\footnote{Source: This wonderful website: \url{https://bionumbers.hms.harvard.edu/bionumber.aspx?id=111360}}, 
 Rather than immediately dividing into separate cells, the fertilized egg first undergoes several rounds of nuclear division within one large cell. This unique arrangement results in about 5000 nuclei lining the shell of the egg. Eventually, each nucleus becomes encased in its own membrane, marking the cellular blastoderm stage, where distinct cells finally emerge.
 
 
@@ -180,10 +180,10 @@ Rather than immediately dividing into separate cells, the fertilized egg first u
 %     Germ-band: A band of germs}
 %     \label{fig:enter-label}
 % \end{figure}
-Now these cells will need to move around, defining the different [smth] and layers of the fly. This next step, called the gastrulation, is the focus of this [thesis]:
+Now these cells will need to move around, defining the different inside and outside layers of the fly. This next step, called the gastrulation, is the focus of this [thesis]:
 
-The Drosophila gastrulation consist of a series of interconnected but independent cell movements. It has YY and YYY, and YYY. \\
-We will now present an abridged overview, roughly ordered in time. In it three events have been highlighted, chosen for being both instrumental for the final morphological outcome and relating to spatially different domains of the embryo. \todo{where 2 put}
+The Drosophila gastrulation consist of a series of interconnected but independent cell movements. \\
+We will now present an abridged overview, roughly ordered in time. In it, three events have been highlighted, chosen for being both instrumental for the final morphological outcome and relating to spatially different domains of the embryo. 
 
 
 

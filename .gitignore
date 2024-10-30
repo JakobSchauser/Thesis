@@ -12,3 +12,5 @@ DeconstructingGastrulation-Data/Data analysis/Data analysis/*
 *.txt
 *.pptx
 *.npy
+
+!/FinalVideos/

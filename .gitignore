@@ -14,3 +14,4 @@ DeconstructingGastrulation-Data/Data analysis/Data analysis/*
 *.npy
 
 !/FinalVideos/*
+!/FinalVideos/Mutants/*

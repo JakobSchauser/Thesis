@@ -56,13 +56,36 @@ Modifying $\lambda_3$ causes more understandable changes to the morphology (the 
 \end{figure}
 \section{Code details}
 \label{App:Code}
+By far the heaviest load, so optimizing this is the highest priority. Firstly, new neighbours are only found every 50th time step. 
+Secondly, the search space is reduced by querying using SciPy's \verb|cKDTree|.
+Finally, Voronoi neighbors are changed to "approximate line of sight neighbors" giving phenomenologically the same results while being magnitudes faster to calculate. The algorithm can be seen below:
+
+\begin{lstlisting}
+# dx = direction vectors
+# d = distances
+# n_neighbors = 0 for nearest neighbors, 1 for neareast and second nearest, and so on 
+
+
+# Calculate pairwise midpoints between the cells
+n_dis = torch.sum((dx[:, None, :] / 2 - dx[None, :, :]) ** 2, dim=3)
+
+# add a large constant to the diagonal for no self-intersections 
+n_dis += 1000 * torch.eye(n_dis.shape[1])[None, :, :]
+
+# Find all cells that are closer than halfway to any other.
+#    this effectively finds Voronoi neighbors.
+z_mask = torch.sum(n_dis < (d[:, :, None] ** 2 / 4), dim=2) <= n_neighbors
+\end{lstlisting}
+
+The rest of the code base can be found on:
+\url{https://github.com/JakobSchauser/Thesis/}
 \section{Videos}
 \label{App:videos}
-Link to the videos of the different models:
+The videos of the different simulated mutants can be found here:
 
-\url{https://github.com/JakobSchauser/Thesis/tree/main/FinalVideos/}
-\section{Sergei-analyses (tie into PCP)}
-\label{App:Sergei}
+\url{https://github.com/JakobSchauser/Thesis/tree/main/FinalVideos/Mutants/}
+% \section{Sergei-analyses (tie into PCP)}
+% \label{App:Sergei}
 
 \section{Green-Lagrange strain inference}
 \label{App:Strain-Calculation}
@@ -184,7 +207,7 @@ In Figure \ref{fig:roestte-angle-dist}, the distribution of angles of all found 
 
 We believe the lack of malleability in the contours of the cells might be to blame.\\
 In our model, where the equilibrium distance is the same for every direction no matter the pressure exerted, getting a bimodality is predictable.
-Every time a new pair 'touch' on the up-down axis, they release space for a pair above or below on the perpendicular axis. The lack of anisotropic cell shapes forces this discrepancy into being.
+Every time a new pair 'touch' on the up-down axis, they release space for a pair above or below on the perpendicular axis. The lack of anisotropic cell shapes almost forces this discrepancy into being.
 
 
 % When speaking with Daniel, a researcher at the [Stas'] laboratory who did the original analysis, he said that this makes sense, as looking at neighboring nuclei is fundamentally different from edges. \todo{rephrase to make less bad}. 
@@ -206,18 +229,17 @@ Every time a new pair 'touch' on the up-down axis, they release space for a pair
 % \end{figure}
 
 % \section{Other efforts we have tried in vain}
-\section{For eftertiden}
+\section{Elements cut for lack of time}
 \subsection{Ventral Furrow}
-I would love to quantify the accuracy of our simulated ventral furrow.\\
-I am guessing we can do a cell-center fit of Figure \ref{fig:VFComparison}.\\
-Is this out of scope? Yes. Would it be cool? Also yes.
+We would have loved to quantify the accuracy of our simulated ventral furrow.\\
+Doing computer vision cell center fit on \ref{fig:VFComparison}, for example.
 
 \subsection{Cell surface area}
-I am sure I could get the data and would love to quantify the agreement.
+As the changes in cell surface area and percentage of invaginated tissue are known, quantifying the agreement could have helped understand the model better.
 
 \subsection{Interaction matrix}
-Wish I had time
+We have done a bunch of examinations into the mutants. combining different mutations, seeing the second-order interactions, would be an ovious and interesting next step.
 
-\subsection{Without gene-defined pcp}
-Wish I had time
+\subsection{Without gene-defined PCP}
+The Planar Cell Polarity was defined though the \textit{Even skipped} and \textit{Runt} stripes. Seeing the effects this had (compared to simply breaking the in-plane symmetry along the anterior-posterior axis) would have been super interesting.
 

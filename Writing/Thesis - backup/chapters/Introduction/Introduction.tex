@@ -1,32 +1,21 @@
 
-\section{Questions}
-Q0 - minimal rule-set for that is in-vivo like gastrulation. \\
-Q1 - Are BC/IC sufficient?\\
-Q2 - Given a bottom-up, full scale model, what can we say re: domain-interactions\\
-\\\\
-Result 1: Visual and quantitative comparison between Silico and Vivo\\
-Result 2a: Comparison between Silico mutants and Vivo mutants\\
-Result 2a: Comparison between Silico mutants and Silico optimal (remember to include PCP-orientation)\\
-
-
-We will be introducing three events (A1-A3) and 
-In a field that is notoriousl old (many, many proteins, genes etc. where found in Drosophila first) we will be attempting a world-first [smth]
-\textbf{We are in a way the first who can simulate the posterior invagination (PMG) \pmg{A3} as this requires both successful modelling of \vf{A1} and \gb{A2}. Each of which has had multiple YYY before, but never in a way where combining them was possible}
-
-
-
-
-
-\section{The introduction}
 In 1952, two years before his untimely death, Alan Turing wrote an article called \textit{The chemical basis of morphogenesis}.\cite{turing52the} In it, he predicted that the diffusion of off-equilibrium chemicals, combined with relatively simple interactions could originate much of the extraordinary patterning we see in nature. When talking about these chemicals, Turing coined the term morphogens thereby cementing that patterning has a connection to not just visual pigmentation, but also physical shape. \\
 
-In this thesis we will be exploring \textbf{morphogenesis}, the origin of form, through modeling the \textbf{emergent} behavior of individual cells during a the early stages of gastrulation in the common fruit fly, \textbf{Drosophila}.\\
 
-Plato used the words \textit{form} and \textit{idea} interchangeably. This is ascribed to a quirk of translation from ancient Greek, but he might have been more right than he realized.\\ Almost every biological structure has an intrinsic link between form and function; from the nephron in the kidney to the neck of the giraffe.  
-On top of this, Nature is remarkably consistent. Any two livers across organisms of the same species are functionally the same. The translation from blueprint to finished structure must either be very precisely controlled or full of innate error correction. This makes the biological formation of physical shape (i.e. \textbf{morphogenesis}) an inherently interesting thing to study. \\
+The fact that simple interactions between individual constituents can lead to complex and surprising behavior on a larger scale, (i.e. emergence), is one of the core concepts in physics. But just like no individual water molecule knows the shape of a wave, no single cell knows what a human is. All biological systems involve intricate inter-cell coordination, which needs to be robust and precise for multicellular life to be feasible. Most of these cells use the same array of seemingly simple actions to achieve wildly different and complex results. On top of this, Nature is remarkably consistent. Any two livers across organisms of the same species are functionally the same. The translation from blueprint to finished structure must either be very precisely controlled or full of innate error correction. \\
+
+Taking our onset in this mindset, we will in this thesis be introducing a model that, through simulating the emergent behavior of individual cells, can capture the full-embryo large scale movements that is seen in nature. We will be looking at morphogenesis, the formation of physical form, in early stages of the fruit fly embryo. The common fruit fly (Drosophila among friends) has been studied for decades and is used as a model for understanding many part of the earliest stages of life. Especially \textit{gastrulation}, the point in which the inside- and outside domains are defined and separated has been studied intensively and has birthed multiple Nobel prizes. We will be highlighting three events during the approximate 15 minutes this gastrulation takes, and through simulation of these, we will be corroborating the validity of our model. By perturbing the model and seeing how the events independently and collectively react we will be showcasing the novelty, justification and value of our bottom-up approach.\\
+
+Plato used the words \textit{form} and \textit{idea} interchangeably. This can be ascribed to a quirk of translation from ancient Greek, but he might have been more correct than he realized: Every biological structure has an intrinsic link between form and function; from the beak of a bird to the neck of the giraffe. The fact that physical shape is so fundamental to nature raises questions about the processes that bring it into being.\\
+How form arises, how cells coordinate, and how this can be modeled will be explored in the following chapters.
 
 
-\textbf{Emergence}, the fact that simple interactions between individual constituents can lead to complex and surprising behavior on a larger scale, is one of the core concepts in physics. Just like no individual water molecule knows the shape of a wave, no single cell knows what a human is.All biological systems involve intricate inter-cell coordination. Most of these cells use the same array of seemingly simple actions to achieve wildly different and complex results. This coordination needs to robust and precise to make multicellular life feasible.  \\
+
+
+
+
+
+
 
 
 
@@ -39,68 +28,68 @@ On top of this, Nature is remarkably consistent. Any two livers across organisms
 % In this thesis we will be looking at how emergent phenomena across many different 
 
 
-\subsection{Why emergence. }
+% \subsection{Why emergence. }
 
 
 % but somewhere in its creation, the person must be imbued with something making it greater than the sum of its part. Some might call this emergent phenomenon a "soul", but you could also ascribe it to coordinated group behavior and smart feedback loops. \note{maybe too much? Maybe mention Hoefstadters strange loops? }
 
- While we can 
-
-
-
-
-In medicine creation, understanding the interplay between the microscopic and the macroscopic is vital; drugs perform changes on minute intracellular dynamics -- with their desired effects on organ, human, or even population scale.\footnote{The Danish population consist of $10^{20}$ cells}
-
-Understanding the individual parts might grants us the possibility for an alternative, bottoms-up understanding of the whole.
-
-
-\textbf{Me ranting: Use some for abstract?}
-
- -- Plato -- ontological --
-Like snowflakes:
-Proteins are made up of only 22 amino acids, their 
-
-Nature keeps remaking the same structures. A leaf consists of recursive branching, where each branch is a smaller copy of the branch it is rooted in. But so are lungs and kidneys also made!(something something scales)  The symmetries from the building blocks define all life as we know it. 
-
-Much like twins who are genetically identical can turn out differently, cells
-
-Creation requires an interplay between information stored within the building blocks and their environment. (something something charcoal drawing)
-
-The formation of biology cannot be separated from the chemistry of its constituents. And chemistry is just physics, 
-
-\subsection{Why do we care about Morphogenesis?}
-
-
-\subsection{Why drosophila}
-When studying the interplay between morphogens and morphogenesis, no other organism has been studied as much as the common fruit fly. Drosophila Melongaster, as it is known in the scientific community, is the definitive model organism and studying its biology has taught us many things that has been generalized to humans. \\
-
-
-When studying any of the above-mentioned phenomena, physicsist and biologist seem too often to rely on the reductionist mathematics of solvable differential equations. Much like simple cellular automata can be used to describe things everything from the stock market to the Eucalyptus-leaves, we will be trying to apply many of the same principles to a 3d point-based model.
-
-\subsection{Why modeling full-embryo gastrulation }
-As questions!
-
-
-
-
-% It is suggested that a system of chemical substances, called morphogens, reacting together and diffusing through a tissue, is adequate to account for the main phenomena of morphogenesis through the emergence of genetic patterning.
+%  While we can 
 
 
 
 
 
 
-We will be trying to find the minimal number of rules for vivo-like gastrulation to emerge. We will have extra focus on the speciality of the problem, only transmitting global information through the local sensing of boundary- and initial conditions.
-
-To examine we will do both visual and quantitative comparisons between Silico and Vivo, not only for wild-type but also for different known (and maybe even some unknown) mutants. Putting our results under scrutiny 
-
-Finally when we are confident in our model, we will take advantage of the world first, bottom-up, full scale model to see what can we say regarding interactions between different domains.\\
+% Understanding the individual parts might grants us the possibility for an alternative, bottoms-up understanding of the whole.
 
 
+% \textbf{Me ranting: Use some for abstract?}
+
+%  -- Plato -- ontological --
+% Like snowflakes:
+% Proteins are made up of only 22 amino acids, their 
+
+% Nature keeps remaking the same structures. A leaf consists of recursive branching, where each branch is a smaller copy of the branch it is rooted in. But so are lungs and kidneys also made!(something something scales)  The symmetries from the building blocks define all life as we know it. 
+
+% Much like twins who are genetically identical can turn out differently, cells
+
+% Creation requires an interplay between information stored within the building blocks and their environment. (something something charcoal drawing)
+
+% The formation of biology cannot be separated from the chemistry of its constituents. And chemistry is just physics, 
+
+% \subsection{Why do we care about Morphogenesis?}
+
+
+% \subsection{Why drosophila}
+% When studying the interplay between morphogens and morphogenesis, no other organism has been studied as much as the common fruit fly. Drosophila Melongaster, as it is known in the scientific community, is the definitive model organism and studying its biology has taught us many things that has been generalized to humans. \\
+
+
+% When studying any of the above-mentioned phenomena, physicsist and biologist seem too often to rely on the reductionist mathematics of solvable differential equations. Much like simple cellular automata can be used to describe things everything from the stock market to the Eucalyptus-leaves, we will be trying to apply many of the same principles to a 3d point-based model.
+
+% \subsection{Why modeling full-embryo gastrulation }
+% As questions!
 
 
 
-In this
+
+% % It is suggested that a system of chemical substances, called morphogens, reacting together and diffusing through a tissue, is adequate to account for the main phenomena of morphogenesis through the emergence of genetic patterning.
+
+
+
+
+
+
+% We will be trying to find the minimal number of rules for vivo-like gastrulation to emerge. We will have extra focus on the speciality of the problem, only transmitting global information through the local sensing of boundary- and initial conditions.
+
+% To examine we will do both visual and quantitative comparisons between Silico and Vivo, not only for wild-type but also for different known (and maybe even some unknown) mutants. Putting our results under scrutiny 
+
+% Finally when we are confident in our model, we will take advantage of the world first, bottom-up, full scale model to see what can we say regarding interactions between different domains.\\
+
+
+
+
+
+% In this
 
 % Also, as physicists, embryogenesis is a cornucopia of interesting examples of biomechanics. The genetic makeup, the cells local neighborhood and any global environment and maternal effects, all have an influence on successful embryogenesis. 
 

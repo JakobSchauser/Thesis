@@ -202,7 +202,7 @@ We will now present an abridged overview, roughly ordered in time. In it, three 
       \textit{(Previous page.) }\\ 
       A somewhat comprehensive explanations of the most important parts of the early Drosophila gastrulation. The three events (\vf{A1}, \gb{A2} and \pmg{A3}) have been highlighted by us for later referencing.\\
       \textbf{A:} A diagram of the drosophila embryo as it is usually depicted: The front side (what will become the head) facing left. The primary domains of interest are depicted.\\
-      \textbf{B:} An electron microscope image of the embryo around 30 seconds after initialized gastrulation. The early signs of the cephalic furrow and ventral furrow are visible. On the anterior (back) tip, a number of germ cells (called pole cells) can be seen. (Source: )\\
+      \textbf{B:} An electron microscope image of the embryo around 30 seconds after initialized gastrulation. The early signs of the cephalic furrow and ventral furrow are visible. On the anterior (back) tip, a number of germ cells (called pole cells) can be seen.\\
       \textbf{C - F:} Electron microscopy of a cross section of the {ventral furrow} closing off (\vf{A1}). (Source: \citeAY{sweeton1991gastrulation})\\
       \textbf{G:} A diagram of the motion of the {germ-band} as it extends (\gb{A2}). The locations of auxiliary folds are also highlighted. (Source: \citeAY{kong2017forces})\\
       \textbf{H:} Imaging of the embryo with highlighted cell walls. We can see the {posterior midgut} as it invaginates and combines with the ventral furrow (\pmg{A3}). (Source: \citeAY{stern2022deconstructing})
@@ -211,23 +211,33 @@ We will now present an abridged overview, roughly ordered in time. In it, three 
 \end{figure}
 % \vspace*{5cm} 
 
-As we now have the basis for understanding how ...
+As we now have the basis for understanding in place, we can pose our main questions succinctly:\\
 
-\todo{Reexplain problems}
+We would like to see, with as few parameters as possible, how close we can get to the gastrulation seen in vivo. Here we will focusing on the three main events as described above.\\ Secondly we would like to see whether any explicit timing-dependence is needed for the quite temporally complex chain of events to unfold. \\ 
+Finally, given a model we are have confident in, we would like to probe it about the interplay between its different spacial domains. Specifically, how removing any of the above events affects the progression of the others.
+
+
+% Q0 - Mimimale\\
+% Q1 - Are BC/IC sufficient?\\
+% Q2 - Given a bottom-up, full scale model, what can we say re: domain-interactions\\
 % \textit{This page is intentionally left blank so the previous page can be taken and kept as a cheat-sheet for later referencing. }
 \newpage
 \section{Previous attempts at simulation}
-\note{I am aware this section is not up to par :)}\\
-In silico models has already provided multiple working examples of all the aforementioned embryogenetic events with multiple different approaches since the 1970's.\\
+In silico models has provided multiple working examples of all the aforementioned embryogenetic events with multiple different approaches since the 1970's. \\
 When studying the biomechanics of morphogenesis there seems to be two primary strategies:\\
 
-\textbf{Isolated Active Event:} This strategy focuses on a single morphogenetic event, modeling it in detail. For instance, ventral furrow formation can be simulated as an elastic sheet subjected to pulling forces \todo{find reference}. This approach can enhance our understanding of the physical forces or biological systems required for the event to occur but may limit generalization to other morphogenetic processes.\\
+\textbf{Isolated Active Event:} This strategy focuses on a single morphogenetic event, modeling it in detail. For instance, ventral furrow formation (\vf{A1}) can be simulated as an elastic sheet subjected to pulling forces. This approach can enhance our understanding of the physical forces or biological mechanics required for an event to occur but may limit generalization to other morphogenetic processes.\\
 
-\textbf{Isolated Active Phenomenon:} In this approach, a single active phenomenon, such as convergent extension, is simulated "in a vacuum." This allows for a detailed comparison of the actions of individual cells against imaging of YYY. An example of this could be the YYY,.  This method can provide great insight into the underlying physics and chemistry at play. However, this method may fall short in shedding light on the any specific morphogenetic event or omit important context.\\
+\textbf{Isolated Active Phenomenon:} In this approach, a single active phenomenon, such as convergent extension (the driving force in \gb{A2)}, is simulated "in a vacuum." This allows for a detailed comparison of the actions of individual cells against imaging. This method can provide great insight into the underlying physics and chemistry in the cells, but falls short in shedding light on any specific activities, especially as it omits influence from any outside context.\\
 
-It is mainly either vertex-based or continuum approximation-based simulations that have dominated the field. These are all great for accurately describing the minute changes in the physics of tubologenesis, tissue-folding etc., but they comes with some drawbacks. These  models focus on the pressure and tensile forces, simulating the strains in the cell walls. Finite-element models that look at sub-parts of cells are often computationally heavy. This often requires it to be done in 2D \cite{krajnc2018fluidization}, inherently loosing some particularities of the problem. A more computationally efficient approach is the cell-center based models. When looking for off-lattice center-based model, not many show up. An example, but only using non-polar interactions is \citeAY{atwell2015mechano}. They modeled who modeled \todo{finish}.\\
+Our approach will fall in between the two above, in previously unexplored territory; Simulating everything, everywhere on the embryo, all at once. But to understand how this is feasible (and the inherent drawbacks), we will need more context.\\
 
-This all boils down to: No one has been able to simulate the formation of the posterior midgut (\pmg{A3}), as this requires a successful model of (\vf{A1}) and (\gb{A2}), and a way to combine them, almost necessitating a simulation of the full embryo.
+
+Vertex-based and continuum approximation-based simulations have dominated the field since computer modeling of biology started. These are great for accurately describing the minute changes in the physics of tubologenesis, tissue-folding etc., but they come with some inherent downsides. These models focus on the pressure and tensile forces, simulating the strains in the cell walls and looking at sub-parts of cells are often computationally heavy. This requires it to be done in 2D\cite{krajnc2018fluidization}, inherently loosing some particularities of the problem.\\ A more computationally efficient approach is the cell-center based models. Here, doing the computation on a lattice is the by far the most prevalent method, again gaining speed by trading some particularities of the problem.\\   
+
+When looking for off-lattice, center-based model, not many show up. An example, but only using non-polar interactions is \citeAY{atwell2015mechano}. Ween looking for full embryo models, the highlight is \citeAY{allena2010simulation} where they simulate the same three events we will be focusing on, but only individually.\\
+
+This all boils down to: No one has been able to simulate the formation of the posterior midgut (\pmg{A3}) (correctly), as this requires a successful model of (\vf{A1}) and (\gb{A2}), and a way to combine them, necessitating a simulation of the full embryo with multiple different types of interactions.\\
 
 
 % Examples of 1) are early Apical Constriction 2d cross section \cite{odell1981mechanical}, 
@@ -254,7 +264,7 @@ This all leads us to the star of the show:
 
 Our model takes its onset in the ideas posed in \citeAY{nissen2018theoretical} and later expanded in \citeAY{nielsen2020model}. Whenever we deviate from the existing literature, this will be stated clearly.\\
 
-As we know global-scale changes in physical structure during gastrulation all arise from single cell actions with little discernible individual movement. The model is built around simulating the cells as point-based particles and elevate their individual [chemical?] gradients to vectors with explicitly stated orientations. No global YYY, no YYY stresses or strains, no YYYY. \\
+As we know global-scale changes in physical structure during gastrulation all arise from single cell actions with little discernible individual movement. The model is built around simulating the cells as point-based particles and elevate their internal chemical gradients to vectors with explicitly stated orientations. \\
 It is based on the following intercellular potential $V_{ij}$ described by: 
 
 \begin{equation}
@@ -277,8 +287,7 @@ where the sum over $j$ is over all Line of sight/Voronoi neighbors. Voronoi neig
     \caption{A Voronoi diagram. Every point within a region is closer to its respective \textit{cell} than to any other \textit{cell} in the space. The regions are drawn with rounded corner for no other reason than to mimic biology.}
     \label{fig:voronoi-explanation}
 \end{figure}
-The interaction with the neighbors should remind you of the nearest-neighbor protein connections in Figure \ref{fig:mysosinMeshwork}. 
-\todo{Reexplain myosin or remove note}\\
+\\
 
 To get a feeling for $S_{ij}$ (Equation \ref{eq:main-pot}), the potential can be seen in Figure \ref{fig:potential} for $A_{ij}=1$.
 \begin{figure}[H]
@@ -290,7 +299,7 @@ To get a feeling for $S_{ij}$ (Equation \ref{eq:main-pot}), the potential can be
 
 The shape of the potential well should remind you of the Yukawa/Lennard-Jones potential, which also rely on strong short-range repulsion and weaker, longer-ranged attraction.\\
 
-Running the simulation at this point, the cells would simply converge to a sphere. Much like the earliest stage of the Drosophila embryo.
+Running the simulation at this point, the cells would simply converge to a packed sphere, much like the earliest stage of the Drosophila embryo.
 
 
 % Lets us introduce these new $S$-terms one by one, keeping the biological foundation we built up in the earlier sections in mind:\\
@@ -380,7 +389,7 @@ We can now finally introduce the more complicated $A_{ij}$-parameter as teased i
 
 If the constraint $\sum_{n=1}^{3}\lambda_n=1$ is not fulfilled, the relaxed cell size is not constant. \\
 
-To round off our array of actions the cells can take \reph, we introduce the second dynamical [smth],\footnote{Checkov's active single-cell biomechanics} described earlier: Apical constriction (Section \ref{sec:ApicalConstriction}). In our model, this is done via \textbf{Wedging}
+To finalize off our array of actions the cells can take, we introduce the second mechanical activity described earlier: Apical constriction (Section \ref{sec:ApicalConstriction}). In our model, this is done via \textbf{Wedging}
 
 As apical constriction is the single cells way of creating larger-scale furrows and wedges, we implement this by changing the $\hat{p}_i$'s to 'trick' each cell into believing their neighbors are differently oriented, thereby changing the relaxation angle:
 
@@ -390,58 +399,9 @@ As apical constriction is the single cells way of creating larger-scale furrows 
 
 with $\alpha\in [0,0.5]$ 
 
-\todo{add drawing}
-
-
 A similar expression can be made for anisotropic wedging, taking  $\hat{q}_i$'s into account.\\
-All cells can now be defined by a cell type, which simply means they have a $\lambda$-array and a $\alpha$ associated with them. \todo{foreshadow?}\\
 
-
-We will now be diverging from the original papers, and update the model for our specific case:\\
-
-As the shape of the egg shell is proposed to be defining for the gastrulation, \textbf{boundary conditions} where parameterized by hand from visual references and added as a term in the potential.\\
-
-A slight \textbf{differential adhesion} was added to simulation. This covers the concept that some cell types have preferences (encouraging or discouraging) about which other cell types to adhere to.
-The interaction between the ventral furrow cells (cell type 2) and cells of other types where scaled by a factor of 5\% (multiplied by 0.95) so as to discourage unnecessary mixing. This is a phenomenon often seen in nature.\\
-
-To emulate the lowering of apical surface area \textbf{better emulation of apical constriction} was introduced. Invaginating cells ($\alpha > 0$) got an increase in their $\lambda_1$'s (in Equation \ref{eq:s1}) making their relaxation distance shorter. This had the added benefit of echoing the tighter bonds in constricting cell clusters.\\
-
-We removed penalization for "outside-touching-outside", i.e. two \textbf{apical sides touching}. When any of the invaginating tissue 'closed off' it forced cells on either side to have their AB-vectors pointing towards each other. This would get penalized in their $S_1$-terms (Equation \ref{eq:s1}) making any folds unstable. A line of code was added, to combat this: When two apical sides interacted they were only allowed to interact non-polar'ly, i.e. their $\lambda_1$-values where changed into $\lambda_0$.\\
-
-
-Taking inspiration from \citeAY{kirkegaard2019self}, a \textbf{nematic planar-cell polarity} were implemented. This was mainly done so as to better mimic natural [something]. This means changing the definition of $A_{ij}$ in the following way:
-\begin{align*}
-    A_{ij}&=\sum_{n=0}^{3}\lambda_n  S_n\\ \downarrow \\A_{ij}&=\lambda_0S_0+\lambda_1S_1+\lambda_2|S_2|+\lambda_3|S_3|
-\end{align*}
-
-This allowed for \todo{finish}\\
-
-And finally, the most important contribution -- \textbf{patterning}:\\
-As we have about 5000 cells with four $\lambda$'s and a wedging constant $\alpha$ for each, this effectively gives 25000 parameters.To combat this, we again look to nature and remember the patterning Section \ref{sec:gen_patterns}. Somehow all the information a cell needs is available in these initial conditions.\\
-
-
-In \citeAY{shinyDVEX} they map out the relative gene expression for the drosophila embryo. We can then take this spatial data, project it onto our embryo and cross reference with known molecular activators of developmental processes.  This approach enables us to identify specific cell types based on their gene expression profiles and their corresponding roles in key morphogenetic events. By cross-referencing in this way, we establish a pipeline that connects morphogen gradients to the simulation of morphogenesis. This not only enhances our simulation by justifying cell roles, but might also shed some light on how the spatial patterning of gene expression orchestrates the choreography of embryogenesis. In Section \ref{App:morphogens} in the Appendix the exact choices made and justifications can be seen.\\
-
-Having established the pipeline, a demonstration of how to define the initial conditions can be seen here:
-
-\begin{lstlisting}
-# Start a new egg from a relaxed base shape
-GE = GeneExpression("path/to/base_shape")
-
-# combine morpogens through [and, or, not]
-twist_and_snail = GE.and_gene(GE.gene("twi"), GE.gene("sna"))
-
-# Make a cut-off (20%) and define cells as 
-#    belonging to a cell type (2) 
-GE.add_expression(twist_and_snail, 0.2, 2) 
-
-# save and run simulation
-GE.save("name_of_expression_profile",)
-
-\end{lstlisting}
-
-Given 5 different cell types and no non-polar interaction, we have cut our parameter space down to 20.
-
+All cells can now be defined by a cell type, which simply means they have a $\lambda$-array and a $\alpha$ associated with them.\\
 
 
 \section{Implementation}
@@ -455,7 +415,7 @@ where $\eta$ is uncorrelated Gaussian noise and U is the total potential as defi
 
 The gradient is calculated via an automatic differentiation engine (The PyTorch-framework specifically) and the simulation time steps are calculated via Euler integration.\\
 
-Every frame, the positions, AB-vectors and PCP-vectors are saved. As the model is purely point-based, whenever we speak of inter-cellular junctions, neighbors, areas or angles, everything is inferred from the modeled point cloud and Voronoi-neighbors. 
+Every frame, the positions, AB-vectors and PCP-vectors are saved. As the model is purely point-based, whenever we speak of inter-cellular junctions, neighbors, areas or angles, everything is inferred from the modeled point cloud and Voronoi-neighbors. \\
 
-Implementation is not interesting to read about, so extensive notes on the actual implementation along with pseudocode can be found in Section \ref{App:Code} in the Appendix.
+The computer science is not the interesting part of this thesis, so notes on the actual implementation along with pseudocode can be found in Section \ref{App:Code} in the Appendix.
 

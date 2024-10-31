@@ -1,93 +1,83 @@
-We set out with the purpose of answering a list of questions, or at least YY\\
+Even though it is often hard to grasp, the interactions between constituent elements and their emergent behavior is defining for many natural systems. In medicine creation, for example, understanding the interplay between the microscopic and the macroscopic is vital; drugs perform changes on minute intracellular dynamics -- with their desired effects on organ, human, or even population scale.\footnote{The Danish population consist of $10^{20}$ cells}\\ 
 
-Q0 - Mimimale\\
-Q1 - Are BC/IC sufficient?\\
-Q2 - Given a bottom-up, full scale model, what can we say re: domain-interactions\\
-\\\\
-Result 1: \
-Result 2a: Comparison between Silico mutants and Vivo mutants\\
-Result 2a: Comparison between Silico mutants and Silico optimal (remember to include PCP-orientation)\\
+Through examining the biology of the cell, specifics of gastrulation, and existing in silico solution, we have proposed a biologically sensible, relatively simple computer model on single cell-level. Using existing data of the genetic expression of the fruit fly embryo, the base for simulating the gastrulation was condensed to only a handful of parameters. 
 
-----------------------
+Using a novel approach for the field, our off-grid agent based model allowed for a full-embryo simulation of the Drosophila morphogenesis. This lead to a a list of seemingly world-first analyses: An in silico recreation of the much-studied posterior midgut invagination, and an examination of the interaction between both active and reactive domains of the embryo. \\
 
-Through examining the biology of the cell, specifics of gastrulation, and the literature on existing in silico solution, we proposed a biologically sensible, relatively simple computer model of a single cell. Using existing data of the genetic expression of the fruit fly embryo, the base for simulating the gastrulation was condensed to only a handful of parameters. \\
+The solution was initially validated by large-scale visual analyses of the morphology at different time point and of the timing between them. By recognizing a number of key dynamic events in the embryogenesis, the timeline was compared to known in vivo phenomena. We believe to have found general qualitative agreement, albeit with some obvious shortcomings.\\
 
-The model was initially validated by large-scale visual analyses of the morphology at different time point and of the timing between them. By recognizing a number of key dynamic events in the embryogenesis, the timeline was compared to different known in vivo phenomena(?). We believe to have found general qualitative agreement, albeit with some obvious and YYY differences.\\ 
+When the visual validity of the model was understood, a number of numerical metrics were deviced so as to quantify the agreement between simulation and reality. These metrics were utilized, granting us quantitative evidence of our model aligning with data. Finally, after examining the model's ability to correctly recuperate the gastrulation, we introduced known and unknown mutants, seeing how the model responded, and analyzed the ramifications of these perturbations. \\\\
 
-When the visual validity of the model was [understood], a number of numerical metrics was devices so as to quantify the agreement between simulation and reality. These metrics were tested and YYY.\\
-
-Finally, after all the validation and examination on the models ability to correctly recuperate , we introduced known and unknown mutants, seeing how the model responded and, with some YYY, analyzed the ramifications of this YYY. 
+Turing showed that simple interplay between chemicals can create arbitrarily complex biopatterning. We have taken a step toward demonstrating how minimal, axiomatic environmental information and straightforward naturally feasible single-cell rules can lead to the creation of physical form.\\
 
 
+% If you are studying morphogenesis, you are certain to encounter the gastrulation of the fruit fly. As people have studied the fly troughout the years, a self-perpetuating effect has brought it to be the de-facto model organism for much of the field. \\
+
+% While looking at the [small parts] in many cases can lead to crudely reductionist conclusions, it is sometimes the only obvious.
+
+% We have seen that even if many biological systems are "more than than the sum of its parts", having a model for the parts can allow for intere.
+
+% We have shown that complex time-[something] of events can arise from the physically simple interactions with boundary conditions and mechanical feedback-loops.
 
 
-If you are studying morphogenesis, you are certain to encounter the gastrulation of the fruit fly.
+% We wanted to probe the feasibility of [recuperating] using a point-based simulation with minimal rule-set. We have kept every interaction as biologically defensible as possible, keeping in mind that most coordinated efforts in nature are emergent -- with all(/most?) large-scale information sharing contained in the initial conditions.
+% After [trusting] the phenomenological validity of our simulation, we . Checking its stability under perturbations in parameters and [YYY].\\
 
-As people have studied the fly troughout the years, a self-perpetuating effect has brought it to be the de-facto model organism for much of the field. 
+% For the qualitative and quantitative comparisons between silico and vivo we found the following.
 
-We wanted to probe the feasibility of [recuperating] using a point-based simulation with minimal rule-set. We have kept every interaction as biologically defensible as possible, keeping in mind that most coordinated efforts in nature are emergent -- with all(/most?) large-scale information sharing contained in the initial conditions.
-After [trusting] the phenomenological validity of our simulation, we . Checking its stability under perturbations in parameters and [YYY].\\
+% Folds on the top (dorsal) side would be a welcome addition. The literature agrees \reph\todo{Link to the paper where it show it happens under stress}. Cells shape change for added motion on the bottom. We saw, when trying to have more horizontal pressure come from the \vf{ventral furrow}. Active intercalations (as described in Section \ref{sec:germ-band}) are simply not enough. This, we found out, was also corroborated by the literature \cite{detder}.
 
-For the qualitative and quantitative comparisons between silico and vivo we found the following.
+% Explicit timing does not seem needed!
 
-Folds on the top (dorsal) side would be a welcome addition. The literature agrees \reph\todo{Link to the paper where it show it happens under stress}. Cells shape change for added motion on the bottom. We saw, when trying to have more horizontal pressure come from the \vf{ventral furrow}. Active intercalations (as described in Section \ref{sec:germ-band}) are simply not enough. This, we found out, was also corroborated by the literature \cite{detder}.
+% Using our novel modeling approach we have found the interplay between seemingly disparate biomechanical events to be [vital]. This is   unsurprisingly as the different   
 
-Explicit timing does not seem needed!
+% The fractal-like YYY of emergence across multiple [phsyical scales] is defining for natural phenomena.
 
-Using our novel modeling approach we have found the interplay between seemingly disparate biomechanical events to be [vital]. This is   unsurprisingly as the different   
-
-The fractal-like YYY of emergence across multiple [phsyical scales] is defining for natural phenomena.
-
-Turing
+% Turing
 
 
-\textbf{We are in a way the first who can simulate the posterior invagination (PMG) \pmg{A3} as this requires both successful modelling of \vf{A1} and \gb{A2}. Each of which has had multiple YYY before, but never in a way where combining them was possible}
+% \textbf{We are in a way the first who can simulate the posterior invagination (PMG) \pmg{A3} as this requires both successful modelling of \vf{A1} and \gb{A2}. Each of which has had multiple YYY before, but never in a way where combining them was possible}
 
 
-\section{Questions}
-\todo{Give me all the questions again}
-Q0 - Mimimale\\
-Q1 - Are BC/IC sufficient?\\
-Q2 - Given a bottom-up, full scale model, what can we say re: domain-interactions\\
-\\\\
-Result 1: \
-Result 2a: Comparison between Silico mutants and Vivo mutants\\
-Result 2a: Comparison between Silico mutants and Silico optimal (remember to include PCP-orientation)\\
+% \section{Questions}
+% \todo{Give me all the questions again}
+% Q0 - Mimimale\\
+% Q1 - Are BC/IC sufficient?\\
+% Q2 - Given a bottom-up, full scale model, what can we say re: domain-interactions\\
+% \\\\
+% Result 1: \
+% Result 2a: Comparison between Silico mutants and Vivo mutants\\
+% Result 2a: Comparison between Silico mutants and Silico optimal (remember to include PCP-orientation)\\
 
-\section{Answers}
-\begin{itemize}
-    \item Polarizations and cell-interactions only set from biologically founded initial conditions.
-    \item No  timing
-    \item Stable under perturbations
-    \item With a p-value of 
-\end{itemize}
-
-While looking at the [small parts] in many cases can lead to crudely reductionist conclusions, it is sometimes the only obvious.
-
-We have seen that even if many biological systems are "more than than the sum of its parts", having a model for the parts can allow for .
-
-We have shown that complex time-[something] of events can arise from the physically simple interactions with boundary conditions and mechanical feedback-loops.
-
-\textbf{We are in a way the first who can simulate the posterior invagination (PMG) \pmg{A3} as this requires both successful modelling of \vf{A1} and \gb{A2}. Each of which has had multiple YYY before, but never in a way where combining them was possible}\\\\
+% \section{Answers}
+% \begin{itemize}
+%     \item Polarizations and cell-interactions only set from biologically founded initial conditions.
+%     \item No  timing
+%     \item Stable under perturbations
+%     \item With a p-value of 
+% \end{itemize}
 
 
-\textbf{List of things that we know we have not taken into account but very likely could have been helpful}:
-Cell shape change, Dorsal folds, Cephalic fold.
-
-\textbf{Comparisons to data}\\
-We have found through multiple comparisons, how our simulation is recapitulating the dynamics.
-
-The movement vectors, timing, strain-distribution over time and rosettes all had clear relations[?] to reality while also showing the different shortcomings where our methodology could be improved.
-\textbf{Further work}
-
-We have identified the possibility of cell shape change (i.e. anisotropic relaxation distances in relation to external pressure) to be the most promising next step. Some work was already put into this witout anything fruitful. Other potential expansions on the model would be for the dorsal and cephalic folds to buckle under pressure. Also adding in the in-plane proliferation in the cephalic region. This was implemented, but removed for simplicity.
-
-\textbf{Combinations}
-We have seen that every part of the simulated embryo was necessary for successful gastrulation. 
-While both our model and nature is stable to noise and YYY, the environment, boundary conditions and initial conditions are vital for defining YYY
-
-\textbf{closing remarks}
-Turing showed that simple interplay between chemicals can create arbitrarily complex biopatterning that can serve as a blueprint. We have taken a step in the direction of showing how a combination between minimal environmental information and simple rules for the interplay between individual cells can lead to the creation of physical form. \todo{rephrase}\\
+% \textbf{We are in a way the first who can simulate the posterior invagination (PMG) \pmg{A3} as this requires both successful modelling of \vf{A1} and \gb{A2}. Each of which has had multiple YYY before, but never in a way where combining them was possible}\\\\
 
 
-\textit{axiomatic}dk
+% % \textbf{List of things that we know we have not taken into account but very likely could have been helpful}:
+% % Cell shape change, Dorsal folds, Cephalic fold.
+
+% % \textbf{Comparisons to data}\\
+% % We have found through multiple comparisons, how our simulation is recapitulating the dynamics.
+
+% % The movement vectors, timing, strain-distribution over time and rosettes all had clear relations[?] to reality while also showing the different shortcomings where our methodology could be improved.
+% % \textbf{Further work}
+
+% % We have identified the possibility of cell shape change (i.e. anisotropic relaxation distances in relation to external pressure) to be the most promising next step. Some work was already put into this witout anything fruitful. Other potential expansions on the model would be for the dorsal and cephalic folds to buckle under pressure. Also adding in the in-plane proliferation in the cephalic region. This was implemented, but removed for simplicity.
+
+% % \textbf{Combinations}
+% We have seen that every part of the simulated embryo was necessary for successful gastrulation. 
+% While both our model and nature is stable to noise and YYY, the environment, boundary conditions and initial conditions are vital for defining YYY
+
+% \textbf{closing remarks}
+
+
+
+% \textit{axiomatic}dk

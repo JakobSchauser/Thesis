@@ -1,9 +1,18 @@
-\chapter*{Appendix}
+\chapter{Appendix}
+
 \section{Unused plots}
 \label{App:Plots}
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{chapters/Appendix/streamplot1.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{chapters/Results/figures/streamplot2.png}
+    \caption{
+Without any basis of comparison this flow-field is not easy to interpret, but it looks cool.}
+    \label{fig:streamplot}
 \end{figure}
 
 
@@ -20,44 +29,52 @@
     \label{fig:enter-label}
 \end{figure}
 \section{Parameter Sensitivity Analysis}
-No good examination of a model is complete without a Parameter Sensitivity Analysis. 
+No good examination of a model is complete without a Parameter Sensitivity Analysis:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{chapters/Results/figures/PSA.png}
-    \caption{Caption}
+    \caption{The sum of the $\Delta$-metric as described in the results section. Error bars are mean and standard deviations of two runs using identical parameters but different seeds. }
     \label{fig:enter-label}
 \end{figure}
+
+In general, the solution is quite stable for perturbations to the two main parameters $\lambda_1$ and $\lambda_3$.
+
+As can be seen, having a too high $\lambda_1$ lowers the internal pressure and therefore deforms the embryo and changes the timing. Lowering $\lambda_1$ seems to not be too bad, but the increased pressure exaggerates all invaginations quite dramatically.
+
+Modifying $\lambda_3$ causes more understandable changes to the morphology (the error bars are also smaller). This comes down to the fact that $\lambda_3$ simply changes the pushing force of the germ-band during its elongation (\gb{A2}). Any change messes up the timing in its interactions with \vf{A1} and \pmg{A3}. In reality, the embryo has some self-correcting effects our model does not capture.
+
+
+
+
 \section{Ventral Furrow}
 \label{App:VF}
-\begin{figure}{H}
+\begin{figure}[H]
     \centering
-    \includegraphics[width=1.\linewidth]{chapters/Appendix/cross_sections.png}
-    \caption{Just before the posteior midgut invaginates (\pmg{A3}). As can be seen, the ventral furrow, which is supposed to go no further than halfway up extends too much into the embryo. \\Note: The apparent hole in the internalized furrow is an artifact of cutting the cells in a plane.}
+    \includegraphics[width=0.9\linewidth]{chapters/Appendix/cross_sections.png}
+    \caption{Just before the posterior midgut invaginates (\pmg{A3}). As can be seen, the ventral furrow, which is supposed to go no further than halfway up extends too much into the embryo. \\Note: The apparent hole in the internalized furrow is an artifact of cutting the cells in a plane.}
     \label{fig:enter-label}
 \end{figure}
 \section{Code details}
 \label{App:Code}
-\section{Additional Videos}
+\section{Videos}
 \label{App:videos}
+Link to the videos of the different models:
+
+\url{https://github.com/JakobSchauser/Thesis/tree/main/FinalVideos/}
 \section{Sergei-analyses (tie into PCP)}
 \label{App:Sergei}
 
 \section{Green-Lagrange strain inference}
 \label{App:Strain-Calculation}
-Firstly transform into cylindrical coordinates.... \\
-"A strain rate is the ratio of the change in length to the original length, divided by the time interval, with units of proportion (pp) per minute. The lines show the mean strain rates for all five embryos, and the ribbon width represents the average standard error within a data set. The timing of developmental landmarks is shown for the five embryos recorded"\cite{butler2009cell}
-\section{Why our rosettes behave differntly }
-\label{App:why-rosettes}
-In our model, where the equilibrium distance is the same for every direction no matter the pressure exerted, getting a bimodality is predictable.
-Every time a new pair 'touch' on the up-down axis, they release space for a pair above or below on the perpendicular axis. 
-
+Firstly transform into cylindrical coordinates. Then implement strain rate as follows:\\
+A strain rate is the ratio of the change in length to the original length, divided by the time interval, with units of proportion (pp) per minute.
 
 \section{We have not taking the following into account}
-\subsection*{Cell shape change!}
-\subsection*{Mitotic pressure in cephalic area}
-\subsection*{Things that change over time}
-\subsection*{Pressure-buckling of dorsal folds}
-\subsection*{Pressure from yolk}
+\subsection{Cell shape change}
+% \subsection{Mitotic pressure in cephalic area}
+% \subsection{Things that change over time}
+\subsection{Pressure-buckling of dorsal folds}
+\subsection{Pressure from yolk}
 \section{Detailed morphogens}
 \label{App:morphogens}
 \begin{table}[H]
@@ -124,17 +141,16 @@ GE.save("no_q_from_runt", q_from_runt=True)
 When we say that the cell types were extracted from data, this comes with a couple asterisks:\\
 Any expression in the cephalic region was removed by hand.\\
 \textbf{Cephalic furrow}
-In the data-set there were no [Cephalic furrow gene], but using the website [website] we could see that it spatially coincided with [other gene] which was in the data-set and was therefore used as a proxy. 
+In the data-set there the gene for the Cphalic furrow where not present, but using the website \url{https://shiny.mdc-berlin.de/DVEX/} we could see that it spatially coincided with \textit{Bfd} which was therefore used as a proxy. 
 \textbf{Germ-band}
-The germ-band was cut off by hand as the [gene1] and [gene2] expressions were very spotty at the top and the germ-band would not extend correctly.\footnote{I am guessing a suppressing gene that we did not take into account is also at play} 
+The germ-band was cut off by hand as the \textit{Eve} and \textit{Run} expressions were very spotty at the top and the germ-band would not extend correctly. We expect there to be a suppressing gene that we did not take into account. 
 
 \textbf{Ventral furrow}
-Even though all the cells expressing \textit{twist} \& \textit{snail} on the belly lower their apical surface area, they do not constrict indiscriminately. Instead they start out by constricting in the \textit{inner} 8x60 cells. [citation needed] It is believed to be a more stable way of wedging [citation needed] but is still strange and not fully understood. [citation needed]. This meant that a specific rule for the wedging in the ventral region was needed. The inner 8 cells has a wedging constant $\alpha = 0.5$ while the rest has $\alpha = 0.2$.
+Even though all the cells expressing \textit{twist} \& \textit{snail} on the belly lower their apical surface area, they do not constrict indiscriminately. Instead they start out by constricting in the \textit{inner} 8x60 cells. It is believed to be a more stable way of wedging, but is still strange and not fully understood! This meant that a specific rule for the wedging in the ventral region was needed. The inner 8 cells has a wedging constant $\alpha = 0.5$ while the rest has $\alpha = 0.2$.
 
-\section*{Rosette analysis}
-Convergent Extension is seen as a vital part of the development of many different YYY. Therefore multiple different methods of analysis and YYY have been developed.
+\section{Rosette analysis}
+Convergent Extension is seen as a vital part of the development of many  multicellular animals. Therefore multiple different methods of analysis and YYY have been developed.
 One of the main quantifiers consist of looking at a cluster of neighboring cells that undergo convergent extension. These clusters are called Rosettes. Trough laser-ablation is has been shown that the Rosettes (as shown in the diagram on Figure \ref{fig:ConvergentExtensionDiagram}) can consist of up two twelve internally connected cells [citation needed].
-For drosophila gastrulation in particular, the direction between each newly acquired neighbor is \todo{finish thought}
 
 
 
@@ -166,7 +182,9 @@ For drosophila gastrulation in particular, the direction between each newly acqu
 \end{figure}
 In Figure \ref{fig:roestte-angle-dist}, the distribution of angles of all found rosette-events can be seen. Strangely, the distribution is clearly bimodal in horizontal and vertical, where the ground truth has a single peak at the vertical axis. 
 
-We believe the lack of malleability in the contours of the cells might be to blame.
+We believe the lack of malleability in the contours of the cells might be to blame.\\
+In our model, where the equilibrium distance is the same for every direction no matter the pressure exerted, getting a bimodality is predictable.
+Every time a new pair 'touch' on the up-down axis, they release space for a pair above or below on the perpendicular axis. The lack of anisotropic cell shapes forces this discrepancy into being.
 
 
 % When speaking with Daniel, a researcher at the [Stas'] laboratory who did the original analysis, he said that this makes sense, as looking at neighboring nuclei is fundamentally different from edges. \todo{rephrase to make less bad}. 
@@ -175,8 +193,8 @@ We believe the lack of malleability in the contours of the cells might be to bla
 
 % ... \\
 % Speaking of Daniel:
-\note{
-Not showing something good :( Keep for completeness or move to appendix?}
+% \note{
+% Not showing something good :( Keep for completeness or move to appendix?}
 
 % \subsection{Daniel-data?}
 % Nothing here yet...
@@ -187,8 +205,8 @@ Not showing something good :( Keep for completeness or move to appendix?}
 %     \label{fig:enter-label}
 % \end{figure}
 
-\section*{Other efforts we have tried in vain}
-\section*{For eftertiden}
+% \section{Other efforts we have tried in vain}
+\section{For eftertiden}
 \subsection{Ventral Furrow}
 I would love to quantify the accuracy of our simulated ventral furrow.\\
 I am guessing we can do a cell-center fit of Figure \ref{fig:VFComparison}.\\

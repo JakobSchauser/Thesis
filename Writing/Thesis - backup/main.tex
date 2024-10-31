@@ -78,6 +78,11 @@
 \newcommand{\lightpurple}[1]{\textcolor{lightpurple}{\textbf{#1}}}
 
 
+\newcommand{\nocontentsline}[3]{}
+\let\origcontentsline\addcontentsline
+\newcommand\stoptoc{\let\addcontentsline\nocontentsline}
+\newcommand\resumetoc{\let\addcontentsline\origcontentsline}
+
 
 \usepackage{listings}  % For presenting code 
 \lstdefinestyle{mystyle}{
@@ -123,10 +128,10 @@
 %%% Front Page %%%
 \ptype{Master's Thesis}
 
-\fpimage{evangelion.png}
-% \fpimage{template/frontpage.png}
+% \fpimage{evangelion.png}
+\fpimage{template/frontpage.png}
 \author{Jakob Hallundbæk Schauser}
-\title{Initial Conditions and Emergence:\\ Drosophila Gastrulation In Silico}
+\title{Patterning and Emergence:\\ Drosophila Gastrulation in Silico}
 \subtitle{Uncovering morphogenesis from single-cell biophysics}
 \advisor{Supervisor: Ala Trusina}
 \date{October 2024}
@@ -205,6 +210,7 @@
 \section*{Abstract}
 \label{sec:abstract}
 \addcontentsline{toc}{section}{Abstract} 
+
 \input{chapters/Abstract}
 % \newpage
 % \section*{Resumé}
@@ -215,12 +221,9 @@
 \section*{Acknowledgements}
 \label{sec:acks}
 \addcontentsline{toc}{section}{Acknowledgements}
+I would like to thank Arnulf for reading and giving notes ("It's better than House of Leaves"). The same for Frederik (""). I would also like to thank Daniel Alber for a super interesting lab-tour, Christian Kragh Jespersen for lodging, and Sebastian Utecht for important sparring throughout the project.\\
 
-Thanks to Arnulf for reading and giving notes ("It's better than House of Leaves") and \\
-
-
-Sunrise Parabellum
- 
+An finally a big thank you to Ala for a great trip to Princeton (and also supervision) 
 
 \newpage
 \tableofcontents
@@ -268,5 +271,14 @@ Sunrise Parabellum
 \appendix
 \renewcommand{\thesection}{A\arabic{section}}
 \addcontentsline{toc}{chapter}{Appendix}
+
+\stoptoc
+
+% \setcounter{tocdepth}{-2}
+% \addtocontents{toc}{cha
+% \setcounter{tocdepth}{-1} 
+% \addtocontents{toc}
+
 \input{chapters/Appendix/Appendix}
+\resumetoc
 \end{document}

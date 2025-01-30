@@ -54,17 +54,17 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, i
 
 
         if tosave is not None:
-            # tosave_c = tosave[int(iterator%len(xs))]
+            tosave_c = tosave[int(iterator%len(xs))]
             # # normalize colors
-            # min2, max2 = np.min(tosave_c[loaded_properties == 4]), np.max(tosave_c[loaded_properties == 4]) 
+            min2, max2 = np.min(tosave_c[loaded_properties == 4]), np.max(tosave_c[loaded_properties == 4]) 
 
             # nonz = np.maximum((max2 - min2), 1e-6)
-            # tosave_c = (tosave_c - min2)/nonz
+            tosave_c = (tosave_c - min2)/(max2 - min2)
 
             # tosave_c[loaded_properties != 4] = 1.
-            # tosave_c = [(c, c, c) for c in tosave_c]
+            tosave_c = [(c, c, c) for c in tosave_c]
 
-            tosave_c = [(0,0,0,1) if d else (1,1,1,1) for d in daniel_stripe] 
+            # tosave_c = [(0,0,0,1) if d else (1,1,1,1) for d in daniel_stripe] 
         else:
             tosave_c = (1, 1, 1, .5)
 
@@ -77,6 +77,8 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, i
         iterator += speed
         if iterator >= len(xs):
             iterator = len(xs)-1
+
+            
     timer = app.Timer(interval=interval)
     timer.connect(update)
     timer.start()
@@ -133,7 +135,7 @@ def interactive_animate(positions, ps, qs, loaded_properties = None, alpha=10, i
 if __name__ == '__main__':
     # get command line argument
 
-    plot_tosave = 1
+    plot_tosave = 0
 
 
 
